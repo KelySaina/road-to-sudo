@@ -18,6 +18,7 @@ func _initialize() -> void:
 	test_traps_and_reboot()
 	test_elevation_unwind()
 	test_nudges()
+	test_talk_teaches()
 	print("\nadventure: %d passed, %d failed" % [passes, failures.size()])
 	for f in failures:
 		print("  FAIL ", f)
@@ -216,6 +217,16 @@ func test_nudges() -> void:
 	narration = []
 	_run(ctx3, "cat /var/log/auth.log")
 	check(narration.any(func(t): return t.contains("grep")), "swamp nudges toward grep after cat")
+
+
+func test_talk_teaches() -> void:
+	var ctx := _new()
+	var o: ExecutionOutcome = ctx.shell.run_line("talk grep")
+	check(o.stdout_text().contains("teach you about"), "talk <command> is in-character")
+	check(o.stdout_text().contains("print lines matching"), "talk grep teaches what grep does")
+	check(o.stdout_text().contains("use it like"), "talk shows how to use it")
+	var bad: ExecutionOutcome = ctx.shell.run_line("talk notacommand")
+	check(bad.stdout_text().contains("don't know a command"), "talk of an unknown command is handled")
 
 
 func _imposter(ctx: Dictionary) -> int:

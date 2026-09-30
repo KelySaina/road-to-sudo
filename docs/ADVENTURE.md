@@ -13,9 +13,12 @@ Nothing is a separate combat minigame: you fight by typing real commands.
 
 - **Move** with WASD / arrows. **E** interacts with whatever you're standing
   next to. **Esc** closes a panel, or saves and returns to the menu.
-- **NPCs** (Tux the old daemon, the Archivist, the Gatekeeper of sudo) open a
-  dialogue box with story and hints. The Gatekeeper grants you `sudo` once you
-  hold the three keys.
+- **NPCs** — every room has a **teacher** (the Locksmith, the Foreman, the
+  Librarian, the Editor, the Archivist, Tux, the Gatekeeper). Talk to them to
+  learn the commands that room needs, with examples. You can also ask any of
+  them to explain a specific command: **`talk grep`**, `talk find`, `talk cut`
+  — they teach it on the spot (same info as `learn <command>` / `man`). The
+  Gatekeeper grants you `sudo` once you hold the three keys.
 - **Consoles / monsters** open a **terminal overlay**. That console's fight is
   a Linux problem: make an unrunnable script run (`chmod`), name the intruder
   flooding a log (`grep`), kill the CPU-devouring miner without killing the

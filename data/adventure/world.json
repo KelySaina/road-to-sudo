@@ -41,12 +41,13 @@
       "npc": {
         "name": "Tux, the Old Daemon",
         "lines": [
-          "So. root is gone and the machine sent for a USER. Times are desperate.",
-          "Listen: this whole world speaks Linux. Move with `go`, look with `look`,",
-          "and when a door won't open, the answer is always a command you can type.",
-          "Read your OPERATOR.txt. Then head east, to the Rusted Gate. Mind the lock."
+          "So. root is gone and the machine sent for a USER. Brave soul.",
+          "This whole world is a Linux machine, and every room has a keeper who knows a tool.",
+          "Wander freely. Talk to everyone. Ask them straight — `talk grep`, `talk find` —",
+          "and they'll teach you the command. At any console, `learn` shows the whole cheat sheet.",
+          "Move with WASD or the arrows, act with E, and `map` shows where you've been."
         ],
-        "hint": "Type `cat OPERATOR.txt`, then `go east`. Stuck at a console? Type `hint`. Curious what a command does? Type `learn`."
+        "hint": "Read `cat OPERATOR.txt`, then head east. Ask any keeper about a command with `talk <command>`, or type `learn`."
       },
       "exits": {
         "east": "gate"
@@ -150,6 +151,16 @@
       "exits": {
         "east": "swamp",
         "west": "home"
+      },
+      "npc": {
+        "name": "The Locksmith",
+        "lines": [
+          "A door that won't open is rarely locked — usually it just can't run.",
+          "Every file has three powers: read (r), write (w), execute (x). See them: `ls -l keycard.sh`.",
+          "No x means nothing runs. Grant it — `chmod +x keycard.sh` — then `./keycard.sh`.",
+          "Ask me to explain either one: `talk chmod` or `talk ls`."
+        ],
+        "hint": "`ls -l keycard.sh` shows it's missing x. `chmod +x keycard.sh`, then `./keycard.sh`."
       }
     },
     "swamp": {
@@ -165,10 +176,10 @@
       "npc": {
         "name": "The Archivist",
         "lines": [
-          "Every attack leaves a wake in the logs, friend. This one hammers a door",
-          "over and over — the same name, again and again, failing each time.",
-          "Do not read it all. Cast a net: keep only the lines that matter, then",
-          "count which name surfaces most."
+          "Every attack leaves a wake in the logs. This one hammers a door — the same name, over and over.",
+          "Do not read four thousand lines. Cast a net: `grep` keeps only the lines that match.",
+          "`grep 'Failed password' /var/log/auth.log` — then count who repeats:",
+          "`... | grep -o 'for [a-z]*' | sort | uniq -c | sort -rn`. Ask me: `talk grep` or `talk sort`."
         ],
         "hint": "grep 'Failed password' /var/log/auth.log will thin the flood. The name repeats after 'for'. Then: echo <name> > ~/intel.txt"
       },
@@ -353,6 +364,16 @@
       "exits": {
         "south": "archive",
         "west": "swamp"
+      },
+      "npc": {
+        "name": "The Foreman",
+        "lines": [
+          "The forge runs hot because something is stealing cycles it never earned.",
+          "You won't find a running program with `ls` — programs that run are PROCESSES.",
+          "List them: `ps aux` — every process, its owner, its CPU%. Spot the greedy one.",
+          "Note its PID (the number) and stop it: `kill <PID>`. Ask me: `talk ps` or `talk kill`."
+        ],
+        "hint": "`ps aux` lists processes; the miner burns the most CPU. `kill` its PID — but spare the backup daemon."
       }
     },
     "gatekeeper": {
@@ -385,10 +406,10 @@
       "npc": {
         "name": "The Gatekeeper",
         "lines": [
-          "Beyond me sits the impostor on root's throne. You cannot fight it as a",
-          "mere user — you must BECOME root, briefly and rightfully, with sudo.",
-          "But sudo is not a trick; it is trust. Test it: `sudo -l` shows what you",
-          "may do. And remember — it asks who you are. Answer well."
+          "Beyond me sits the impostor on root's throne. You cannot fight it as a mere user.",
+          "You must BECOME root — briefly, rightfully — with `sudo`. `sudo -l` shows what you may do.",
+          "`sudo <command>` runs one command as root; `sudo -i` opens a root shell. Ask me: `talk sudo`.",
+          "Bring me the three keys and the gate to the throne is yours."
         ],
         "hint": "You now hold sudo. `sudo -i` opens a root shell. Head north to the Core when ready."
       },
@@ -635,6 +656,16 @@
       "exits": {
         "north": "foundry",
         "west": "cutting"
+      },
+      "npc": {
+        "name": "The Librarian",
+        "lines": [
+          "Lost in the stacks? Nothing worth hiding is ever on the top shelf.",
+          "When you know a name but not the place, don't browse — search.",
+          "`find` walks every shelf under a directory: `find /etc -name backup.cfg`.",
+          "Then carry it home: `mkdir ~/restored` and `cp <the path> ~/restored/`. Ask: `talk find` or `talk cp`."
+        ],
+        "hint": "`find /etc -name backup.cfg` prints the path. `mkdir ~/restored`, then `cp <path> ~/restored/`."
       }
     },
     "cutting": {
@@ -725,6 +756,16 @@
       "exits": {
         "east": "archive",
         "west": "gatekeeper"
+      },
+      "npc": {
+        "name": "The Editor",
+        "lines": [
+          "Columns, columns, columns. The craft is keeping only what matters.",
+          "`cut` slices one column from every line: `cut -d, -f1 access.csv` takes the first field.",
+          "Then the sysadmin's favourite chorus: `sort | uniq -c | sort -rn` —",
+          "it counts each value and floats the most common to the top. Ask: `talk cut` or `talk sort`."
+        ],
+        "hint": "`cut -d, -f1 access.csv | sort | uniq -c | sort -rn` — the top name is the culprit. `echo <name> > ~/culprit.txt`."
       }
     }
   },

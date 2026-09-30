@@ -23,7 +23,7 @@
   "####################################################"
  ],
  "spawn": [
-  4,
+  3,
   5
  ],
  "objects": [
@@ -38,10 +38,20 @@
    "label": "Tux"
   },
   {
+   "kind": "npc",
+   "node": "gate",
+   "at": [
+    15,
+    5
+   ],
+   "sprite": "locksmith",
+   "label": "The Locksmith"
+  },
+  {
    "kind": "console",
    "node": "gate",
    "at": [
-    19,
+    22,
     5
    ],
    "sprite": "console",
@@ -51,7 +61,7 @@
    "kind": "npc",
    "node": "swamp",
    "at": [
-    29,
+    28,
     5
    ],
    "sprite": "archivist",
@@ -68,10 +78,20 @@
    "label": "Log console"
   },
   {
+   "kind": "npc",
+   "node": "foundry",
+   "at": [
+    41,
+    5
+   ],
+   "sprite": "foreman",
+   "label": "The Foreman"
+  },
+  {
    "kind": "console",
    "node": "foundry",
    "at": [
-    45,
+    48,
     5
    ],
    "sprite": "miner",
@@ -79,10 +99,20 @@
    "enemy": true
   },
   {
+   "kind": "npc",
+   "node": "archive",
+   "at": [
+    41,
+    15
+   ],
+   "sprite": "librarian",
+   "label": "The Librarian"
+  },
+  {
    "kind": "console",
    "node": "archive",
    "at": [
-    45,
+    48,
     15
    ],
    "sprite": "packrat",
@@ -90,10 +120,20 @@
    "enemy": true
   },
   {
+   "kind": "npc",
+   "node": "cutting",
+   "at": [
+    28,
+    15
+   ],
+   "sprite": "editor",
+   "label": "The Editor"
+  },
+  {
    "kind": "console",
    "node": "cutting",
    "at": [
-    32,
+    35,
     15
    ],
    "sprite": "shredder",

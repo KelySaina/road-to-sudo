@@ -46,9 +46,9 @@ func _phys(n: int) -> void:
 		await get_tree().physics_frame
 
 
-func _find_obj(world, node_id: String):
+func _find_obj(world, node_id: String, want_kind: int = -1):
 	for it in world._objects:
-		if it.node_id == node_id:
+		if it.node_id == node_id and (want_kind == -1 or it.kind == want_kind):
 			return it
 	return null
 
@@ -172,7 +172,8 @@ func _run() -> void:
 	var world = main.host.get_child(main.host.get_child_count() - 1)
 	check(world.name == "World2D", "World2D scene shown for adventure")
 	check(world._player != null, "player character spawned")
-	check(world._objects.size() >= 6, "interactables placed (%d)" % world._objects.size())
+	check(world._objects.size() >= 12, "interactables placed (%d)" % world._objects.size())
+	check(_find_obj(world, "archive", Interactable.Kind.NPC) != null, "every fight room has a teacher NPC")
 	check(world._dialogue.visible, "intro dialogue shown on entry")
 	while world._dialogue.visible:
 		world._advance_dialogue()
@@ -194,7 +195,7 @@ func _run() -> void:
 	check(world._player.global_position.x > world.TILE, "wall blocks the player (no escaping the room)")
 
 	# engage the gate console and solve it with real Linux commands
-	var gate_obj = _find_obj(world, "gate")
+	var gate_obj = _find_obj(world, "gate", Interactable.Kind.CONSOLE)
 	world._player.global_position = gate_obj.global_position + Vector2(0, 44)
 	await _frames(2)
 	world._interact(gate_obj)

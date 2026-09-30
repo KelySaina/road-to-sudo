@@ -14,9 +14,9 @@ func _phys(n:=8):
 func _shot(nm):
 	await _frames(8); await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(out_dir.path_join(nm+".png"))
-func _find(w,nid):
+func _find(w,nid,kind:=-1):
 	for it in w._objects:
-		if it.node_id==nid: return it
+		if it.node_id==nid and (kind==-1 or it.kind==kind): return it
 	return null
 func _run():
 	var main:Control = load("res://scenes/main/main.tscn").instantiate(); add_child(main); await _frames()
@@ -25,12 +25,22 @@ func _run():
 	var world=main.host.get_child(main.host.get_child_count()-1)
 	while world._dialogue.visible: world._advance_dialogue()
 	await _frames(2)
-	# jump straight into the archive fight and hunt with ls to trigger the nudge
-	Game.adventure.state.add_flag("keycard"); Game.adventure.state.add_flag("intel"); Game.adventure.state.add_flag("cpu_freed")
-	Game.adventure.state.cleared["gate"]=true; Game.adventure.state.cleared["swamp"]=true; Game.adventure.state.cleared["foundry"]=true
-	var arc=_find(world,"archive"); world._player.global_position=arc.global_position+Vector2(0,50)
-	await _phys(6); await _frames(3)
 	world._terminal.set_speed("instant")
-	world._interact(arc); await _frames(3)
-	Game.submit("ls /etc"); await _frames(3)
-	await _shot("nudge_find")
+	# open the gate to reach the Locksmith's room (or just teleport into gate room)
+	Game.adventure.state.cleared["gate"]=true  # so we can stand freely; still shows both chars
+	var lock=_find(world,"gate",Interactable.Kind.NPC)
+	world._player.global_position=lock.global_position+Vector2(40,40)
+	await _phys(6); await _frames(3)
+	await _shot("e1_room_with_teacher")     # Locksmith + Gate console in one room
+	# talk to the Locksmith
+	world._interact(lock); await _frames(3)
+	await _shot("e2_npc_teaches")
+	while world._dialogue.visible: world._advance_dialogue()
+	# open a console and ask it to teach a command
+	var con=_find(world,"gate",Interactable.Kind.CONSOLE)
+	world._player.global_position=con.global_position+Vector2(0,48)
+	await _phys(6); await _frames(3)
+	Game.adventure.state.cleared.erase("gate")  # reopen the fight so the console engages
+	world._interact(con); await _frames(3)
+	Game.submit("talk chmod"); await _frames(3)
+	await _shot("e3_talk_command")
