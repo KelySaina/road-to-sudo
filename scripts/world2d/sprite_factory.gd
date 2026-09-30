@@ -95,30 +95,187 @@ const ART := {
 			"..RRR......RRR..",
 		],
 	},
-	# The operator: visor, ops suit, mag boots. Drawn facing right, feet on the
-	# bottom row so Player2D's feet-origin lands flush on a tile top.
+	# The operator: visor, ops suit, pack and mag boots, feet on the bottom row
+	# so Player2D's feet-origin lands flush on a tile top. The outline is traced
+	# from the silhouette at build time, which is what keeps it legible against
+	# five different world palettes.
 	"player": {
+		"outline": "05030f",
 		"palette": {
-			"h": "2a2456", "H": "3a3270", "v": "00e5ff", "V": "8ff6ff",
-			"b": "232050", "B": "2e2a63", "C": "2bffb0", "L": "15113a", "k": "0d0a24",
+			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
+			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
 		},
 		"rows": [
 			"................",
+			"......hhhh......",
 			".....hhhhhh.....",
-			"....hhhhhhhh....",
-			"....hvvvvvVh....",
-			"....hvvvvvVh....",
-			"....hhhhhhhh....",
-			"...HHbbbbbbHH...",
-			"...HHbbbbbbHH...",
-			"...HHbbCbbbHH...",
-			"....bbbbbbbb....",
-			"....bBbbbbBb....",
-			"....bbbbbbbb....",
-			".....bb..bb.....",
-			".....bb..bb.....",
-			"....LLLL.LLLL...",
-			"....kkkk.kkkk...",
+			".....hvvvvh.....",
+			".....hvvvvh.....",
+			".....hhhhhh.....",
+			"...ppHHHHHHa....",
+			"...ppHbbbbHa....",
+			"...ppHbCbbHa....",
+			"....pHbbbbH.....",
+			".....bbbbbb.....",
+			"....bb..bb......",
+			"....bb..bb......",
+			"....bb..bb......",
+			"...LLL..LLL.....",
+			"...kkk..kkk.....",
+		],
+	},
+	# Run cycle: contact, left leg lifted, contact, right leg lifted — the legs
+	# have to alternate or it reads as bouncing rather than running.
+	"player_run_0": {
+		"outline": "05030f",
+		"palette": {
+			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
+			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
+		},
+		"rows": [
+			"................",
+			"......hhhh......",
+			".....hhhhhh.....",
+			".....hvvvvh.....",
+			".....hvvvvh.....",
+			".....hhhhhh.....",
+			"...ppHHHHHHa....",
+			"...ppHbbbbHa....",
+			"...ppHbCbbHa....",
+			"....pHbbbbH.....",
+			".....bbbbbb.....",
+			"....bb..bb......",
+			"...bb.....bb....",
+			"..bb.......bb...",
+			".LLL.......LLL..",
+			".kkk.......kkk..",
+		],
+	},
+	"player_run_1": {
+		"outline": "05030f",
+		"palette": {
+			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
+			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
+		},
+		"rows": [
+			"................",
+			"......hhhh......",
+			".....hhhhhh.....",
+			".....hvvvvh.....",
+			".....hvvvvh.....",
+			".....hhhhhh.....",
+			"...ppHHHHHHa....",
+			"...ppHbbbbHa....",
+			"...ppHbCbbHa....",
+			"....pHbbbbH.....",
+			".....bbbbbb.....",
+			"....bb..bb......",
+			"....bb..bb......",
+			"....bb...LL.....",
+			"...LLL...kk.....",
+			"...kkk..........",
+		],
+	},
+	"player_run_2": {
+		"outline": "05030f",
+		"palette": {
+			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
+			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
+		},
+		"rows": [
+			"................",
+			"......hhhh......",
+			".....hhhhhh.....",
+			".....hvvvvh.....",
+			".....hvvvvh.....",
+			".....hhhhhh.....",
+			"...ppHHHHHHa....",
+			"...ppHbbbbHa....",
+			"...ppHbCbbHa....",
+			"....pHbbbbH.....",
+			".....bbbbbb.....",
+			"....bb..bb......",
+			"...bb....bb.....",
+			"..bb......bb....",
+			".LLL......LLL...",
+			".kkk......kkk...",
+		],
+	},
+	"player_run_3": {
+		"outline": "05030f",
+		"palette": {
+			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
+			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
+		},
+		"rows": [
+			"................",
+			"......hhhh......",
+			".....hhhhhh.....",
+			".....hvvvvh.....",
+			".....hvvvvh.....",
+			".....hhhhhh.....",
+			"...ppHHHHHHa....",
+			"...ppHbbbbHa....",
+			"...ppHbCbbHa....",
+			"....pHbbbbH.....",
+			".....bbbbbb.....",
+			"....bb..bb......",
+			"....bb..bb......",
+			".....LL..bb.....",
+			".....kk..LLL....",
+			".........kkk....",
+		],
+	},
+	# Rising: legs tucked.
+	"player_jump": {
+		"outline": "05030f",
+		"palette": {
+			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
+			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
+		},
+		"rows": [
+			"................",
+			"......hhhh......",
+			".....hhhhhh.....",
+			".....hvvvvh.....",
+			".....hvvvvh.....",
+			".....hhhhhh.....",
+			"...ppHHHHHHa....",
+			"...ppHbbbbHa....",
+			"...ppHbCbbHa....",
+			"....pHbbbbH.....",
+			".....bbbbbb.....",
+			"....bb..bb......",
+			"...bb....bb.....",
+			"..LLL....LLL....",
+			"..kkk....kkk....",
+			"................",
+		],
+	},
+	# Falling: legs reaching for the ground.
+	"player_fall": {
+		"outline": "05030f",
+		"palette": {
+			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
+			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
+		},
+		"rows": [
+			"................",
+			"......hhhh......",
+			".....hhhhhh.....",
+			".....hvvvvh.....",
+			".....hvvvvh.....",
+			".....hhhhhh.....",
+			"...ppHHHHHHa....",
+			"...ppHbbbbHa....",
+			"...ppHbCbbHa....",
+			"....pHbbbbH.....",
+			".....bbbbbb.....",
+			"....bb..bb......",
+			"...bb.....bb....",
+			"..bb.......bb...",
+			".bb.........bb..",
+			".LLL.......LLL..",
 		],
 	},
 }
@@ -141,6 +298,24 @@ static func texture(sprite_name: String) -> Texture2D:
 	return tex
 
 
+## A soft radial glow in `tint`, cached per colour. Used for the skill orbs and
+## for the halo that keeps a hazard readable against any world's palette.
+static func glow(tint: Color, size: int = 16) -> ImageTexture:
+	var key := "glow:%s:%d" % [tint.to_html(), size]
+	if _cache.has(key):
+		return _cache[key]
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var centre := Vector2(size / 2.0 - 0.5, size / 2.0 - 0.5)
+	for y in size:
+		for x in size:
+			var d := Vector2(x, y).distance_to(centre) / (size / 2.0)
+			var a := clampf(1.0 - d, 0.0, 1.0)
+			img.set_pixel(x, y, Color(tint.r, tint.g, tint.b, a * a))
+	var tex := ImageTexture.create_from_image(img)
+	_cache[key] = tex
+	return tex
+
+
 static func has(sprite_name: String) -> bool:
 	return ART.has(sprite_name) or ResourceLoader.exists(DIR + sprite_name + ".png")
 
@@ -150,6 +325,7 @@ static func _from_art(art: Dictionary) -> ImageTexture:
 	var palette: Dictionary = art.palette
 	var img := Image.create(CELL, CELL, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
+	var solid: Dictionary = {}
 	for y in mini(CELL, rows.size()):
 		var row: String = rows[y]
 		for x in mini(CELL, row.length()):
@@ -157,6 +333,20 @@ static func _from_art(art: Dictionary) -> ImageTexture:
 			if not palette.has(key):
 				continue
 			img.set_pixel(x, y, Color(palette[key]))
+			solid[Vector2i(x, y)] = true
+	# Trace a 1px outline round the silhouette from the shape itself, rather
+	# than drawing it by hand in every frame. It is what keeps a sprite legible
+	# against five different world palettes.
+	if art.has("outline"):
+		var ink := Color(art.outline)
+		for y in CELL:
+			for x in CELL:
+				if solid.has(Vector2i(x, y)):
+					continue
+				for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					if solid.has(Vector2i(x, y) + d):
+						img.set_pixel(x, y, ink)
+						break
 	return ImageTexture.create_from_image(img)
 
 

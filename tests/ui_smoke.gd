@@ -345,6 +345,31 @@ func _run() -> void:
 	# the run — there is no death in this mode and there must never be one.
 	_drain_dialogue(world)
 	await _phys(8)
+	# Every sprite the world asks for must exist. A missing one doesn't crash —
+	# it silently degrades to a placeholder that nobody notices until a
+	# screenshot, which is exactly the kind of rot a test should catch.
+	var sprite_names: Array = ["spikes", "crate", "console", "console_done", "door",
+		"player", "player_jump", "player_fall"]
+	for colour in ["blue", "red", "green", "orange", "violet"]:
+		for role in ["_floor", "_floor_alt", "_wall", "_wall_alt"]:
+			sprite_names.append(colour + role)
+	for i in 4:
+		sprite_names.append("rover_%d" % i)
+		sprite_names.append("burst_%d" % i)
+	sprite_names.append_array(Player2D.RUN_FRAMES)
+	var missing: Array = []
+	for n in sprite_names:
+		if not SpriteFactory.has(str(n)):
+			missing.append(n)
+	check(missing.is_empty(), "every sprite the world uses exists (missing: %s)" % str(missing))
+	# And every palette a world names must have a full tile set behind it.
+	var bad_palette := ""
+	for wi in Game.adventure.world.count():
+		var pal: String = world._palette_for(wi)
+		if not SpriteFactory.has(pal + "_floor"):
+			bad_palette = "world %d asks for palette '%s', which has no tiles" % [wi + 1, pal]
+	check(bad_palette == "", "every world's palette has tiles (%s)" % bad_palette)
+
 	check(world._hazards.size() > 0, "world 2 has hazards on its course (%d)" % world._hazards.size())
 	var skills_before: int = Game.adventure.state.skills.size()
 	var hazard = world._hazards[0]

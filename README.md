@@ -160,7 +160,9 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   (`chmod`), name a log intruder (`grep|sort|uniq`), stop a miner (`ps`,`kill`)…
   Any valid solution passes, you get a "what you learned", and the **portal** to
   the next world opens. No HP, no lives and nothing kills you — touch a hazard or
-  fall in a pit and you're set back on the last ground you stood on. It ends at the Throne of root: the
+  fall in a pit and you're set back on the last ground you stood on, and told so.
+  The camera leads where you run, the operator has a real run cycle, and each
+  course is backed by parallax layers of machine receding into the dark. It ends at the Throne of root: the
   **sudo orb** earns you the right, and you become root to end the impostor
   (*"YOU MADE IT."*). Trial XP feeds the same ranks; the run is saved.
   Full write-up: [docs/ADVENTURE.md](docs/ADVENTURE.md).

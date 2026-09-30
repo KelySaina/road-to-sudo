@@ -33,8 +33,10 @@ It reuses the whole engine — the VFS, the shell, and the same
   exactly one new thing to read.
 - **Nothing can kill you.** There is no HP, no lives and no failed run. Touch a
   hazard or fall in a pit and you are set back down on the last ground you stood
-  on, a couple of seconds lost, with a moment of grace so you can't be caught
-  again instantly. A course you can lose is a course you stop playing, and this
+  on — the screen says *"set back — nothing lost, try it again"*, so it is never
+  mistaken for losing something — with a moment of grace so you can't be caught
+  again instantly. Hazards carry a red halo that breathes while they are live,
+  because the tiles come in five colours and the hazard art only one. A course you can lose is a course you stop playing, and this
   is a game about learning Linux.
 - **Skill orbs** — orbs sit on the ledges, one per command, so every skill costs
   you a jump. Reach one and you learn it: a card shows what the command does, it
@@ -92,12 +94,19 @@ from its orb count, so adding a world is pure JSON.
   gravity, coyote time, jump buffering and variable jump height. Its tuning and
   the level generator agree on one contract: a full jump clears ~3 tiles of
   height and ~3.7 across, so ledges sit 2 tiles up and pits are at most 3 wide.
+- Feel: the camera leads you in the direction you're running; the operator has
+  a four-frame run cycle stepped off ground covered rather than off time, so the
+  feet don't skate, plus jump and fall poses; and every course is backed by two
+  parallax layers of machine receding into the dark, generated per world from
+  its palette so no two skylines match.
 - Hurdles: `scripts/world2d/hazard.gd` (spikes, rovers, bursts — all of which
   set you back rather than kill) and `scripts/world2d/moving_platform.gd` (the
   lift, an AnimatableBody2D so it carries the player for free).
 - Art: terrain and hazards are sliced from Buch's CC0 sci-fi sheet by
   `tools/extract_tiles.py` (see `assets/tiles/CREDITS.md`); the console, portal
-  and operator are 16x16 colour maps authored in `sprite_factory.gd`.
+  and operator are 16x16 colour maps authored in `sprite_factory.gd`, which
+  traces their outlines from the silhouette at build time rather than asking
+  every frame to draw its own.
 - Tested headlessly in `tests/adventure_smoke.gd`, and through the real 2D
   scene in `tests/ui_smoke.gd` — which also holds the generator to its contract:
   every orb sits on a ledge (or over a lift), every ledge is within one measured

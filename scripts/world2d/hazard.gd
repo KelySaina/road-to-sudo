@@ -22,6 +22,7 @@ const FPS := 7.0
 var kind: Kind = Kind.SPIKES
 
 var _sprite: Sprite2D
+var _halo: Sprite2D
 var _frames: Array = []
 var _t := 0.0
 var _min_x := 0.0
@@ -56,6 +57,15 @@ func _ready() -> void:
 	for name in art:
 		_frames.append(SpriteFactory.texture(name))
 
+	# A danger halo behind the art. The tiles come in five colours and the hazard
+	# art only one, so on some worlds it would otherwise sit too close to the
+	# ground it is standing on; this keeps "that will hurt" readable everywhere.
+	_halo = Sprite2D.new()
+	_halo.texture = SpriteFactory.glow(UiTheme.ERROR)
+	_halo.scale = Vector2(5.5, 4.2)
+	_halo.modulate.a = 0.0
+	add_child(_halo)
+
 	_sprite = Sprite2D.new()
 	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_sprite.texture = _frames[0]
@@ -83,6 +93,9 @@ func _process(delta: float) -> void:
 	_t += delta
 	if _frames.size() > 1:
 		_sprite.texture = _frames[int(_t * FPS) % _frames.size()]
+	# The halo breathes while the thing is live, and goes out when it isn't.
+	var want: float = (0.30 + 0.10 * sin(_t * 4.0)) if is_live() else 0.0
+	_halo.modulate.a = move_toward(_halo.modulate.a, want, delta * 3.0)
 	match kind:
 		Kind.ROVER:
 			position.x += _dir * ROVER_SPEED * delta

@@ -48,6 +48,13 @@ const DEFAULT_COURSES := [
 ]
 const DEFAULT_PALETTES := ["blue", "green", "red", "violet", "orange", "red"]
 
+## Backdrop tint per palette — the machine receding into the dark behind you.
+const PALETTE_TINTS := {
+	"blue": Color("2b3a7a"), "red": Color("7a2b35"), "green": Color("1f6b4e"),
+	"orange": Color("8a4a1f"), "violet": Color("53398c"),
+}
+const LOOKAHEAD := 96.0         # how far the camera leads you when running
+
 var world: AdventureWorld
 var state: AdventureState
 var adv: AdventureManager
@@ -61,6 +68,7 @@ var _console: Interactable
 var _portal: Interactable
 var _near: Interactable = null
 var _level_w := 0
+var _backdrop: CanvasLayer
 var _hazards: Array = []
 var _hazard_grace := 0.0          # brief immunity after a setback
 var _safe_pos := Vector2.ZERO     # last spot the player stood on solid ground
@@ -73,6 +81,7 @@ var _sub_label: Label
 var _skills_box: HFlowContainer
 var _orb_label: Label
 var _prompt_label: Label
+var _flash_label: Label
 var _dialogue_layer: CanvasLayer
 var _dialogue: Control
 var _dialogue_name: Label
@@ -258,6 +267,7 @@ func _load_world(index: int) -> void:
 	var orb_count: int = adv.orbs_total(index)
 	var plan := _plan_level(index)
 	_level_w = plan.w
+	_build_backdrop(str(plan.palette))
 	_build_level_geometry(plan)
 
 	_hazards.clear()
@@ -345,7 +355,7 @@ func _add_orb(index: int, skill: String, cell: Vector2i) -> void:
 	node.position = Vector2((cell.x + 0.5) * TILE, (cell.y + 0.5) * TILE)
 	_room.add_child(node)
 	var spr := Sprite2D.new()
-	spr.texture = _orb_texture()
+	spr.texture = SpriteFactory.glow(UiTheme.ACCENT)
 	spr.scale = Vector2(2.4, 2.4)
 	node.add_child(spr)
 	var label := Label.new()
@@ -364,24 +374,6 @@ func _add_orb(index: int, skill: String, cell: Vector2i) -> void:
 	_orbs.append({"node": node, "index": index})
 
 
-static var _orb_tex: ImageTexture
-func _orb_texture() -> ImageTexture:
-	if _orb_tex != null:
-		return _orb_tex
-	var n := 16
-	var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
-	var c := UiTheme.ACCENT
-	var center := Vector2(n / 2.0 - 0.5, n / 2.0 - 0.5)
-	for y in n:
-		for x in n:
-			var d := Vector2(x, y).distance_to(center) / (n / 2.0)
-			var a := clampf(1.0 - d, 0.0, 1.0)
-			a = a * a
-			img.set_pixel(x, y, Color(c.r, c.g, c.b, a))
-	_orb_tex = ImageTexture.create_from_image(img)
-	return _orb_tex
-
-
 ## Place a prop standing on the ground at a column, sprite resting on the surface.
 func _make_interactable(kind: Interactable.Kind, sprite: String, label: String, col: int) -> Interactable:
 	var it := Interactable.new()
@@ -392,6 +384,62 @@ func _make_interactable(kind: Interactable.Kind, sprite: String, label: String, 
 	it.z_index = 6
 	_room.add_child(it)
 	return it
+
+
+## Racks of machine receding into the dark, on two parallax layers. Without
+## these the courses float on flat black, which reads as unfinished rather than
+## as depth. Generated rather than drawn: it is a silhouette, and a seed gives
+## every world its own skyline.
+func _build_backdrop(palette: String) -> void:
+	if _backdrop != null:
+		_backdrop.queue_free()
+	var tint: Color = PALETTE_TINTS.get(palette, Color("2b3a7a"))
+	_backdrop = ParallaxBackground.new()
+	_backdrop.layer = -10
+	add_child(_backdrop)
+	# Far layer sits low and barely moves; the near one is taller and darker,
+	# so the two read as distance rather than as one wallpaper.
+	for spec in [
+		{"seed": 11, "scale": Vector2(0.10, 0.03), "y": 150.0, "shade": 0.45, "h": 74},
+		{"seed": 29, "scale": Vector2(0.28, 0.07), "y": 250.0, "shade": 0.24, "h": 110},
+	]:
+		var layer := ParallaxLayer.new()
+		layer.motion_scale = spec.scale
+		_backdrop.add_child(layer)
+		var tex := _rack_texture(int(spec.seed), tint * float(spec.shade), int(spec.h))
+		var spr := Sprite2D.new()
+		spr.texture = tex
+		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		spr.centered = false
+		spr.scale = Vector2(3, 3)
+		spr.position = Vector2(0, float(spec.y))
+		layer.add_child(spr)
+		layer.motion_mirroring = Vector2(tex.get_width() * 3, 0)
+
+
+## One tile of skyline: racks of varying height with a lit top edge and a few
+## status LEDs, on transparent. Deterministic for a given seed.
+func _rack_texture(rack_seed: int, tint: Color, height: int) -> ImageTexture:
+	var w := 192
+	var img := Image.create(w, height, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = rack_seed
+	var x := 0
+	while x < w:
+		var rw := rng.randi_range(7, 17)
+		var top := rng.randi_range(int(height * 0.18), int(height * 0.72))
+		for px in range(x, mini(x + rw, w)):
+			for py in range(top, height):
+				img.set_pixel(px, py, tint if py > top else tint.lightened(0.45))
+		# A couple of lit vents, so it reads as machine and not as buildings.
+		for i in 3:
+			var ly := rng.randi_range(top + 3, height - 2)
+			var lx := x + rng.randi_range(1, maxi(1, rw - 2))
+			if lx < w and ly < height:
+				img.set_pixel(lx, ly, tint.lightened(0.7))
+		x += rw + rng.randi_range(2, 7)
+	return ImageTexture.create_from_image(img)
 
 
 func _build_player() -> void:
@@ -466,6 +514,20 @@ func _build_hud() -> void:
 	_prompt_label.text = "A D / ← → run   ·   Space or W jump   ·   E at a console   ·   Esc menu"
 	_prompt_label.theme_type_variation = &"DimLabel"
 	prompt_panel.add_child(_prompt_label)
+
+	# Says what just happened when you are put back — a flash alone leaves you
+	# wondering whether you lost something.
+	_flash_label = Label.new()
+	_flash_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_flash_label.position = Vector2(-220, 120)
+	_flash_label.size = Vector2(440, 24)
+	_flash_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_flash_label.theme_type_variation = &"AccentLabel"
+	_flash_label.add_theme_color_override("font_color", UiTheme.WARN)
+	_flash_label.add_theme_color_override("font_outline_color", UiTheme.BG)
+	_flash_label.add_theme_constant_override("outline_size", 6)
+	_flash_label.modulate.a = 0.0
+	root.add_child(_flash_label)
 
 
 func _refresh_hud() -> void:
@@ -681,6 +743,13 @@ func _process(delta: float) -> void:
 			continue
 		var spr: Sprite2D = node.get_meta("spr")
 		spr.position.y = node.get_meta("base_y") + sin(Time.get_ticks_msec() / 1000.0 * 3.0 + o.index) * 4.0
+	# Lead the camera in the direction of travel, so you can see what you are
+	# running into rather than what you already cleared.
+	var lead := 0.0
+	if absf(_player.velocity.x) > 20.0:
+		lead = signf(_player.velocity.x) * LOOKAHEAD
+	_camera.position.x = move_toward(_camera.position.x, lead, delta * 180.0)
+
 	_hazard_grace = maxf(0.0, _hazard_grace - delta)
 	if _overlay.visible or _dialogue.visible:
 		if _near:
@@ -734,6 +803,10 @@ func _setback() -> void:
 	_hazard_grace = 1.0
 	_player.modulate = Color(1.0, 0.45, 0.6, 0.35)
 	create_tween().tween_property(_player, "modulate", Color.WHITE, 0.5)
+	if _flash_label != null:
+		_flash_label.text = "set back — nothing lost, try it again"
+		_flash_label.modulate.a = 1.0
+		create_tween().tween_property(_flash_label, "modulate:a", 0.0, 1.6)
 
 
 func _unhandled_input(event: InputEvent) -> void:

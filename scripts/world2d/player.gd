@@ -22,6 +22,8 @@ const JUMP_VELOCITY := -790.0
 const JUMP_CUT := 0.42          # release early -> shorter hop
 const COYOTE_TIME := 0.10       # grace after walking off a ledge
 const JUMP_BUFFER := 0.12       # grace when you hit jump just before landing
+const RUN_FRAMES := ["player_run_0", "player_run_1", "player_run_2", "player_run_3"]
+const RUN_STRIDE := 26.0        # pixels of ground covered per run frame
 
 @warning_ignore("unused_signal")
 signal moved()
@@ -33,7 +35,7 @@ var _sprite: Sprite2D
 var _facing := 1
 var _coyote := 0.0
 var _buffer := 0.0
-var _step := 0.0
+var _stride := 0.0
 var _was_airborne := false
 
 
@@ -100,20 +102,23 @@ func _animate(dir: float, delta: float) -> void:
 	if not is_zero_approx(dir):
 		_facing = 1 if dir > 0.0 else -1
 		_sprite.flip_h = _facing < 0
+	_sprite.position.y = -24
 	if not is_on_floor():
 		# Lean into the arc: stretch rising, squash falling.
 		var t := clampf(velocity.y / 700.0, -1.0, 1.0)
 		_sprite.scale = Vector2(3.0 - t * 0.2, 3.0 + t * 0.2)
-		_sprite.position.y = -24
-		_step = 0.0
+		_sprite.texture = SpriteFactory.texture("player_fall" if velocity.y > 0.0 else "player_jump")
+		_stride = 0.0
 		return
 	_sprite.scale = Vector2(3, 3)
 	if absf(velocity.x) < 12.0:
-		_step = 0.0
-		_sprite.position.y = -24
+		_stride = 0.0
+		_sprite.texture = SpriteFactory.texture("player")
 		return
-	_step += delta * 13.0
-	_sprite.position.y = -24 + (2.0 if sin(_step) > 0.0 else 0.0)
+	# Step the run cycle off ground covered rather than off time, so the feet
+	# never skate when you are accelerating or shoving into a wall.
+	_stride += absf(velocity.x) * delta / RUN_STRIDE
+	_sprite.texture = SpriteFactory.texture(RUN_FRAMES[int(_stride) % RUN_FRAMES.size()])
 
 
 func facing_dir() -> Vector2:
