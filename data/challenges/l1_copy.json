@@ -1,0 +1,36 @@
+{
+  "id": "l1_copy",
+  "title": "Always back up first",
+  "level": "filesystem",
+  "machine": "workstation",
+  "xp": 100,
+  "briefing": [
+    "Level 1 — The Filesystem.",
+    "",
+    "Rule one of touching anything important: make a copy first.",
+    "You're about to edit a config. Back it up so a mistake can't hurt you."
+  ],
+  "tips": ["`cp SOURCE DEST` copies a file. The original stays put."],
+  "objective": "Make a backup of app.conf named app.conf.bak, in the same directory.",
+  "expert_objective": "Back up ~/app.conf to ~/app.conf.bak.",
+  "hints": [
+    "You want a second copy of the file, not to move it. There's a two-letter command for that.",
+    "`cp` copies: `cp <source> <destination>`. The source stays where it is.",
+    "`cp app.conf app.conf.bak`"
+  ],
+  "solution": "cp app.conf app.conf.bak",
+  "setup": {
+    "files": {
+      "~/app.conf": {"owner": "player", "group": "player", "lines": ["# app config", "listen 8080", "workers 4", "loglevel info"]}
+    },
+    "remove": ["~/app.conf.bak"],
+    "cwd": "~"
+  },
+  "success": {"all": [
+    {"type": "file_exists", "path": "~/app.conf.bak"},
+    {"type": "file_contains", "path": "~/app.conf.bak", "text": "listen 8080"}
+  ]},
+  "explanation": "`cp source dest` duplicates a file; the original is untouched. Backing up before editing is a habit that will save you more times than you can count. To copy a whole directory, add -r: `cp -r site site-backup`.",
+  "unlocks": ["cp"],
+  "teaches": ["copying", "backups"]
+}

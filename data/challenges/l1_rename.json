@@ -1,0 +1,29 @@
+{
+  "id": "l1_rename",
+  "title": "A name to fix",
+  "level": "filesystem",
+  "machine": "workstation",
+  "xp": 100,
+  "briefing": ["Someone fat-fingered a filename. There is no `rename` command on Linux —", "moving a file to a new name in the same place IS renaming."],
+  "tips": ["`mv OLD NEW` moves a file. If NEW is just a different name, that's a rename."],
+  "objective": "Rename the misspelled reprot.txt to report.txt.",
+  "expert_objective": "Fix the name: reprot.txt should be report.txt.",
+  "hints": [
+    "There's no rename command — you MOVE the file to the correct name.",
+    "`mv <old name> <new name>` in the same directory renames it.",
+    "`mv reprot.txt report.txt`"
+  ],
+  "solution": "mv reprot.txt report.txt",
+  "setup": {
+    "files": {"~/reprot.txt": {"owner": "player", "group": "player", "content": "Q3 report — draft\n"}},
+    "remove": ["~/report.txt"],
+    "cwd": "~"
+  },
+  "success": {"all": [
+    {"type": "file_exists", "path": "~/report.txt"},
+    {"type": "path_missing", "path": "~/reprot.txt"}
+  ]},
+  "explanation": "`mv` moves a file — and moving it to a new name in the same folder is how you rename on Linux. `mv a.txt dir/` moves it into a directory instead; `mv a.txt dir/b.txt` moves and renames at once.",
+  "unlocks": ["mv"],
+  "teaches": ["renaming", "moving"]
+}

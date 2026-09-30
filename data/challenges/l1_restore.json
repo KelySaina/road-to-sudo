@@ -1,0 +1,84 @@
+{
+  "id": "l1_restore",
+  "title": "Restore the homepage",
+  "level": "filesystem",
+  "machine": "workstation",
+  "xp": 160,
+  "time_limit": 240,
+  "briefing": [
+    "Ticket: the website's homepage is blank.",
+    "",
+    "Someone renamed the real index.html to index.html.bak while 'fixing' it,",
+    "and left a junk index.html.tmp behind. Put it right."
+  ],
+  "expert_objective": "Restore ~/site: index.html.bak -> index.html, and remove index.html.tmp.",
+  "tips": [
+    "This is just the tools you already have: `mv` to rename, `rm` to delete."
+  ],
+  "objective": "In ~/site: rename index.html.bak back to index.html, and delete the leftover index.html.tmp.",
+  "hints": [
+    "Two problems: the real page has the wrong name, and there's a junk file to remove. Fix both.",
+    "Rename the backup back: `mv index.html.bak index.html`. Then delete the tmp file with `rm`.",
+    "`cd ~/site`, then `mv index.html.bak index.html`, then `rm index.html.tmp`"
+  ],
+  "solution": "cd ~/site\nmv index.html.bak index.html\nrm index.html.tmp",
+  "setup": {
+    "files": {
+      "~/site": {
+        "dir": true,
+        "owner": "player",
+        "group": "player"
+      },
+      "~/site/index.html.bak": {
+        "owner": "player",
+        "group": "player",
+        "lines": [
+          "<!doctype html>",
+          "<h1>Welcome</h1>"
+        ]
+      },
+      "~/site/index.html.tmp": {
+        "owner": "player",
+        "group": "player",
+        "content": "JUNK JUNK JUNK\n"
+      },
+      "~/site/style.css": {
+        "owner": "player",
+        "group": "player",
+        "content": "body{}\n"
+      }
+    },
+    "remove": [
+      "~/site/index.html"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {
+        "type": "file_exists",
+        "path": "~/site/index.html"
+      },
+      {
+        "type": "file_contains",
+        "path": "~/site/index.html",
+        "text": "Welcome"
+      },
+      {
+        "type": "path_missing",
+        "path": "~/site/index.html.bak"
+      },
+      {
+        "type": "path_missing",
+        "path": "~/site/index.html.tmp"
+      }
+    ]
+  },
+  "explanation": "Nothing new here — just `mv` and `rm` used together to fix a real-looking mess. That's most of system administration: small, careful moves with tools you already know. You finished Level 1: files bend to your will.",
+  "unlocks": [],
+  "teaches": [
+    "moving",
+    "deleting",
+    "incident-response"
+  ]
+}

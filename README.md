@@ -94,6 +94,8 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   basics"), Continue, **Adventure**, Practice Lab, Achievements, Settings and
   Exit.
   Starting over and resetting progress each ask for confirmation first.
+- **Campaign — two levels, 16 challenges** (state-checked, so any valid
+  solution passes):
 - **Level 0 · First Contact**, 10 challenges:
   1. *Who are you?* (`whoami` / `id`)
   2. *Where are you?* (`pwd`)
@@ -107,6 +109,9 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   9. *Permission denied*: Alice's backup script (`ls -l`, `chmod`)
   10. *Your first incident*: a report generator fails for two independent
       reasons. You have to read the logs and fix both.
+- **Level 1 · The Filesystem**, 6 challenges: back up with `cp`, rename with
+  `mv`, tidy `*.log` files into a folder, delete a build dir with `rm -r`,
+  hunt a buried file with `find`, and restore a broken homepage (`mv` + `rm`).
 - **Adventure mode — "The Ascent to Root" (a 2D RPG):** a real top-down game.
   You steer an operator (WASD / arrows) through the mainframe's rooms, walk up
   to consoles, NPCs and monsters, and press **E**. Consoles open a **terminal
@@ -273,8 +278,7 @@ These are honest gaps, not bugs:
 
 ## Roadmap (next steps)
 
-1. **Level 1 · The Filesystem:** `cp` / `mv` / `rm` / `find` challenges.
-   These commands are already implemented.
+1. **Level 1 · The Filesystem** — done (cp / mv / rm / find, 6 challenges).
 2. **Level 3–4 · Permissions, users and groups:** `useradd`, `passwd` and
    interactive password prompts (a `PromptRequest` in `ExecutionOutcome`).
 3. **Level 5 · Processes:** a live process table (CPU hogs that respawn),

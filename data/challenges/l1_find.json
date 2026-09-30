@@ -1,0 +1,33 @@
+{
+  "id": "l1_find",
+  "title": "The needle",
+  "level": "filesystem",
+  "machine": "workstation",
+  "xp": 130,
+  "briefing": ["Somewhere deep under your projects folder, a key file is hidden.", "Digging by hand would take all day. Let find do the walking."],
+  "tips": ["`find WHERE -name PATTERN` searches a whole directory tree for a name.", "Once you know the path, `cat` it to read it."],
+  "objective": "A file named secret.key is buried somewhere under ~/projects. Find it and read what's inside.",
+  "expert_objective": "Locate and read secret.key under ~/projects.",
+  "hints": [
+    "You know the name but not the place. That's exactly what `find` is for.",
+    "`find ~/projects -name secret.key` prints its full path.",
+    "Then read it: `cat <the path find printed>`."
+  ],
+  "solution": "find ~/projects -name secret.key\ncat ~/projects/apollo/config/keys/secret.key",
+  "setup": {
+    "files": {
+      "~/projects/apollo/config/keys/secret.key": {"owner": "player", "group": "player", "content": "vault-code: AURORA-7\n"},
+      "~/projects/apollo/src/main.py": {"owner": "player", "group": "player", "content": "print('hi')\n"},
+      "~/projects/gemini/readme.md": {"owner": "player", "group": "player", "content": "# gemini\n"}
+    },
+    "cwd": "~"
+  },
+  "success": {"type": "output_contains", "text": "AURORA-7"},
+  "reactions": [
+    {"when": {"type": "command_ran", "name": ["ls", "cd"], "scope": "any"}, "difficulty": ["beginner"],
+     "say": "You could click through every folder by hand... or let `find` search the whole tree in one command."}
+  ],
+  "explanation": "`find PATH -name NAME` walks an entire directory tree looking for matches — no more guessing which folder. Combine it with -exec to run a command on every match, e.g. `find . -name '*.tmp' -delete`.",
+  "unlocks": ["find"],
+  "teaches": ["find", "searching"]
+}

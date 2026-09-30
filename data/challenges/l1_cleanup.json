@@ -1,0 +1,38 @@
+{
+  "id": "l1_cleanup",
+  "title": "Take out the trash",
+  "level": "filesystem",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": ["A leftover build directory is wasting space. Delete it — all of it.", "", "Remember: rm has no undo and no recycle bin. Read before you press Enter."],
+  "tips": ["`rm FILE` deletes a file. A directory with contents needs `rm -r` (recursive)."],
+  "objective": "Delete the entire ~/build directory and everything inside it.",
+  "expert_objective": "Remove ~/build and its contents.",
+  "hints": [
+    "`rm` on a directory complains — a directory isn't a single file.",
+    "To remove a directory and everything in it, rm needs to go recursive: the -r flag.",
+    "`rm -r build`"
+  ],
+  "solution": "rm -r build",
+  "setup": {
+    "files": {
+      "~/build": {"dir": true, "owner": "player", "group": "player"},
+      "~/build/main.o": {"owner": "player", "group": "player", "content": "junk\n"},
+      "~/build/cache/tmp1": {"owner": "player", "group": "player", "content": "junk\n"},
+      "~/keep.txt": {"owner": "player", "group": "player", "content": "do not delete me\n"}
+    },
+    "cwd": "~"
+  },
+  "protected": ["~/keep.txt"],
+  "success": {"all": [
+    {"type": "path_missing", "path": "~/build"},
+    {"type": "file_exists", "path": "~/keep.txt"}
+  ]},
+  "reactions": [
+    {"when": {"type": "command_ran", "name": "rm", "args_contain": "build"}, "difficulty": ["beginner"],
+     "say": "If rm complained 'Is a directory', that's expected — a directory needs `rm -r` to remove it and its contents."}
+  ],
+  "explanation": "`rm -r` removes a directory and everything inside, recursively. There is no trash can — deleted is deleted. The safety habit: run `ls` on what you're about to delete first, and never, ever `rm -rf /` (the game refuses it, real machines don't).",
+  "unlocks": ["rm"],
+  "teaches": ["deleting", "recursion", "safety"]
+}

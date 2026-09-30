@@ -2,9 +2,15 @@
   "id": "filesystem",
   "order": 1,
   "title": "Level 1 — The Filesystem",
-  "subtitle": "Coming next: cp, mv, rm, find, absolute vs relative paths",
-  "description": "Not built yet — the vertical slice ends with Level 0. See docs/ADDING_CHALLENGES.md to add the first challenge here.",
+  "subtitle": "Copy, move, delete, and find your way around",
+  "description": "You can look; now learn to change things. Copy and back up, rename and move, delete safely, and hunt files down with find.",
   "machine": "workstation",
-  "locked": true,
-  "challenges": []
+  "challenges": [
+    "l1_copy",
+    "l1_rename",
+    "l1_organize",
+    "l1_cleanup",
+    "l1_find",
+    "l1_restore"
+  ]
 }

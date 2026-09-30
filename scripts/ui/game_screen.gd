@@ -93,6 +93,12 @@ func _on_narrate(text: String, kind: String) -> void:
 func _on_challenge_started(c: Challenge) -> void:
 	var diff: DifficultySettings = Game.difficulty
 	var pos := Game.library.position_of(c.id)
+	if int(pos.get("index", 0)) == 0:
+		var lvl: Dictionary = pos.get("level", {})
+		terminal.print_text("")
+		terminal.print_rule(str(lvl.get("title", "")).to_upper())
+		if lvl.has("description"):
+			terminal.type_text("  " + str(lvl.description), "dim")
 	terminal.print_text("")
 	terminal.print_rule("%d/%d · %s" % [int(pos.get("index", 0)) + 1, int(pos.get("count", 1)), c.title])
 	terminal.type_text("")
@@ -166,25 +172,37 @@ func _on_adventure_won() -> void:
 
 func _on_campaign_finished() -> void:
 	var p: PlayerProfile = Game.profile
+	var done: Array = []
+	for lvl in Game.library.levels:
+		if not lvl.get("challenges", []).is_empty():
+			done.append(str(lvl.get("title", "")))
 	terminal.print_text("")
-	terminal.print_rule("END OF LEVEL 0")
-	for line in [
+	terminal.print_rule("THE ROAD CONTINUES")
+	var lines: Array = [
 		"",
 		"  You started this session not knowing who you were.",
-		"  You just debugged a production incident.",
+		"  Now files, permissions and a broken production box all bend to you.",
 		"",
 		"  Rank        %s" % Game.progression.current_rank().name,
 		"  XP          %d" % p.xp,
 		"  Commands    %d run, %d pipes, %d permission errors met" % [int(p.stats.commands_run), int(p.stats.pipes), int(p.stats.permission_denied)],
 		"  Hints used  %d" % int(p.stats.hints_used),
 		"",
-		"  The road to sudo continues: users & groups, processes, networking,",
-		"  services, SSH... Level 1 is not built yet — this is the vertical slice.",
+		"  Finished so far:",
+	]
+	for title in done:
+		lines.append("    ✔ %s" % title)
+	lines.append_array([
 		"",
-		"  Keep exploring this machine, or type :menu. Practice Lab is always open.",
-	]:
+		"  Next on the road: users & groups, processes, networking, services,",
+		"  SSH, git, security... more levels are on the way.",
+		"",
+		"  Type :menu, keep exploring this machine, or try Adventure mode and",
+		"  the Practice Lab — both always open.",
+	])
+	for line in lines:
 		terminal.type_text(line, "story")
-	objective_panel.show_practice()
-	objective_panel.level_label.text = "LEVEL 0 COMPLETE"
+		objective_panel.show_practice()
+	objective_panel.level_label.text = "CAMPAIGN COMPLETE"
 	objective_panel.title.text = "The road continues"
-	objective_panel.objective.text = "More levels are coming. See docs/ADDING_CHALLENGES.md to build one."
+	objective_panel.objective.text = "You've finished every level built so far. More are on the way."

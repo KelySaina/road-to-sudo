@@ -1,0 +1,42 @@
+{
+  "id": "l1_organize",
+  "title": "Tidy up",
+  "level": "filesystem",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": ["Your home directory is littered with log files. Time to file them away.", "One wildcard can grab them all at once."],
+  "tips": ["`*` matches anything: `*.log` means every name ending in .log.", "`mkdir NAME` makes a directory; `mv *.log NAME/` moves them all inside."],
+  "objective": "Create a directory called logs and move every .log file in your home into it.",
+  "expert_objective": "Collect all ~/*.log into a new ~/logs/.",
+  "hints": [
+    "First make somewhere to put them: a directory. Then move the files there.",
+    "`mkdir logs` makes the directory. `*.log` matches every log file at once.",
+    "`mkdir logs`, then `mv *.log logs/`"
+  ],
+  "solution": "mkdir logs\nmv *.log logs/",
+  "setup": {
+    "files": {
+      "~/access.log": {"owner": "player", "group": "player", "content": "GET /\n"},
+      "~/error.log": {"owner": "player", "group": "player", "content": "oops\n"},
+      "~/debug.log": {"owner": "player", "group": "player", "content": "trace\n"},
+      "~/readme.txt": {"owner": "player", "group": "player", "content": "keep me here\n"}
+    },
+    "remove": ["~/logs"],
+    "cwd": "~"
+  },
+  "success": {"all": [
+    {"type": "dir_exists", "path": "~/logs"},
+    {"type": "file_exists", "path": "~/logs/access.log"},
+    {"type": "file_exists", "path": "~/logs/error.log"},
+    {"type": "file_exists", "path": "~/logs/debug.log"},
+    {"type": "path_missing", "path": "~/access.log"},
+    {"type": "file_exists", "path": "~/readme.txt"}
+  ]},
+  "reactions": [
+    {"when": {"type": "path_missing", "path": "~/readme.txt"}, "kind": "warning",
+     "say": "readme.txt was not a .log — `*.log` shouldn't have touched it. Careful which wildcard you use."}
+  ],
+  "explanation": "The shell expands `*.log` to every matching name before mv even runs, so `mv *.log logs/` moves them in one shot. Wildcards (globs) are one of the biggest time-savers in the shell — and one of the easiest ways to move the wrong thing, so look before you glob.",
+  "unlocks": [],
+  "teaches": ["globs", "organizing", "mkdir"]
+}
