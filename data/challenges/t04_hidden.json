@@ -1,0 +1,28 @@
+{
+  "id": "t04_hidden",
+  "title": "Nothing to see here",
+  "machine": "workstation",
+  "xp": 100,
+  "briefing": ["The note said not everything shows up when you list a directory.", "It wasn't lying."],
+  "tips": [
+    "Commands take options that change their behaviour. Options start with a dash: ls -l, ls -a ...",
+    "`man ls` explains every option ls understands."
+  ],
+  "objective": "Something in your home directory is hidden. Find it and read it to get the second codeword.",
+  "expert_objective": "Recover the second codeword. It's closer than you think.",
+  "hints": [
+    "A plain `ls` doesn't show everything. Options (starting with -) change what a command does; `man ls` lists them.",
+    "On Linux, a file is hidden simply because its name starts with a dot. `ls -a` shows all of them.",
+    "`ls -a`, then `cat .hidden_note`."
+  ],
+  "solution": "ls -a\ncat .hidden_note",
+  "setup": {"restore": ["~/.hidden_note"]},
+  "success": {"type": "output_contains", "text": "ORBIT"},
+  "reactions": [
+    {"when": {"type": "event", "name": "manual_read", "data": {"topic": "ls"}}, "difficulty": ["beginner", "normal"],
+     "say": "Reading the manual first. That's the habit of people who get good at this."}
+  ],
+  "explanation": "A leading `.` is the whole secret: such files are skipped by a plain `ls`. Configuration hides this way — .bashrc, .profile, .ssh/. `ls -a` shows everything, including `.` (this directory) and `..` (its parent).",
+  "unlocks": [],
+  "teaches": ["hidden-files", "options", "man"]
+}

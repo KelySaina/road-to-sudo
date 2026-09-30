@@ -1,0 +1,107 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/adventure_panel.gd" id="1_adv"]
+
+[node name="AdventurePanel" type="PanelContainer"]
+size_flags_vertical = 3
+script = ExtResource("1_adv")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Region" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CapsLabel"
+text = "THE ASCENT TO ROOT"
+
+[node name="Location" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "Location"
+autowrap_mode = 3
+
+[node name="HpRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HpLabel" type="Label" parent="VBox/HpRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "HP"
+
+[node name="HpBar" type="ProgressBar" parent="VBox/HpRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.001
+show_percentage = false
+
+[node name="HpText" type="Label" parent="VBox/HpRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "30/30"
+
+[node name="Objective" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"AccentLabel"
+text = ""
+autowrap_mode = 3
+
+[node name="EnemyLine" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = ""
+autowrap_mode = 3
+
+[node name="Sep" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="ExitsTitle" type="Label" parent="VBox"]
+layout_mode = 2
+theme_type_variation = &"CapsLabel"
+text = "PATHS"
+
+[node name="Exits" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = ""
+autowrap_mode = 3
+
+[node name="KeysTitle" type="Label" parent="VBox"]
+layout_mode = 2
+theme_type_variation = &"CapsLabel"
+text = "KEYS"
+
+[node name="Keys" type="HFlowContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+
+[node name="Spacer" type="Control" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Verbs" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"FaintLabel"
+text = "look · go <way> · talk · map · status · hint"
+autowrap_mode = 3
+
+[node name="HintButton" type="Button" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"GhostButton"
+text = "Ask for a hint  (hint)"

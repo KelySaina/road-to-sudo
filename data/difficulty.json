@@ -1,0 +1,40 @@
+{
+  "order": ["beginner", "normal", "expert"],
+  "skip_basics_to": "t08_needle",
+  "beginner": {
+    "label": "Beginner",
+    "description": "Never touched a terminal? Start here. Explanations after every step, gentle nudges, up to 3 hints and a solution when you're stuck.",
+    "show_tips": true,
+    "show_explanations": true,
+    "max_hints": 3,
+    "allow_solution": true,
+    "allow_skip": false,
+    "inline_suggestions": true,
+    "xp_multiplier": 1.0,
+    "time_bonus": false
+  },
+  "normal": {
+    "label": "Normal",
+    "description": "You know what a terminal is. Objectives and realistic machines, fewer nudges. Hints and solutions stay available. You may :skip.",
+    "show_tips": false,
+    "show_explanations": true,
+    "max_hints": 3,
+    "allow_solution": true,
+    "allow_skip": true,
+    "inline_suggestions": false,
+    "xp_multiplier": 1.25,
+    "time_bonus": false
+  },
+  "expert": {
+    "label": "Expert",
+    "description": "Tickets, not tutorials. Vague objectives, one hint, no solutions, bonus XP for solving fast. Skip whatever you already know.",
+    "show_tips": false,
+    "show_explanations": false,
+    "max_hints": 1,
+    "allow_solution": false,
+    "allow_skip": true,
+    "inline_suggestions": false,
+    "xp_multiplier": 1.5,
+    "time_bonus": true
+  }
+}

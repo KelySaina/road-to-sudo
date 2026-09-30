@@ -1,0 +1,99 @@
+{
+  "hostname": "mainframe",
+  "users": {
+    "root": {
+      "uid": 0,
+      "gid": 0,
+      "groups": [
+        "root"
+      ],
+      "home": "/root",
+      "shell": "/bin/bash",
+      "gecos": "root"
+    },
+    "player": {
+      "uid": 1000,
+      "gid": 1000,
+      "groups": [
+        "player",
+        "users"
+      ],
+      "home": "/home/player",
+      "shell": "/bin/bash",
+      "gecos": "Operator"
+    },
+    "wraith": {
+      "uid": 1313,
+      "gid": 1313,
+      "groups": [
+        "wraith"
+      ],
+      "home": "/home/wraith",
+      "shell": "/usr/sbin/nologin",
+      "gecos": "?"
+    }
+  },
+  "processes": [
+    {
+      "pid": 1,
+      "user": "root",
+      "cpu": 0.0,
+      "mem": 0.5,
+      "stat": "Ss",
+      "cmd": "/sbin/init"
+    },
+    {
+      "pid": 212,
+      "user": "root",
+      "cpu": 0.1,
+      "mem": 0.9,
+      "stat": "Ss",
+      "cmd": "/lib/systemd/systemd-journald"
+    },
+    {
+      "pid": 488,
+      "user": "root",
+      "cpu": 0.0,
+      "mem": 0.3,
+      "stat": "Ss",
+      "cmd": "/usr/sbin/cron -f"
+    },
+    {
+      "pid": 502,
+      "user": "root",
+      "cpu": 0.2,
+      "mem": 0.6,
+      "stat": "Ss",
+      "cmd": "sshd: /usr/sbin/sshd -D [listener]"
+    },
+    {
+      "pid": 900,
+      "user": "player",
+      "cpu": 0.0,
+      "mem": 0.1,
+      "stat": "S",
+      "cmd": "-bash",
+      "tty": "pts/0"
+    }
+  ],
+  "files": {
+    "/etc/motd": {
+      "content": "\n  M A I N F R A M E   //   emergency console\n  system integrity: DEGRADED\n\n"
+    },
+    "/home/player/OPERATOR.txt": {
+      "owner": "player",
+      "group": "player",
+      "lines": [
+        "If you are reading this, the automated recovery failed and a human — you —",
+        "has been paged. root is unreachable. Something is wearing its face.",
+        "",
+        "This console speaks Linux. So must you.",
+        "  look          survey where you are",
+        "  go <way>      travel   ·   talk       speak to whoever is here",
+        "  map           the world   ·   status  your health and keys",
+        "Everything else is a real command. Type `learn` for a cheat sheet of",
+        "what each command does, or `help` for the full list."
+      ]
+    }
+  }
+}

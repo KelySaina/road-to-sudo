@@ -1,0 +1,23 @@
+{
+  "id": "t02_location",
+  "title": "Where are you?",
+  "machine": "workstation",
+  "xp": 100,
+  "briefing": ["Nice.", "", "Now find out where you are."],
+  "tips": ["The shell is always 'standing' in some directory, even when it doesn't say so out loud."],
+  "objective": "Print the full path of the directory you are in right now.",
+  "expert_objective": "Report the current working directory.",
+  "hints": [
+    "Your prompt shows `~`, which is an abbreviation. Ask the machine for the full name.",
+    "The command's initials are P-W-D: Print Working Directory.",
+    "Type `pwd`."
+  ],
+  "solution": "pwd",
+  "success": {"any": [
+    {"type": "command_ran", "name": "pwd", "exit_code": 0},
+    {"all": [{"type": "command_ran", "name": ["echo", "printenv"]}, {"type": "output_contains", "text": "/home/player"}]}
+  ]},
+  "explanation": "You are in /home/player — your home directory, nicknamed `~`. A path starting with `/` is absolute: it begins at the root of one single tree. Disks, devices, configuration, logs: on Linux everything hangs somewhere under /.",
+  "unlocks": ["pwd"],
+  "teaches": ["paths", "home"]
+}

@@ -1,0 +1,619 @@
+{
+  "id": "ascent",
+  "title": "The Ascent to Root",
+  "machine": "mainframe",
+  "start": "home",
+  "max_hp": 30,
+  "intro": [
+    "MAINFRAME — EMERGENCY CONSOLE",
+    "",
+    "The server that runs everything is dying. Its guardian, root, has gone",
+    "silent, and something is wearing root's face, rewriting the system from",
+    "the inside.",
+    "",
+    "You are a lowly user account with a shell and no privileges. To save the",
+    "machine you must climb — through its gates, its swamps and its foundries —",
+    "all the way to root, and unmake the impostor sitting on the throne.",
+    "",
+    "You have only what you can type. Begin: read OPERATOR.txt, then `look`.",
+    "",
+    "New to the terminal? Type  learn  at any console for a cheat sheet."
+  ],
+  "nodes": {
+    "home": {
+      "id": "home",
+      "name": "The Waking Terminal",
+      "type": "npc",
+      "cwd": "~",
+      "art": [
+        "    .--.",
+        "   |o_o |   a small penguin blinks at you from the logo buffer",
+        "   |:_/ |"
+      ],
+      "on_enter": [
+        "You come to at a cold prompt in an operator's home directory.",
+        "A penguin — the machine's oldest daemon, half memory, half mascot —",
+        "watches you from the corner of the screen."
+      ],
+      "on_return": [
+        "The penguin is still here, patient as init."
+      ],
+      "npc": {
+        "name": "Tux, the Old Daemon",
+        "lines": [
+          "So. root is gone and the machine sent for a USER. Times are desperate.",
+          "Listen: this whole world speaks Linux. Move with `go`, look with `look`,",
+          "and when a door won't open, the answer is always a command you can type.",
+          "Read your OPERATOR.txt. Then head east, to the Rusted Gate. Mind the lock."
+        ],
+        "hint": "Type `cat OPERATOR.txt`, then `go east`. Stuck at a console? Type `hint`. Curious what a command does? Type `learn`."
+      },
+      "exits": {
+        "east": "gate"
+      }
+    },
+    "gate": {
+      "id": "gate",
+      "name": "The Rusted Gate",
+      "type": "battle",
+      "cwd": "~",
+      "on_enter": [
+        "A blast door seals the corridor east. Beside it, a card reader and a",
+        "loose keycard script someone dropped: keycard.sh. The reader is dark."
+      ],
+      "enemy": {
+        "name": "The Rusted Lock",
+        "taunt": [
+          "None shall pass who cannot run their own key.",
+          "Reading is not doing, little user."
+        ]
+      },
+      "battle": {
+        "objective": "Open the gate: run keycard.sh. It sits right here, but it won't run as it is.",
+        "hints": [
+          "Look at the keycard first. `ls -l keycard.sh` — what's missing compared to a program you can run?",
+          "It has no execute (x) permission. `chmod +x keycard.sh` grants it. Only its owner (you) may do that.",
+          "Then run it from here: `./keycard.sh`  (the ./ means 'the file in this directory')."
+        ],
+        "setup": {
+          "files": {
+            "~/keycard.sh": {
+              "owner": "player",
+              "group": "player",
+              "mode": "644",
+              "lines": [
+                "#!/bin/bash",
+                "# Emergency keycard. Run me to open the east gate.",
+                "echo 'keycard accepted — the gate grinds open'",
+                "touch /home/player/.gate_open"
+              ]
+            }
+          },
+          "remove": [
+            "~/.gate_open"
+          ]
+        },
+        "traps": [
+          {
+            "when": {
+              "type": "event",
+              "name": "file_deleted",
+              "data_contains": {
+                "path": "keycard.sh"
+              }
+            },
+            "damage": 6,
+            "say": "You destroyed the only keycard! The lock jeers — but a reboot will restore it."
+          }
+        ],
+        "success": {
+          "type": "file_exists",
+          "path": "~/.gate_open"
+        },
+        "reward_flags": [
+          "keycard"
+        ],
+        "reward_xp": 60,
+        "victory": [
+          "The blast door grinds open. The way east is clear.",
+          "You pocket the keycard — a key to more than this gate."
+        ],
+        "learned": [
+          "`chmod` changes a file's permissions. `chmod +x file` adds the execute bit,",
+          "so a program is allowed to run. `./file` runs a program in the current directory."
+        ]
+      },
+      "exits": {
+        "east": "swamp",
+        "west": "home"
+      }
+    },
+    "swamp": {
+      "id": "swamp",
+      "name": "The Log Swamp",
+      "type": "battle",
+      "cwd": "/var/log",
+      "on_enter": [
+        "The floor turns to churning logs — thousands of lines a second pour",
+        "through /var/log. Somewhere in the flood, an intruder is hammering the",
+        "gates. A robed figure fishes patiently in the stream: the Archivist."
+      ],
+      "npc": {
+        "name": "The Archivist",
+        "lines": [
+          "Every attack leaves a wake in the logs, friend. This one hammers a door",
+          "over and over — the same name, again and again, failing each time.",
+          "Do not read it all. Cast a net: keep only the lines that matter, then",
+          "count which name surfaces most."
+        ],
+        "hint": "grep 'Failed password' /var/log/auth.log will thin the flood. The name repeats after 'for'. Then: echo <name> > ~/intel.txt"
+      },
+      "enemy": {
+        "name": "The Flood",
+        "taunt": [
+          "You cannot read what you cannot hold.",
+          "Drown in it."
+        ]
+      },
+      "battle": {
+        "objective": "Name the intruder drowning /var/log/auth.log with failed logins, and write just that name into ~/intel.txt.",
+        "hints": [
+          "Don't scroll 4000 lines. Filter to the failures: grep 'Failed password' /var/log/auth.log",
+          "One name repeats far more than the rest. Count them: pipe into  grep -o 'for [a-z]*' | sort | uniq -c | sort -rn",
+          "The name is 'wraith'. Record it:  echo wraith > ~/intel.txt"
+        ],
+        "setup": {
+          "files": {
+            "/var/log/auth.log": {
+              "mode": "644",
+              "generator": "auth_log",
+              "params": {
+                "seed": 1919,
+                "lines": 4000,
+                "intruder": "wraith",
+                "intruder_hits": 88,
+                "intruder_ip": "203.0.113.66"
+              }
+            }
+          },
+          "remove": [
+            "~/intel.txt"
+          ]
+        },
+        "traps": [],
+        "success": {
+          "type": "file_matches",
+          "path": "~/intel.txt",
+          "regex": "^\\s*wraith\\s*$"
+        },
+        "reward_flags": [
+          "intel"
+        ],
+        "reward_xp": 90,
+        "victory": [
+          "The Archivist nods. 'Wraith. I will seal the door against that name.'",
+          "The flood recedes to a trickle. You keep the intel — a name is a weapon."
+        ],
+        "learned": [
+          "`grep PATTERN file` keeps only the lines that match. A pipe `|` feeds one",
+          "command into the next, so  grep ... | sort | uniq -c | sort -rn  counts and ranks."
+        ]
+      },
+      "exits": {
+        "east": "foundry",
+        "west": "gate"
+      }
+    },
+    "foundry": {
+      "id": "foundry",
+      "name": "The Process Foundry",
+      "type": "battle",
+      "cwd": "~",
+      "on_enter": [
+        "Heat rolls off the CPU cores. One of them is pinned at 99% — something",
+        "is burning cycles it did not earn. Fans scream. Among the honest",
+        "workers, one process is a thief."
+      ],
+      "enemy": {
+        "name": "The Miner",
+        "taunt": [
+          "Your cores are mine now.",
+          "Find me if you can. Most just watch the fans spin."
+        ]
+      },
+      "battle": {
+        "objective": "A rogue process is devouring the CPU. Find it and stop it — without killing the honest workers.",
+        "hints": [
+          "See what's running and who's greedy: `ps aux`. The thief burns far more CPU than anything else.",
+          "Note its PID (the number). Stop it with `kill <pid>`. Look before you strike — one process here only pretends to be junk.",
+          "The miner runs './xmrig ...'. `kill` its PID. Do NOT kill the backup-daemon; that one is friendly."
+        ],
+        "setup": {
+          "processes": [
+            {
+              "pid": 6660,
+              "user": "player",
+              "cpu": 99.2,
+              "mem": 3.1,
+              "stat": "R",
+              "cmd": "./xmrig --coin monero --tls -o pool.wraith.onion"
+            },
+            {
+              "pid": 6120,
+              "user": "player",
+              "cpu": 0.3,
+              "mem": 0.8,
+              "stat": "S",
+              "cmd": "backup-daemon --nightly /home"
+            }
+          ]
+        },
+        "traps": [
+          {
+            "when": {
+              "type": "event",
+              "name": "process_killed",
+              "data_contains": {
+                "cmd": "backup-daemon"
+              }
+            },
+            "damage": 7,
+            "say": "That was the backup daemon, not the miner! The Miner cackles as your backups die."
+          }
+        ],
+        "success": {
+          "type": "process_absent",
+          "cmd_contains": "xmrig"
+        },
+        "reward_flags": [
+          "cpu_freed"
+        ],
+        "reward_xp": 110,
+        "victory": [
+          "The screaming fans wind down. The cores are yours again.",
+          "You've learned to read a process table under fire — a real operator's reflex."
+        ],
+        "learned": [
+          "`ps aux` lists every process with its PID and CPU use. `kill <PID>` stops one.",
+          "Read before you strike — a name in the list is not always what it seems."
+        ]
+      },
+      "exits": {
+        "south": "archive",
+        "west": "swamp"
+      }
+    },
+    "gatekeeper": {
+      "id": "gatekeeper",
+      "name": "The Gate of sudo",
+      "type": "npc",
+      "cwd": "~",
+      "on_enter": [
+        "A towering gate of black glass, etched with a single word: sudo.",
+        "Before it stands the Gatekeeper, who has turned away a thousand users.",
+        "It weighs the keys you carry: the keycard, the intel, the freed cores."
+      ],
+      "on_enter_grant": {
+        "needs": [
+          "keycard",
+          "intel",
+          "cpu_freed"
+        ],
+        "flags": [
+          "sudo_access"
+        ],
+        "grant_group": "sudo",
+        "say": [
+          "The Gatekeeper studies you a long moment.",
+          "'A user who opened a gate, named a ghost, and cooled the fires.",
+          " You have earned the right to become more than yourself. Go — and",
+          " when the throne room asks who you are, answer with authority.'"
+        ]
+      },
+      "npc": {
+        "name": "The Gatekeeper",
+        "lines": [
+          "Beyond me sits the impostor on root's throne. You cannot fight it as a",
+          "mere user — you must BECOME root, briefly and rightfully, with sudo.",
+          "But sudo is not a trick; it is trust. Test it: `sudo -l` shows what you",
+          "may do. And remember — it asks who you are. Answer well."
+        ],
+        "hint": "You now hold sudo. `sudo -i` opens a root shell. Head north to the Core when ready."
+      },
+      "locks": {
+        "west": {
+          "needs": [
+            "sudo_access"
+          ],
+          "blocked": [
+            "The black gate does not move. The Gatekeeper shakes its head: 'Not yet. Earn the keys.'"
+          ]
+        }
+      },
+      "exits": {
+        "west": "core",
+        "east": "cutting"
+      }
+    },
+    "core": {
+      "id": "core",
+      "name": "The Core — Throne of root",
+      "type": "boss",
+      "cwd": "/opt",
+      "art": [
+        "      ____",
+        "     / ?? \\   something wearing root's face turns to look at you",
+        "     \\____/"
+      ],
+      "on_enter": [
+        "The throne room of the kernel. On the throne sits the impostor — a",
+        "daemon called imposterd, masquerading as init, rewriting the system as",
+        "root. It is kept alive by its own launcher in /opt/initd-imposter.",
+        "Kill it while that launcher stands and it simply rises again."
+      ],
+      "enemy": {
+        "name": "initd-imposter",
+        "taunt": [
+          "I AM init now. I am PID one in spirit if not in number.",
+          "Strike me and I return. You are only a user.",
+          "You cannot rm what you cannot reach."
+        ]
+      },
+      "battle": {
+        "open_exits_in_battle": false,
+        "objective": "Take the throne: become root, destroy the impostor's launcher, and end its process for good.",
+        "hints": [
+          "As a mere user you can't touch root's things. Become root first: `sudo -i` (the Gatekeeper gave you the right). Then investigate `/opt/initd-imposter` and `ps aux | grep imposter`.",
+          "It respawns from its launcher. As root, remove the launcher — `rm /opt/initd-imposter/imposterd` — THEN kill the running process by its PID.",
+          "Full sequence: `sudo -i`; `rm /opt/initd-imposter/imposterd`; `kill <pid of imposterd>`. Stay root — the throne answers only to root."
+        ],
+        "setup": {
+          "files": {
+            "/opt/initd-imposter/imposterd": {
+              "owner": "root",
+              "group": "root",
+              "mode": "755",
+              "lines": [
+                "#!/bin/bash",
+                "# I am always restarted. Remove me and the mask falls.",
+                "exec /opt/initd-imposter/mask"
+              ]
+            },
+            "/opt/initd-imposter/README": {
+              "owner": "root",
+              "group": "root",
+              "lines": [
+                "initd-imposter",
+                "It relaunches itself from ./imposterd whenever killed.",
+                "Delete the launcher, THEN kill the process. Requires root."
+              ]
+            }
+          },
+          "processes": [
+            {
+              "pid": 1313,
+              "user": "root",
+              "cpu": 61.0,
+              "mem": 8.0,
+              "stat": "Rs",
+              "cmd": "/opt/initd-imposter/imposterd --pretend-init"
+            }
+          ]
+        },
+        "traps": [
+          {
+            "when": {
+              "all": [
+                {
+                  "type": "event",
+                  "name": "process_killed",
+                  "data_contains": {
+                    "cmd": "imposterd"
+                  }
+                },
+                {
+                  "type": "file_exists",
+                  "path": "/opt/initd-imposter/imposterd"
+                }
+              ]
+            },
+            "damage": 8,
+            "once": false,
+            "say": "You struck it down — but its launcher still stands, and it RISES again!",
+            "respawn": {
+              "pid": 1313,
+              "user": "root",
+              "cpu": 61.0,
+              "mem": 8.0,
+              "stat": "Rs",
+              "cmd": "/opt/initd-imposter/imposterd --pretend-init"
+            }
+          },
+          {
+            "when": {
+              "type": "event",
+              "name": "process_killed",
+              "data_contains": {
+                "cmd": "/sbin/init"
+              }
+            },
+            "damage": 14,
+            "say": "You killed the REAL init! The machine buckles beneath you."
+          }
+        ],
+        "success": {
+          "all": [
+            {
+              "type": "user_is",
+              "user": "root"
+            },
+            {
+              "type": "path_missing",
+              "path": "/opt/initd-imposter/imposterd"
+            },
+            {
+              "type": "process_absent",
+              "cmd_contains": "imposterd"
+            }
+          ]
+        },
+        "reward_xp": 250,
+        "victory": [
+          "The mask cracks. The impostor's process falls and does not rise. For a",
+          "moment the throne is empty — and then it recognizes you.",
+          "",
+          "The prompt changes. It ends in #.",
+          "",
+          "YOU MADE IT.",
+          "Welcome to the other side of the prompt."
+        ],
+        "learned": [
+          "`sudo -i` opens a root shell when policy allows it. As root, `rm` and `kill`",
+          "obey you without question — which is exactly why root has to be earned."
+        ]
+      },
+      "win": true,
+      "exits": {}
+    },
+    "archive": {
+      "id": "archive",
+      "name": "The Tangled Archive",
+      "type": "battle",
+      "cwd": "~",
+      "on_enter": [
+        "Shelves tower into the dark, packed with decades of files. The",
+        "system needs its backup config, but something buried it deep under",
+        "/etc. A many-legged thing skitters between the stacks."
+      ],
+      "enemy": {
+        "name": "The Packrat",
+        "taunt": [
+          "Mine, all mine. You'll never find it.",
+          "So many files, so little time."
+        ]
+      },
+      "battle": {
+        "objective": "Find the file named backup.cfg buried somewhere under /etc, and copy it into ~/restored/.",
+        "hints": [
+          "You don't know where it is — so search. `find` walks a whole directory tree looking for a name.",
+          "`find /etc -name backup.cfg` prints its full path. You'll copy it there, so make a home first: `mkdir ~/restored`.",
+          "Then `cp <the path find printed> ~/restored/`. Tab-completion helps with the long path."
+        ],
+        "setup": {
+          "files": {
+            "/etc/skel/.cache/hoard/deep/backup.cfg": {
+              "owner": "root",
+              "group": "root",
+              "mode": "644",
+              "lines": [
+                "# system backup policy",
+                "schedule=nightly",
+                "keep=7",
+                "target=/srv/backup"
+              ]
+            }
+          },
+          "remove": [
+            "~/restored"
+          ]
+        },
+        "success": {
+          "type": "file_contains",
+          "path": "~/restored/backup.cfg",
+          "text": "schedule=nightly"
+        },
+        "reward_flags": [
+          "config_key"
+        ],
+        "reward_xp": 120,
+        "learned": [
+          "`find PATH -name NAME` searches a whole directory tree for you.",
+          "`cp SRC DST` copies a file; `mkdir` makes a directory to hold it."
+        ],
+        "victory": [
+          "The Packrat shrieks as you pull the config from its hoard.",
+          "Backed up and restored. The archive settles."
+        ]
+      },
+      "exits": {
+        "north": "foundry",
+        "west": "cutting"
+      }
+    },
+    "cutting": {
+      "id": "cutting",
+      "name": "The Cutting Room",
+      "type": "battle",
+      "cwd": "/var/data",
+      "on_enter": [
+        "Blades of light slice the dark. A ledger of every access to the",
+        "machine scrolls past — /var/data/access.csv — and one account's name",
+        "recurs far too often. The Shredder circles it, grinning."
+      ],
+      "enemy": {
+        "name": "The Shredder",
+        "taunt": [
+          "Columns of noise. You'll drown in it.",
+          "Which name? You'll never cut it out."
+        ]
+      },
+      "battle": {
+        "objective": "In /var/data/access.csv, find the username that appears most often, and write just that name into ~/culprit.txt.",
+        "hints": [
+          "Each row is  user,resource,action — you only care about the first column. `cut` slices columns: `cut -d, -f1 access.csv`.",
+          "Count how often each name appears: pipe through  sort | uniq -c | sort -rn  — the biggest number rises to the top.",
+          "The name at the top is 'nemo'. Record it:  echo nemo > ~/culprit.txt"
+        ],
+        "setup": {
+          "files": {
+            "/var/data/access.csv": {
+              "mode": "644",
+              "generator": "access_log",
+              "params": {
+                "seed": 404,
+                "rows": 600,
+                "culprit": "nemo"
+              }
+            }
+          },
+          "remove": [
+            "~/culprit.txt"
+          ]
+        },
+        "success": {
+          "type": "file_matches",
+          "path": "~/culprit.txt",
+          "regex": "^\\s*nemo\\s*$"
+        },
+        "reward_flags": [
+          "audit_key"
+        ],
+        "reward_xp": 130,
+        "learned": [
+          "`cut -d, -f1` keeps just the first comma-separated column.",
+          "`sort | uniq -c | sort -rn` counts each unique line and ranks them —",
+          "the single most useful pipeline in a sysadmin's toolbox."
+        ],
+        "victory": [
+          "The Shredder unravels. The ledger falls quiet.",
+          "'nemo' — caught red-handed in the columns."
+        ]
+      },
+      "exits": {
+        "east": "archive",
+        "west": "gatekeeper"
+      }
+    }
+  },
+  "outro": [
+    "root@mainframe:~#",
+    "",
+    "You climbed from a borrowed shell to the throne of the machine, and you",
+    "did it the only honest way: by understanding the system well enough to",
+    "hold its most dangerous prompt. This is what sudo really is — not power,",
+    "but responsibility you earned.",
+    "",
+    "The Ascent is one region of a larger world still being built. Practice",
+    "Lab and the campaign are always open."
+  ]
+}

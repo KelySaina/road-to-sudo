@@ -1,0 +1,40 @@
+{
+  "id": "t05_logs",
+  "title": "Where the logs live",
+  "machine": "workstation",
+  "xp": 100,
+  "briefing": [
+    "Every Linux system follows the same map:",
+    "",
+    "  /etc   configuration",
+    "  /home  users' files",
+    "  /tmp   scratch space, wiped on reboot",
+    "  /usr   installed programs",
+    "  /var   data that varies: caches, mail, spools... and logs"
+  ],
+  "expert_briefing": ["Logs tell you what the machine did while you weren't looking."],
+  "tips": ["`cd DIRECTORY` moves you. Watch your prompt change as you travel."],
+  "objective": "Move into the directory where the system keeps its log files, and list what's inside.",
+  "expert_objective": "Go where the logs live. Look around.",
+  "hints": [
+    "Logs are data that *varies* over time. Which top-level directory on the map is for that? Logs live one level below it.",
+    "The logs are in /var/log. `cd` changes directory.",
+    "`cd /var/log`, then `ls`."
+  ],
+  "solution": "cd /var/log\nls",
+  "success": {"all": [
+    {"type": "cwd_is", "path": "/var/log"},
+    {"type": "command_ran", "name": ["ls", "dir"], "cwd": "/var/log", "exit_code": 0}
+  ]},
+  "reactions": [
+    {"when": {"type": "cwd_is", "path": "/var"}, "difficulty": ["beginner", "normal"],
+     "say": "Close — you're in /var. One of the directories in here holds the logs. List it."},
+    {"when": {"type": "event", "name": "permission_denied"}, "difficulty": ["beginner"],
+     "say": "Not every door opens for you. Remember who you are (whoami). We'll come back to permissions."},
+    {"when": {"all": [{"type": "cwd_is", "path": "/var/log"}, {"not": {"type": "command_ran", "name": "ls", "cwd": "/var/log"}}]}, "difficulty": ["beginner"],
+     "say": "You're there. Now look around."}
+  ],
+  "explanation": "`cd /var/log` uses an absolute path. From /var, `cd log` (relative) gets you there too; `cd ..` climbs one level; a bare `cd` always takes you home and `cd -` goes back. You'll spend a lot of your life in /var/log.",
+  "unlocks": ["cd"],
+  "teaches": ["fhs", "navigation"]
+}

@@ -1,0 +1,38 @@
+{
+  "hostname": "lab",
+  "users": {
+    "root":   {"uid": 0,    "gid": 0,    "groups": ["root"],            "home": "/root"},
+    "player": {"uid": 1000, "gid": 1000, "groups": ["player", "users"], "home": "/home/player"},
+    "bob":    {"uid": 1002, "gid": 1002, "groups": ["bob", "users"],    "home": "/home/bob"}
+  },
+  "processes": [
+    {"pid": 1,    "user": "root",   "cpu": 0.0,  "mem": 0.4, "stat": "Ss", "cmd": "/sbin/init"},
+    {"pid": 640,  "user": "bob",    "cpu": 3.1,  "mem": 1.2, "stat": "S",  "cmd": "python3 -m http.server 8000"},
+    {"pid": 2048, "user": "player", "cpu": 0.0,  "mem": 0.1, "stat": "S",  "cmd": "sleep 600", "tty": "pts/0"}
+  ],
+  "files": {
+    "/home/player/README.lab": {"owner": "player", "group": "player", "lines": [
+      "PRACTICE LAB",
+      "",
+      "No objectives, no timer, no XP. Break things; nobody is watching.",
+      "",
+      "Things to try:",
+      "  sort fruits.txt | uniq -c | sort -rn",
+      "  grep -n ERROR /var/log/app.log | head",
+      "  find ~ -name '*.txt'",
+      "  chmod 600 secrets.txt && ls -l secrets.txt",
+      "  ./scripts/hello.sh      (then: chmod +x it)",
+      "  ls -l /home             (who can enter bob's home?)"
+    ]},
+    "/home/player/fruits.txt": {"owner": "player", "group": "player", "lines": ["banana", "apple", "cherry", "apple", "banana", "apple", "kiwi", "cherry", "apple", "mango"]},
+    "/home/player/numbers.txt": {"owner": "player", "group": "player", "lines": ["42", "7", "1000", "3", "256", "19", "88"]},
+    "/home/player/secrets.txt": {"owner": "player", "group": "player", "mode": "644", "content": "The cake is a lie.\n"},
+    "/home/player/users.csv": {"owner": "player", "group": "player", "lines": ["name,role,shell", "alice,admin,/bin/bash", "bob,dev,/bin/zsh", "carol,dev,/bin/bash", "dave,intern,/bin/sh"]},
+    "/home/player/scripts": {"dir": true, "owner": "player", "group": "player"},
+    "/home/player/scripts/hello.sh": {"owner": "player", "group": "player", "mode": "644", "lines": ["#!/bin/bash", "# Try: ./hello.sh world", "echo \"Hello, $1!\"", "echo \"You are $USER, in $PWD\""]},
+    "/home/bob": {"dir": true, "owner": "bob", "group": "bob", "mode": "700"},
+    "/home/bob/diary.txt": {"owner": "bob", "group": "bob", "mode": "600", "content": "Dear diary, today someone tried to cd into my home.\n"},
+    "/var/log/app.log": {"generator": "app_log", "params": {"seed": 99, "lines": 400, "errors": 9, "app": "webapp"}},
+    "/var/log/auth.log": {"generator": "auth_log", "params": {"seed": 7, "lines": 500, "intruder": "eve", "intruder_hits": 20}}
+  }
+}

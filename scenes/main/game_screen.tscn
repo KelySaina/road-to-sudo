@@ -1,0 +1,71 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/game_screen.gd" id="1_game"]
+[ext_resource type="PackedScene" path="res://scenes/terminal/terminal.tscn" id="2_term"]
+[ext_resource type="PackedScene" path="res://scenes/ui/status_bar.tscn" id="3_status"]
+[ext_resource type="PackedScene" path="res://scenes/ui/progress_card.tscn" id="4_prog"]
+[ext_resource type="PackedScene" path="res://scenes/ui/objective_panel.tscn" id="5_obj"]
+[ext_resource type="PackedScene" path="res://scenes/ui/adventure_panel.tscn" id="6_adv"]
+
+[node name="GameScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_game")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 16
+
+[node name="Columns" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Left" type="VBoxContainer" parent="Margin/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="StatusBar" parent="Margin/Columns/Left" instance=ExtResource("3_status")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Terminal" parent="Margin/Columns/Left" instance=ExtResource("2_term")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Side" type="VBoxContainer" parent="Margin/Columns"]
+custom_minimum_size = Vector2(390, 0)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ProgressCard" parent="Margin/Columns/Side" instance=ExtResource("4_prog")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ObjectivePanel" parent="Margin/Columns/Side" instance=ExtResource("5_obj")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AdventurePanel" parent="Margin/Columns/Side" instance=ExtResource("6_adv")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="MenuButton" type="Button" parent="Margin/Columns/Side"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"GhostButton"
+text = "⎋  Save & return to menu   (:menu)"

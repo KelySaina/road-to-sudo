@@ -1,0 +1,28 @@
+{
+  "id": "t03_look_around",
+  "title": "Look around",
+  "machine": "workstation",
+  "xp": 100,
+  "briefing": ["Your home directory is not empty.", "Somebody left something for you."],
+  "tips": [
+    "To see what's in a directory, list it. The command is two letters.",
+    "Once you know a file's name, print it: cat NAME"
+  ],
+  "objective": "Find the file waiting in your home directory and read it. It contains a codeword.",
+  "expert_objective": "There is a codeword somewhere in your home directory. Retrieve it.",
+  "hints": [
+    "First find out what's there. The command that lists files is very short.",
+    "`ls` lists files. To print a file's content use `cat` (from 'concatenate') followed by the file name.",
+    "`ls`, then `cat welcome.txt`."
+  ],
+  "solution": "ls\ncat welcome.txt",
+  "setup": {"restore": ["~/welcome.txt"]},
+  "success": {"type": "output_contains", "text": "LANTERN"},
+  "reactions": [
+    {"when": {"all": [{"type": "command_ran", "name": "ls", "exit_code": 0, "cwd": "~"}, {"not": {"type": "output_contains", "text": "LANTERN"}}]}, "difficulty": ["beginner"],
+     "say": "There's a file. Now print what's inside it — and you can press Tab to complete its name."}
+  ],
+  "explanation": "`ls` lists a directory; `cat` prints a file. Linux keeps nearly all configuration in plain text, so reading files is half of system administration. Tab-completion saves typing and typos. And did you read the P.S.?",
+  "unlocks": ["ls", "cat"],
+  "teaches": ["listing", "reading-files"]
+}

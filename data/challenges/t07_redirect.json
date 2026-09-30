@@ -1,0 +1,27 @@
+{
+  "id": "t07_redirect",
+  "title": "Leave a note",
+  "machine": "workstation",
+  "xp": 100,
+  "briefing": ["An empty to-do list is a sad thing.", "There is no text editor on this machine. You'll have to be clever."],
+  "tips": ["`echo hello` prints hello. The shell can send ANY command's output into a file instead of the screen, with `>`."],
+  "objective": "Write the line `buy more coffee` into ~/projects/todo.txt.",
+  "expert_objective": "Put \"buy more coffee\" in ~/projects/todo.txt. No editor available.",
+  "hints": [
+    "`echo` prints text to the screen. What if the 'screen' were a file?",
+    "The `>` operator redirects output into a file, replacing its content. `>>` appends to the end instead.",
+    "`echo \"buy more coffee\" > ~/projects/todo.txt`, then `cat ~/projects/todo.txt` to check."
+  ],
+  "solution": "echo \"buy more coffee\" > ~/projects/todo.txt",
+  "setup": {"files": {"~/projects": {"dir": true, "owner": "player", "group": "player"}}},
+  "success": {"type": "file_contains", "path": "~/projects/todo.txt", "text": "buy more coffee"},
+  "reactions": [
+    {"when": {"all": [{"type": "command_ran", "name": "echo"}, {"not": {"type": "event", "name": "redirect_used"}}]}, "difficulty": ["beginner"],
+     "say": "echo printed to the screen. Now point that output at the file instead."},
+    {"when": {"type": "file_contains", "path": "~/projects/todo.txt", "text": "buy more cofee"}, "difficulty": ["beginner", "normal"],
+     "say": "Check your spelling — computers are painfully literal."}
+  ],
+  "explanation": "`>` sends a command's output into a file, replacing what was there; `>>` appends. It works with every command: `ls > files.txt`, `whoami >> log.txt`. Careful: `> file` empties the file *before* the command even runs.",
+  "unlocks": ["echo"],
+  "teaches": ["redirection"]
+}

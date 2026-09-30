@@ -1,0 +1,38 @@
+{
+  "id": "t08_needle",
+  "title": "Needle, meet haystack",
+  "machine": "workstation",
+  "xp": 150,
+  "time_limit": 240,
+  "briefing": [
+    "08:47 — message from the security team:",
+    "",
+    "  \"We're seeing a flood of failed logins on workstation.",
+    "   Someone is guessing passwords. Which account are they after?\"",
+    "",
+    "/var/log/auth.log has 3,000 lines. Good luck scrolling."
+  ],
+  "tips": [
+    "`grep WORD FILE` prints only the lines that contain WORD.",
+    "A pipe `|` feeds one command's output into the next: grep something file | tail"
+  ],
+  "objective": "Find the account under attack (the name with repeated failed passwords in /var/log/auth.log) and write just that name into ~/intruder.txt.",
+  "expert_objective": "Brute force in progress on workstation. Identify the targeted account; its name goes in ~/intruder.txt.",
+  "hints": [
+    "Don't read 3,000 lines. Filter: you only care about lines that mention failed passwords.",
+    "`grep \"Failed password\" /var/log/auth.log` keeps only those lines. Pipe it into `tail` to tame the output: which name keeps coming back?",
+    "The name comes right after 'for'. Once you know it: `echo NAME > ~/intruder.txt`."
+  ],
+  "solution": "grep \"Failed password\" /var/log/auth.log | grep -o \"for [a-z]*\" | sort | uniq -c | sort -rn\necho mallory > ~/intruder.txt",
+  "setup": {"restore": ["/var/log/auth.log"], "remove": ["~/intruder.txt"]},
+  "success": {"type": "file_matches", "path": "~/intruder.txt", "regex": "^\\s*mallory\\s*$"},
+  "reactions": [
+    {"when": {"type": "command_ran", "name": ["cat", "less", "more"], "args_contain": "auth.log"}, "difficulty": ["beginner"],
+     "say": "That's... a lot of text. There's a command that keeps only the lines matching a pattern."},
+    {"when": {"all": [{"type": "file_exists", "path": "~/intruder.txt"}, {"not": {"type": "file_matches", "path": "~/intruder.txt", "regex": "^\\s*mallory\\s*$"}}]},
+     "say": "~/intruder.txt exists, but it doesn't hold the right answer (just the name, nothing else). `cat ~/intruder.txt` to check it."}
+  ],
+  "explanation": "`grep` keeps matching lines and `|` pipes them into the next tool. The pro one-liner for 'who is attacked most?':\n  grep 'Failed password' auth.log | grep -o 'for [a-z]*' | sort | uniq -c | sort -rn\nsort groups identical lines, uniq -c counts each group, sort -rn puts the biggest first. You will use this shape for the rest of your career.",
+  "unlocks": ["grep", "head", "tail", "wc", "sort", "uniq"],
+  "teaches": ["grep", "pipes", "logs"]
+}

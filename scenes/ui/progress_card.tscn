@@ -1,0 +1,52 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/progress_card.gd" id="1_prog"]
+
+[node name="ProgressCard" type="PanelContainer"]
+theme_type_variation = &"CardPanel"
+script = ExtResource("1_prog")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RankRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="Rank" type="Label" parent="VBox/RankRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"VioletLabel"
+text = "Newbie"
+
+[node name="Xp" type="Label" parent="VBox/RankRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "0 XP"
+
+[node name="Bar" type="ProgressBar" parent="VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+max_value = 1.0
+step = 0.001
+show_percentage = false
+
+[node name="Next" type="Label" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"FaintLabel"
+text = "Next: Terminal Tourist at 150 XP"
+
+[node name="CommandsTitle" type="Label" parent="VBox"]
+layout_mode = 2
+theme_type_variation = &"CapsLabel"
+text = "COMMANDS LEARNED"
+
+[node name="Commands" type="HFlowContainer" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6

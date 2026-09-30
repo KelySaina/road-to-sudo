@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/status_bar.gd" id="1_status"]
+
+[node name="StatusBar" type="PanelContainer"]
+theme_type_variation = &"CardPanel"
+script = ExtResource("1_status")
+
+[node name="Row" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Led" type="Label" parent="Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"AccentLabel"
+text = "●"
+
+[node name="Host" type="Label" parent="Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = "LOCALHOST"
+
+[node name="Mode" type="Label" parent="Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "CAMPAIGN · BEGINNER"
+
+[node name="Spacer" type="Control" parent="Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Cpu" type="Label" parent="Row"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "CPU ░░░░░░░░░░   0%"
+
+[node name="Ram" type="Label" parent="Row"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "RAM ░░░░░░░░░░   0%"
+
+[node name="Clock" type="Label" parent="Row"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "00:00"

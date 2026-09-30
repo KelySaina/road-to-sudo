@@ -1,0 +1,46 @@
+{
+  "intro": "A field guide to this machine. Each line is a tool and what it's for. Type  learn <command>  or  man <command>  for the full story, and try the examples — nothing here can hurt a real computer.",
+  "sections": [
+    {"title": "Look around", "items": [
+      {"cmd": "pwd",   "desc": "where am I right now?",            "ex": "pwd"},
+      {"cmd": "ls",    "desc": "what is in this directory?",       "ex": "ls -la"},
+      {"cmd": "cd",    "desc": "move to another directory",        "ex": "cd /var/log"},
+      {"cmd": "cat",   "desc": "print a whole file",               "ex": "cat notes.txt"},
+      {"cmd": "less",  "desc": "read a long file a screen at a time","ex": "less big.log"},
+      {"cmd": "tree",  "desc": "draw the directory layout",        "ex": "tree ~"}
+    ]},
+    {"title": "Make and change files", "items": [
+      {"cmd": "mkdir", "desc": "create a directory",               "ex": "mkdir ~/work"},
+      {"cmd": "touch", "desc": "create an empty file",             "ex": "touch todo.txt"},
+      {"cmd": "echo",  "desc": "print text; > writes it to a file","ex": "echo hi > note.txt"},
+      {"cmd": "cp",    "desc": "copy a file or directory",         "ex": "cp a.txt b.txt"},
+      {"cmd": "mv",    "desc": "move or rename",                   "ex": "mv old.txt new.txt"},
+      {"cmd": "rm",    "desc": "delete (there is no undo!)",       "ex": "rm junk.txt"},
+      {"cmd": "find",  "desc": "search for files by name",         "ex": "find / -name '*.conf'"}
+    ]},
+    {"title": "Dig through text (glue with | pipes)", "items": [
+      {"cmd": "grep",  "desc": "keep only lines that match",       "ex": "grep ERROR app.log"},
+      {"cmd": "head",  "desc": "the first lines",                  "ex": "head -n 5 file"},
+      {"cmd": "tail",  "desc": "the last lines",                   "ex": "tail -n 20 file"},
+      {"cmd": "wc",    "desc": "count lines / words",              "ex": "wc -l file"},
+      {"cmd": "sort",  "desc": "sort lines",                       "ex": "sort names.txt"},
+      {"cmd": "uniq",  "desc": "collapse repeats (sort first)",    "ex": "sort f | uniq -c"},
+      {"cmd": "cut",   "desc": "pick out columns",                 "ex": "cut -d: -f1 /etc/passwd"}
+    ]},
+    {"title": "Permissions (the rwx letters)", "items": [
+      {"cmd": "ls -l", "desc": "see owner, group and rwx bits",    "ex": "ls -l run.sh"},
+      {"cmd": "chmod", "desc": "change who may read/write/run",    "ex": "chmod +x run.sh"},
+      {"cmd": "chown", "desc": "change the owner (root only)",     "ex": "chown alice file"}
+    ]},
+    {"title": "Who am I, and what's running", "items": [
+      {"cmd": "whoami","desc": "which user am I?",                 "ex": "whoami"},
+      {"cmd": "id",    "desc": "my user id and groups",           "ex": "id"},
+      {"cmd": "ps",    "desc": "list running processes",          "ex": "ps aux"},
+      {"cmd": "kill",  "desc": "stop a process by its PID",       "ex": "kill 1234"}
+    ]},
+    {"title": "Becoming root", "items": [
+      {"cmd": "sudo",  "desc": "run one command as root",         "ex": "sudo cat /etc/shadow"},
+      {"cmd": "su",    "desc": "switch user",                     "ex": "su - alice"}
+    ]}
+  ]
+}

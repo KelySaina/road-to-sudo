@@ -1,0 +1,38 @@
+{
+  "id": "t01_identity",
+  "title": "Who are you?",
+  "machine": "workstation",
+  "xp": 100,
+  "briefing": [
+    "Welcome, user.",
+    "",
+    "You have been given access to a Linux machine.",
+    "",
+    "Your first objective:",
+    "Find out who you are."
+  ],
+  "tips": [
+    "This is a terminal: type a command, press Enter, the machine answers.",
+    "Linux commands are short words. Some of them are literally questions."
+  ],
+  "objective": "Find out which user you are logged in as.",
+  "expert_objective": "Identify the account this shell runs as.",
+  "hints": [
+    "You want to ask the machine a question about yourself. Commands are often English words squashed together.",
+    "Ask it literally: who... am... i? All one word, lowercase.",
+    "Type `whoami` and press Enter."
+  ],
+  "solution": "whoami",
+  "success": {"any": [
+    {"type": "command_ran", "name": "whoami", "exit_code": 0},
+    {"type": "command_ran", "name": "id", "exit_code": 0},
+    {"all": [{"type": "command_ran", "name": ["printenv", "echo", "env"]}, {"type": "output_contains", "text": "player"}]}
+  ]},
+  "reactions": [
+    {"when": {"type": "event", "name": "command_not_found"}, "difficulty": ["beginner"],
+     "say": "Typos happen to everyone. When a command doesn't exist, the shell tries to guess what you meant — read its suggestion."}
+  ],
+  "explanation": "`whoami` prints the account you are using: player. Your prompt says it too — player@workstation:~$ means WHO you are, on WHICH machine, and WHERE. Every file and every process belongs to a user, and every permission check asks one question: who is this? You are not root. Remember that.",
+  "unlocks": ["whoami", "id"],
+  "teaches": ["users", "prompt"]
+}

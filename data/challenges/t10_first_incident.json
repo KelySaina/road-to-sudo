@@ -1,0 +1,89 @@
+{
+  "id": "t10_first_incident",
+  "title": "Your first incident",
+  "machine": "workstation",
+  "xp": 250,
+  "time_limit": 420,
+  "briefing": [
+    "09:30 — ticket #4711 from Finance:",
+    "",
+    "  \"The daily report didn't arrive this morning.",
+    "   The generator is /opt/reportd/run_report.sh.",
+    "   It worked yesterday. Please fix ASAP!!\"",
+    "",
+    "Nobody knows what changed. Time to investigate."
+  ],
+  "expert_briefing": ["Ticket #4711 (Finance, priority: high): \"daily report missing, fix ASAP\"."],
+  "tips": [
+    "Observe, form a hypothesis, change ONE thing, verify. Start by running the program and reading what it says.",
+    "Failing programs usually write down why, in a log under /var/log."
+  ],
+  "objective": "Get /opt/reportd/run_report.sh to produce ~/reports/daily_report.txt.",
+  "expert_objective": "Restore the daily report (reportd).",
+  "hints": [
+    "Run the script and read its output. Then find its log in /var/log — failing programs leave notes.",
+    "`grep ERROR /var/log/reportd.log` shows two separate problems: a directory that doesn't exist, and a config file nobody can read. `ls -l /opt/reportd` tells you who owns what.",
+    "`mkdir ~/reports`, then `chmod u+r /opt/reportd/report.conf` (you own it), then run `/opt/reportd/run_report.sh` again."
+  ],
+  "solution": "/opt/reportd/run_report.sh\ngrep ERROR /var/log/reportd.log\nmkdir ~/reports\nls -l /opt/reportd\nchmod u+r /opt/reportd/report.conf\n/opt/reportd/run_report.sh",
+  "setup": {
+    "files": {
+      "/opt/reportd": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "/opt/reportd/run_report.sh": {"owner": "player", "group": "player", "mode": "755", "lines": [
+        "#!/bin/bash",
+        "# reportd: builds the daily sales report for Finance.",
+        "# Config: /opt/reportd/report.conf   Log: /var/log/reportd.log",
+        "echo \"reportd: starting daily report\"",
+        "cat /opt/reportd/report.conf > /dev/null || exit 1",
+        "ls /home/player/reports > /dev/null || exit 2",
+        "grep title /opt/reportd/report.conf | cut -d= -f2 > /home/player/reports/daily_report.txt",
+        "echo \"sales lines:\" >> /home/player/reports/daily_report.txt",
+        "grep -c sale /var/lib/reportd/sales.csv >> /home/player/reports/daily_report.txt",
+        "echo \"reportd: report written to ~/reports/daily_report.txt\""
+      ]},
+      "/opt/reportd/report.conf": {"owner": "player", "group": "player", "mode": "200", "lines": [
+        "title=DAILY SALES REPORT",
+        "source=/var/lib/reportd/sales.csv",
+        "recipients=finance@example.invalid"
+      ]},
+      "/opt/reportd/README": {"owner": "player", "group": "player", "lines": [
+        "reportd - tiny report generator",
+        "  config : /opt/reportd/report.conf",
+        "  output : ~/reports/daily_report.txt",
+        "  log    : /var/log/reportd.log",
+        "Maintainer: player (since this morning)"
+      ]},
+      "/var/lib/reportd/sales.csv": {"lines": [
+        "date,type,amount",
+        "2026-06-04,sale,120.00",
+        "2026-06-04,refund,-20.00",
+        "2026-06-04,sale,75.50",
+        "2026-06-04,sale,310.00",
+        "2026-06-04,sale,42.00"
+      ]},
+      "/var/log/reportd.log": {"mode": "644", "generator": "app_log", "params": {
+        "seed": 4711, "lines": 160, "errors": 4, "app": "reportd",
+        "error_messages": [
+          "cannot read /opt/reportd/report.conf: Permission denied",
+          "output directory /home/player/reports does not exist",
+          "cannot read /opt/reportd/report.conf: Permission denied",
+          "output directory /home/player/reports does not exist"
+        ]
+      }}
+    },
+    "remove": ["~/reports"]
+  },
+  "protected": ["/opt/reportd/report.conf", "/opt/reportd/run_report.sh"],
+  "success": {"type": "file_contains", "path": "~/reports/daily_report.txt", "text": "DAILY SALES REPORT"},
+  "reactions": [
+    {"when": {"type": "event", "name": "permission_denied", "data_contains": {"path": "report.conf"}}, "difficulty": ["beginner", "normal"],
+     "say": "Permission denied — on a file this time, not the script. Who owns report.conf? What are its permissions?"},
+    {"when": {"all": [{"type": "mode_has", "path": "/opt/reportd/report.conf", "bits": "u+r"}, {"not": {"type": "dir_exists", "path": "~/reports"}}]}, "difficulty": ["beginner", "normal"],
+     "say": "One problem down. Run the script again — does it get further this time?"},
+    {"when": {"type": "command_ran", "name": ["cat", "tail", "grep", "less", "head"], "args_contain": "reportd.log"}, "difficulty": ["beginner"],
+     "say": "Logs are gold. Notice the ERROR lines — there may be more than one kind."}
+  ],
+  "explanation": "That was a real incident workflow: reproduce the failure, read the logs, form a hypothesis, fix one thing, verify, repeat. Two independent root causes — a missing output directory and an unreadable config — fixed with the tools you learned today. You own report.conf, so you could restore its read bit without being root. That's the job.",
+  "unlocks": ["find", "cut", "stat", "file", "tree"],
+  "teaches": ["debugging", "logs", "permissions", "incident-response"]
+}

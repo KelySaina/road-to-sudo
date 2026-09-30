@@ -1,0 +1,60 @@
+{
+  "id": "t09_permission",
+  "title": "Permission denied",
+  "machine": "workstation",
+  "xp": 150,
+  "time_limit": 180,
+  "briefing": [
+    "Alice left for two weeks and handed you her backup job.",
+    "Her sticky note says: 'just run it'.",
+    "",
+    "  $ ./backup.sh",
+    "  bash: ./backup.sh: Permission denied",
+    "",
+    "The script exists. You can read it. Something prevents it from running."
+  ],
+  "tips": [
+    "`ls -l FILE` shows a file's permissions: the rwx letters on the left.",
+    "Three groups of rwx: owner, group, others. r = read, w = write, x = execute."
+  ],
+  "objective": "Make ~/backup.sh run successfully as ./backup.sh.",
+  "expert_objective": "Alice's backup job (~/backup.sh) won't start. Fix it and run it.",
+  "hints": [
+    "The error is about permission, and permissions belong to the file itself. Inspect the file.",
+    "`ls -l backup.sh` shows `-rw-r--r--`: you (the owner) may read and write, but nobody may execute — there is no x.",
+    "`chmod u+x backup.sh` gives you execute permission. Then run `./backup.sh`."
+  ],
+  "solution": "ls -l backup.sh\nchmod u+x backup.sh\n./backup.sh",
+  "setup": {
+    "files": {
+      "~/projects": {"dir": true, "owner": "player", "group": "player"},
+      "~/backup.sh": {"owner": "player", "group": "player", "mode": "644", "lines": [
+        "#!/bin/bash",
+        "# Nightly backup of ~/projects. Run me as ./backup.sh",
+        "echo \"Backing up /home/player/projects...\"",
+        "mkdir -p /home/player/backups",
+        "cp -r /home/player/projects /home/player/backups/",
+        "echo \"backup complete\" > /home/player/backups/last_run.txt",
+        "echo \"Done. See ~/backups/\""
+      ]}
+    },
+    "remove": ["~/backups"],
+    "cwd": "~"
+  },
+  "protected": ["~/backup.sh"],
+  "success": {"all": [
+    {"type": "mode_has", "path": "~/backup.sh", "bits": "u+x"},
+    {"type": "file_contains", "path": "~/backups/last_run.txt", "text": "backup complete"}
+  ]},
+  "reactions": [
+    {"when": {"type": "command_ran", "name": ["cat", "less", "head"], "args_contain": "backup.sh"}, "difficulty": ["beginner", "normal"],
+     "say": "Reading a script before running it: exactly what careful admins do. Never run scripts you haven't read."},
+    {"when": {"all": [{"type": "event", "name": "script_succeeded", "data": {"path": "bash"}}, {"not": {"type": "mode_has", "path": "~/backup.sh", "bits": "u+x"}}]},
+     "say": "Sneaky: `bash backup.sh` only needs READ permission, so it ran. But the nightly job calls ./backup.sh directly, and that still fails. Fix the file itself."},
+    {"when": {"type": "mode_has", "path": "~/backup.sh", "bits": "o+w"}, "kind": "warning",
+     "say": "Careful: others can now WRITE to this script. Anyone could change what it does — and it runs with your permissions. Least privilege: give only what's needed."}
+  ],
+  "explanation": "`ls -l` showed -rw-r--r--: owner rw-, group r--, others r--. With no x anywhere, the kernel refuses to execute the file. `chmod u+x` adds execute for the owner. In octal, `chmod 755` means rwxr-xr-x (7 = r4 + w2 + x1, 5 = r4 + x1). `bash script.sh` sidesteps x because bash just *reads* the file — handy to know, unwise to rely on.",
+  "unlocks": ["chmod", "bash"],
+  "teaches": ["permissions", "execute-bit", "scripts"]
+}

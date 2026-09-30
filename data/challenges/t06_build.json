@@ -1,0 +1,33 @@
+{
+  "id": "t06_build",
+  "title": "Make yourself at home",
+  "machine": "workstation",
+  "xp": 100,
+  "briefing": ["Enough sightseeing.", "Time to build something of your own."],
+  "tips": [
+    "`mkdir NAME` makes a directory. `touch NAME` creates an empty file.",
+    "`~` means your home directory from anywhere: ~/projects is /home/player/projects."
+  ],
+  "objective": "In your home directory, create a directory named `projects`, and inside it an empty file named `todo.txt`.",
+  "expert_objective": "Set up ~/projects/todo.txt.",
+  "hints": [
+    "You need two things: a directory, then a file inside it. There is one command for each.",
+    "`mkdir` makes directories and `touch` creates empty files. `~/` means your home from anywhere.",
+    "`mkdir ~/projects`, then `touch ~/projects/todo.txt`."
+  ],
+  "solution": "mkdir ~/projects\ntouch ~/projects/todo.txt",
+  "setup": {"remove": ["~/projects"]},
+  "success": {"all": [
+    {"type": "dir_exists", "path": "~/projects"},
+    {"type": "file_exists", "path": "~/projects/todo.txt"}
+  ]},
+  "reactions": [
+    {"when": {"all": [{"type": "dir_exists", "path": "~/projects"}, {"not": {"type": "file_exists", "path": "~/projects/todo.txt"}}]}, "difficulty": ["beginner"],
+     "say": "Directory: done. Now the file inside it."},
+    {"when": {"type": "file_exists", "path": "~/todo.txt"}, "difficulty": ["beginner", "normal"],
+     "say": "todo.txt landed in your home directory, not inside projects. Paths are relative to where you stand — `mv todo.txt projects/` would move it."}
+  ],
+  "explanation": "`mkdir` creates directories, `touch` creates empty files. `~/projects/todo.txt` works from anywhere; `projects/todo.txt` only works when you are in ~. Bonus: `mkdir -p a/b/c` creates a whole chain at once.",
+  "unlocks": ["mkdir", "touch"],
+  "teaches": ["creating-files", "relative-paths"]
+}

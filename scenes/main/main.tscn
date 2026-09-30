@@ -1,0 +1,50 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main.gd" id="1_main"]
+[ext_resource type="Shader" path="res://scenes/ui/background.gdshader" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/ui/toast_stack.gd" id="3_toasts"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bg"]
+shader = ExtResource("2_bg")
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="Background" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_bg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.043, 0.051, 0.071, 1)
+
+[node name="ScreenHost" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Overlay" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Toasts" type="VBoxContainer" parent="Overlay"]
+unique_name_in_owner = true
+offset_left = 40.0
+offset_top = 132.0
+offset_right = 460.0
+offset_bottom = 300.0
+mouse_filter = 2
+theme_override_constants/separation = 10
+script = ExtResource("3_toasts")

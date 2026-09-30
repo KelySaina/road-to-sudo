@@ -1,0 +1,20 @@
+{
+  "id": "first_contact",
+  "order": 0,
+  "title": "Level 0 — First Contact",
+  "subtitle": "Terminal, shell, prompt, filesystem",
+  "description": "You have a login and a blinking cursor. Learn to ask the machine where you are, what's around you, and how to leave your mark.",
+  "machine": "workstation",
+  "challenges": [
+    "t01_identity",
+    "t02_location",
+    "t03_look_around",
+    "t04_hidden",
+    "t05_logs",
+    "t06_build",
+    "t07_redirect",
+    "t08_needle",
+    "t09_permission",
+    "t10_first_incident"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "filesystem",
+  "order": 1,
+  "title": "Level 1 — The Filesystem",
+  "subtitle": "Coming next: cp, mv, rm, find, absolute vs relative paths",
+  "description": "Not built yet — the vertical slice ends with Level 0. See docs/ADDING_CHALLENGES.md to add the first challenge here.",
+  "machine": "workstation",
+  "locked": true,
+  "challenges": []
+}

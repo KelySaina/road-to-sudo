@@ -1,0 +1,237 @@
+[
+  {
+    "id": "first_command",
+    "title": "First Command",
+    "description": "Execute your first Linux command.",
+    "icon": ">_",
+    "trigger": {
+      "stat": "commands_run",
+      "gte": 1
+    }
+  },
+  {
+    "id": "who_am_i",
+    "title": "Who Am I?",
+    "description": "Successfully identify the current user.",
+    "icon": "id",
+    "trigger": {
+      "any": [
+        {
+          "command": "whoami"
+        },
+        {
+          "command": "id"
+        }
+      ]
+    }
+  },
+  {
+    "id": "permission_denied",
+    "title": "Permission Denied",
+    "description": "Encounter your first permission error.",
+    "icon": "!r",
+    "trigger": {
+      "event": "permission_denied"
+    }
+  },
+  {
+    "id": "pipe_dream",
+    "title": "Pipe Dream",
+    "description": "Successfully chain commands with a pipe.",
+    "icon": "|",
+    "trigger": {
+      "event": "pipe_used"
+    }
+  },
+  {
+    "id": "sudo_please",
+    "title": "sudo Please",
+    "description": "Attempt sudo before unlocking it.",
+    "icon": "#",
+    "trigger": {
+      "event": "sudo_denied"
+    }
+  },
+  {
+    "id": "redirected",
+    "title": "Output, Elsewhere",
+    "description": "Send a command's output into a file with > or >>.",
+    "icon": ">",
+    "trigger": {
+      "event": "redirect_used"
+    }
+  },
+  {
+    "id": "hidden_seeker",
+    "title": "Dotfile Detective",
+    "description": "List hidden files.",
+    "icon": ".",
+    "trigger": {
+      "event": "listed",
+      "data_eq": {
+        "all": "true"
+      }
+    }
+  },
+  {
+    "id": "tutorial_done",
+    "title": "Hello, Terminal",
+    "description": "Finish the First Contact tutorial.",
+    "icon": "01",
+    "trigger": {
+      "challenge": "t10_first_incident"
+    }
+  },
+  {
+    "id": "no_training_wheels",
+    "title": "No Training Wheels",
+    "description": "Solve 3 challenges without a single hint.",
+    "icon": "3x",
+    "trigger": {
+      "stat": "no_hint_solves",
+      "gte": 3
+    }
+  },
+  {
+    "id": "shell_apprentice",
+    "title": "Apprenticed",
+    "description": "Reach the rank of Shell Apprentice.",
+    "icon": "SA",
+    "trigger": {
+      "rank": "Shell Apprentice"
+    }
+  },
+  {
+    "id": "root_access",
+    "title": "Root Access",
+    "description": "Complete the final challenge.",
+    "icon": "#!",
+    "trigger": {
+      "challenge": "final_road_to_sudo"
+    }
+  },
+  {
+    "id": "first_blood",
+    "title": "First Blood",
+    "description": "Defeat your first enemy on the Ascent to Root.",
+    "icon": "⚔",
+    "trigger": {
+      "event": "battle_won"
+    }
+  },
+  {
+    "id": "the_ascent",
+    "title": "The Ascent",
+    "description": "Climb from a borrowed shell to the throne of root and hold it.",
+    "icon": "♔",
+    "trigger": {
+      "event": "adventure_won"
+    }
+  },
+  {
+    "id": "rtfm",
+    "title": "RTFM",
+    "description": "Read 5 manual pages. The best sysadmins do.",
+    "icon": "man",
+    "hidden": true,
+    "trigger": {
+      "stat": "manuals_read",
+      "gte": 5
+    }
+  },
+  {
+    "id": "chaos_monkey",
+    "title": "Chaos Monkey",
+    "description": "Try to rm -rf the whole filesystem. The failsafe held.",
+    "icon": "rm",
+    "hidden": true,
+    "trigger": {
+      "event": "rm_root_attempt"
+    }
+  },
+  {
+    "id": "oops",
+    "title": "Oops.",
+    "description": "Delete something you really shouldn't have.",
+    "icon": ":(",
+    "hidden": true,
+    "trigger": {
+      "event": "protected_deleted"
+    }
+  },
+  {
+    "id": "time_traveller",
+    "title": "Time Traveller",
+    "description": "Rewind a challenge with :reset.",
+    "icon": "<<",
+    "hidden": true,
+    "trigger": {
+      "event": "challenge_reset"
+    }
+  },
+  {
+    "id": "pipe_organ",
+    "title": "Pipe Organ",
+    "description": "Build a pipeline of 4 or more commands.",
+    "icon": "||||",
+    "hidden": true,
+    "trigger": {
+      "event": "pipe_used",
+      "data_gte": {
+        "length": 4
+      }
+    }
+  },
+  {
+    "id": "forbidden_fruit",
+    "title": "Forbidden Fruit",
+    "description": "Try to read /etc/shadow, where password hashes live.",
+    "icon": "$6",
+    "hidden": true,
+    "trigger": {
+      "event": "permission_denied",
+      "data_contains": {
+        "path": "shadow"
+      }
+    }
+  },
+  {
+    "id": "sandwich",
+    "title": "Make Me a Sandwich",
+    "description": "Ask sudo for a sandwich. (xkcd #149)",
+    "icon": "xk",
+    "hidden": true,
+    "trigger": {
+      "event": "sudo_attempt",
+      "data_contains": {
+        "args": "sandwich"
+      }
+    }
+  },
+  {
+    "id": "interpreter",
+    "title": "Loophole",
+    "description": "Run a non-executable script through bash. Read permission was enough.",
+    "icon": "sh",
+    "hidden": true,
+    "trigger": {
+      "event": "script_succeeded",
+      "data_eq": {
+        "path": "bash"
+      }
+    }
+  },
+  {
+    "id": "exec_master",
+    "title": "find -exec",
+    "description": "Run a command on every file find returns.",
+    "icon": "{}",
+    "hidden": true,
+    "trigger": {
+      "event": "find_used",
+      "data_eq": {
+        "exec": "true"
+      }
+    }
+  }
+]

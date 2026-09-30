@@ -1,0 +1,46 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/toast.gd" id="1_toast"]
+
+[node name="Toast" type="PanelContainer"]
+custom_minimum_size = Vector2(360, 0)
+theme_type_variation = &"ToastPanel"
+script = ExtResource("1_toast")
+
+[node name="Row" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Icon" type="Label" parent="Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(52, 0)
+layout_mode = 2
+theme_type_variation = &"HeadingLabel"
+text = ">_"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Text" type="VBoxContainer" parent="Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Kicker" type="Label" parent="Row/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"CapsLabel"
+text = "ACHIEVEMENT UNLOCKED"
+
+[node name="Title" type="Label" parent="Row/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"VioletLabel"
+text = "Title"
+
+[node name="Body" type="Label" parent="Row/Text"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "Description"
+autowrap_mode = 3

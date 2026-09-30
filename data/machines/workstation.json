@@ -1,0 +1,67 @@
+{
+  "hostname": "workstation",
+  "users": {
+    "root":   {"uid": 0,    "gid": 0,    "groups": ["root"],                 "home": "/root",         "shell": "/bin/bash", "gecos": "root"},
+    "player": {"uid": 1000, "gid": 1000, "groups": ["player", "users"],      "home": "/home/player",  "shell": "/bin/bash", "gecos": "Player One"},
+    "alice":  {"uid": 1001, "gid": 1001, "groups": ["alice", "users", "sudo"], "home": "/home/alice", "shell": "/bin/bash", "gecos": "Alice (on holiday)"},
+    "www-data": {"uid": 33, "gid": 33,   "groups": ["www-data"],             "home": "/var/www",      "shell": "/usr/sbin/nologin"}
+  },
+  "processes": [
+    {"pid": 1,    "user": "root",   "cpu": 0.0, "mem": 0.4, "stat": "Ss",  "cmd": "/sbin/init"},
+    {"pid": 212,  "user": "root",   "cpu": 0.1, "mem": 0.9, "stat": "Ss",  "cmd": "/lib/systemd/systemd-journald"},
+    {"pid": 488,  "user": "root",   "cpu": 0.0, "mem": 0.3, "stat": "Ss",  "cmd": "/usr/sbin/cron -f"},
+    {"pid": 502,  "user": "root",   "cpu": 0.2, "mem": 0.6, "stat": "Ss",  "cmd": "sshd: /usr/sbin/sshd -D [listener]"},
+    {"pid": 733,  "user": "alice",  "cpu": 0.0, "mem": 0.2, "stat": "S",   "cmd": "tmux: server (alice, detached)"},
+    {"pid": 1337, "user": "player", "cpu": 0.0, "mem": 0.1, "stat": "S",   "cmd": "sleep infinity", "tty": "pts/0"}
+  ],
+  "files": {
+    "/home/player": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+    "/home/player/welcome.txt": {"owner": "player", "group": "player", "mode": "644", "lines": [
+      "Welcome to workstation.",
+      "",
+      "This machine is yours to explore. Nothing you do here can hurt",
+      "your real computer: every file, user and process is simulated.",
+      "",
+      "A few rules of the road:",
+      "  * Commands are case-sensitive. LS is not ls.",
+      "  * Tab completes names. Arrow Up recalls what you typed.",
+      "  * Stuck? Type :hint.  Curious? Type help, or man <command>.",
+      "",
+      "The first codeword is: LANTERN",
+      "",
+      "P.S. Not everything in this directory shows up when you list it."
+    ]},
+    "/home/player/.hidden_note": {"owner": "player", "group": "player", "mode": "644", "lines": [
+      "You found me.",
+      "",
+      "Files whose names start with a dot are hidden from a plain `ls`.",
+      "They are usually configuration: .bashrc, .profile, .ssh/ ...",
+      "",
+      "The second codeword is: ORBIT"
+    ]},
+    "/home/player/.bashrc": {"owner": "player", "group": "player", "mode": "644", "lines": [
+      "# ~/.bashrc: executed by bash for interactive shells.",
+      "export EDITOR=nano",
+      "alias ll='ls -l'",
+      "PS1='\\u@\\h:\\w\\$ '"
+    ]},
+    "/home/player/.profile": {"owner": "player", "group": "player", "mode": "644", "content": "# ~/.profile: executed by the login shell.\n[ -f ~/.bashrc ] && . ~/.bashrc\n"},
+    "/home/alice": {"dir": true, "owner": "alice", "group": "alice", "mode": "750"},
+    "/home/alice/notes.txt": {"owner": "alice", "group": "alice", "mode": "600", "content": "Remember: rotate the backup drive on Friday.\n"},
+    "/etc/motd": {"content": "\nSudoOS 1.0 — workstation\nAuthorized use only. Activity is logged.\n\n"},
+    "/etc/issue": {"content": "SudoOS 1.0 \\n \\l\n"},
+    "/var/log/syslog": {"lines": [
+      "Jun  5 08:00:01 workstation systemd[1]: Started Daily apt download activities.",
+      "Jun  5 08:00:03 workstation CRON[488]: (root) CMD (run-parts /etc/cron.hourly)",
+      "Jun  5 08:12:44 workstation kernel: [ 3021.114] usb 1-2: new high-speed USB device number 4",
+      "Jun  5 08:30:00 workstation systemd[1]: Starting Cleanup of Temporary Directories...",
+      "Jun  5 08:30:00 workstation systemd[1]: Finished Cleanup of Temporary Directories."
+    ]},
+    "/var/log/auth.log": {"mode": "644", "generator": "auth_log", "params": {"seed": 4711, "lines": 3000, "intruder": "mallory", "intruder_hits": 64}},
+    "/var/log/dpkg.log": {"lines": [
+      "2026-06-04 10:02:11 install nano:amd64 <none> 7.2-1",
+      "2026-06-04 10:02:12 status installed nano:amd64 7.2-1"
+    ]},
+    "/tmp/.X0-lock": {"content": "      911\n"}
+  }
+}
