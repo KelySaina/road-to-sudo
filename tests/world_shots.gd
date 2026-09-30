@@ -55,3 +55,17 @@ func _run():
 	world._interact(world._console); await _frames(3)
 	Game.submit("talk chmod"); await _frames(3)
 	await _shot("e5_trial_console")
+	if world._overlay.visible: world._close_terminal()
+	# One wide shot of each world's course, to compare their obstacles.
+	for wi in range(Game.adventure.world.count()):
+		Game.adventure.state.mark_passed(str(Game.adventure.world.world_at(wi).get("id", "")))
+	for wi in range(Game.adventure.world.count()):
+		world._load_world(wi)
+		await _frames(2)
+		while world._dialogue.visible: world._advance_dialogue()
+		await _frames(2)
+		if world._overlay.visible: world._close_terminal()
+		world._camera.zoom = Vector2(0.62, 0.62)
+		world._player.global_position = Vector2(world.TILE * 20, world.GROUND_ROW * world.TILE)
+		await _frames(10)
+		await _shot("w%d_course" % (wi + 1))

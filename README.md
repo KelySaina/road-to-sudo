@@ -149,16 +149,18 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
 - **Adventure mode — "The Ascent to Root" (Skill Worlds):** a side-scrolling 2D
   **platformer** built on one loop — **learn a skill, then prove it.** You run
   (`A`/`D`) and jump (`Space`) an operator through six worlds, each one a course
-  of solid ground, pits and ledges. Glowing **skill orbs** sit on the ledges, so
-  every command costs you a jump. Reach one and you learn it — a card explains
+  built from pits, ledges, spike strips, patrolling rovers, pulsing emitters,
+  two-step stairs, zig-zag towers and lifts over gaps you can't jump — every
+  world picks its own obstacles and its own tile colour in `worlds.json`.
+  Glowing **skill orbs** sit on the ledges, so every command costs you a jump. Reach one and you learn it — a card explains
   the command, and then it drops you onto a **real prompt to try it on**: the
   world's files are laid out so the example actually runs, and nothing there is
   graded. Take every orb and the world's **trial console** unlocks: press **E**
   and solve a real problem with exactly those skills — make a script run
   (`chmod`), name a log intruder (`grep|sort|uniq`), stop a miner (`ps`,`kill`)…
   Any valid solution passes, you get a "what you learned", and the **portal** to
-  the next world opens. No HP and nothing kills you — fall in a pit and you're
-  set back on the last ground you stood on. It ends at the Throne of root: the
+  the next world opens. No HP, no lives and nothing kills you — touch a hazard or
+  fall in a pit and you're set back on the last ground you stood on. It ends at the Throne of root: the
   **sudo orb** earns you the right, and you become root to end the impostor
   (*"YOU MADE IT."*). Trial XP feeds the same ranks; the run is saved.
   Full write-up: [docs/ADVENTURE.md](docs/ADVENTURE.md).
@@ -229,7 +231,8 @@ road-to-sudo/
 │   │                        ConditionEvaluator
 │   ├── adventure/           AdventureWorld, AdventureState, AdventureManager
 │   ├── world2d/             SpriteFactory, Player2D (platformer controller),
-│   │                        Interactable, Blocker, World2D (the 2D courses)
+│   │                        Hazard, MovingPlatform, Interactable, Blocker,
+│   │                        World2D (builds the 2D courses)
 │   ├── progression/         PlayerProfile, Progression, DifficultySettings,
 │   │                        AchievementSystem
 │   └── ui/                  UiTheme + one script per scene
@@ -242,7 +245,7 @@ road-to-sudo/
 │   ├── commands/            (reserved: per-command metadata, see roadmap)
 │   └── tutorials/           (reserved: codex/lesson pages)
 ├── tests/                   run_tests.gd + suites, ui_smoke.tscn, dev helpers
-├── tools/run_tests.sh
+├── tools/run_tests.sh, extract_tiles.py
 └── docs/                    ARCHITECTURE.md, ADDING_COMMANDS.md, ADDING_CHALLENGES.md
 ```
 
@@ -292,20 +295,19 @@ Full details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Credits
 
-Everything here is original — engine, game, terminal font fallback, and the
-pixel art. Adventure mode is set inside a failing mainframe, so its art is
-machine rather than masonry: deck plating with a lit edge, circuit substrate, a
-CRT workstation, a portal and an operator in a visor. Those sprites are authored
-as 16x16 colour maps in
-[scripts/world2d/sprite_factory.gd](scripts/world2d/sprite_factory.gd), in the
-same palette as the rest of the UI, so they live in a text diff rather than a
-binary. A PNG dropped in `assets/tiles/<name>.png` still overrides any name that
-has no built-in map.
+Adventure mode's terrain and hazards come from **"Sci-fi Platformer Tileset" by
+Michele 'Buch' Bucelli** (https://opengameart.org/content/sci-fi-platformer-tileset),
+**CC0 1.0** (public domain). The sheet is not bundled: `tools/extract_tiles.py`
+fetches it and slices out only the tiles the game uses — five colour sets of
+block/edge tiles, plus spikes, a rover and a pulse emitter.
 
-`assets/tiles/` also still holds the **Kenney** (https://kenney.nl) *Tiny
-Dungeon* / *Tiny Town* tiles (**CC0 1.0**, public domain) that the earlier
-top-down build used, with their licenses and a `CREDITS.md`. Nothing loads them
-any more.
+The console, the portal and the operator are original, authored as 16x16 colour
+maps in [scripts/world2d/sprite_factory.gd](scripts/world2d/sprite_factory.gd)
+so they sit in the same palette as the rest of the UI and live in a text diff
+rather than a binary. A PNG in `assets/tiles/<name>.png` overrides any of them.
+
+Everything else — engine, game, terminal font fallback — is original. See
+`assets/tiles/CREDITS.md`.
 
 ## Known limitations of this slice
 

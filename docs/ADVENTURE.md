@@ -12,10 +12,30 @@ It reuses the whole engine — the VFS, the shell, and the same
 
 - **Run** with `A`/`D` or ← →, **jump** with `Space` or `W`. **E** acts on a
   console or portal. **Esc** closes a panel, or saves and returns to the menu.
-- **The course** — each world is one side-scrolling level: solid ground broken by
-  pits, with ledges you reach in a single jump. There is no HP and nothing can
-  kill you; fall in a pit and you're simply set back down on the last ground you
-  stood on.
+- **The course** — each world is one side-scrolling level, built from segments:
+
+  | segment | what it asks of you | holds an orb |
+  |---|---|---|
+  | `flat` | nothing — breathing room | |
+  | `gap` | clear a pit | |
+  | `spikes` | jump a strip of ground that bites | |
+  | `rover` | time a patrol | |
+  | `burst` | read a pulse that switches on and off | |
+  | `ledge` | one jump up, over a pit | ✔ |
+  | `stair` | a two-step climb | ✔ |
+  | `lift` | ride a moving platform over a gap you can't jump | ✔ |
+  | `tower` | a zig-zag climb, three ledges high | ✔ |
+
+  A world names its own segments and tile colour in `worlds.json`
+  (`"course"` and `"palette"`); leave them out and it falls back to the default
+  recipe for its position in the climb. The order of those defaults is the
+  difficulty curve — world 1 only asks you to jump, and each world after adds
+  exactly one new thing to read.
+- **Nothing can kill you.** There is no HP, no lives and no failed run. Touch a
+  hazard or fall in a pit and you are set back down on the last ground you stood
+  on, a couple of seconds lost, with a moment of grace so you can't be caught
+  again instantly. A course you can lose is a course you stop playing, and this
+  is a game about learning Linux.
 - **Skill orbs** — orbs sit on the ledges, one per command, so every skill costs
   you a jump. Reach one and you learn it: a card shows what the command does, it
   drops into your kit (the SKILLS row) — and then it hands you a **practice
@@ -72,9 +92,14 @@ from its orb count, so adding a world is pure JSON.
   gravity, coyote time, jump buffering and variable jump height. Its tuning and
   the level generator agree on one contract: a full jump clears ~3 tiles of
   height and ~3.7 across, so ledges sit 2 tiles up and pits are at most 3 wide.
-- Art: `scripts/world2d/sprite_factory.gd` — the tiles, console, portal and
-  operator are 16x16 colour maps authored in place, in the UiTheme palette.
+- Hurdles: `scripts/world2d/hazard.gd` (spikes, rovers, bursts — all of which
+  set you back rather than kill) and `scripts/world2d/moving_platform.gd` (the
+  lift, an AnimatableBody2D so it carries the player for free).
+- Art: terrain and hazards are sliced from Buch's CC0 sci-fi sheet by
+  `tools/extract_tiles.py` (see `assets/tiles/CREDITS.md`); the console, portal
+  and operator are 16x16 colour maps authored in `sprite_factory.gd`.
 - Tested headlessly in `tests/adventure_smoke.gd`, and through the real 2D
   scene in `tests/ui_smoke.gd` — which also holds the generator to its contract:
-  every orb sits on a ledge, every ledge is within one measured jump of a lower
-  surface, and no pit is wider than a jump.
+  every orb sits on a ledge (or over a lift), every ledge is within one measured
+  jump of a lower surface, and no pit is wider than a jump unless a lift crosses
+  it. That contract already caught a staircase whose step overlapped its own pit.

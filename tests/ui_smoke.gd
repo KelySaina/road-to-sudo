@@ -257,11 +257,17 @@ func _run() -> void:
 	var bad_ledge := ""
 	var bad_pit := ""
 	for wi in Game.adventure.world.count():
-		var plan: Dictionary = world._plan_level(Game.adventure.orbs_total(wi))
+		var plan: Dictionary = world._plan_level(wi)
 		var solid: Dictionary = plan.solid
+		# Columns a lift crosses: an orb may hang over one, and the pit under it
+		# is allowed to be wider than a jump, because the lift is the way across.
+		var lift_cols: Dictionary = {}
+		for l in plan.lifts:
+			for x in range(int(l.from) - 1, int(l.to) + 2):
+				lift_cols[x] = true
 		for cell in plan.orb_cells:
-			if not solid.has(Vector2i(cell.x, cell.y + 1)):
-				bad_orb = "world %d orb at %s floats with no ledge under it" % [wi + 1, cell]
+			if not solid.has(Vector2i(cell.x, cell.y + 1)) and not lift_cols.has(cell.x):
+				bad_orb = "world %d orb at %s floats with no ledge or lift under it" % [wi + 1, cell]
 		# Exposed tops only — those are the surfaces you can actually stand on.
 		var surfaces: Dictionary = {}
 		var rows_above: Dictionary = {}   # row -> [x] for ledges above the ground
@@ -297,10 +303,12 @@ func _run() -> void:
 		for x in int(plan.w):
 			if solid.has(Vector2i(x, world.GROUND_ROW)):
 				run = 0
+			elif lift_cols.has(x):
+				run = 0
 			else:
 				run += 1
 				if run > 3:
-					bad_pit = "world %d has a %d-tile pit at x=%d" % [wi + 1, run, x]
+					bad_pit = "world %d has a %d-tile pit at x=%d with no lift" % [wi + 1, run, x]
 	check(bad_orb == "", "every orb sits on a ledge (%s)" % bad_orb)
 	check(bad_ledge == "", "every ledge is within one jump of a lower surface (%s)" % bad_ledge)
 	check(bad_pit == "", "no pit is wider than a jump (%s)" % bad_pit)
@@ -332,6 +340,23 @@ func _run() -> void:
 	await _frames(3)
 	check(Game.adventure.current_index() == 1, "portal advances to world 2")
 	check(world._orbs.size() == Game.adventure.orbs_total(1), "world 2 room rebuilt with its own orbs")
+
+	# World 2 is the first with hazards. Touching one must cost progress, never
+	# the run — there is no death in this mode and there must never be one.
+	_drain_dialogue(world)
+	await _phys(8)
+	check(world._hazards.size() > 0, "world 2 has hazards on its course (%d)" % world._hazards.size())
+	var skills_before: int = Game.adventure.state.skills.size()
+	var hazard = world._hazards[0]
+	check(hazard.is_live(), "a spike strip is always dangerous")
+	world._player.global_position = hazard.global_position
+	await _phys(4)
+	await _frames(2)
+	check(world._player.global_position.distance_to(hazard.global_position) > 60.0,
+		"touching a hazard sets the player back to solid ground")
+	check(Game.adventure.current_index() == 1, "a hazard costs progress, not the world")
+	check(Game.adventure.state.skills.size() == skills_before, "and costs no skills")
+	check(world._hazard_grace > 0.0, "a setback grants brief grace, so you can't be re-hit instantly")
 
 	# save persists the adventure
 	Game.save_now()

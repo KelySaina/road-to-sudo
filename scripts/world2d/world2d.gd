@@ -18,9 +18,35 @@ const TERMINAL_SCENE := preload("res://scenes/terminal/terminal.tscn")
 const LEVEL_H := 15
 const GROUND_ROW := 12
 const START_W := 7            # flat run-up before the first obstacle
-const SECTION_W := 10         # one obstacle course per skill orb
 const END_W := 14             # the plateau holding the console and the portal
 const PLATFORM_RISE := 2      # rows a platform sits above its launch surface
+
+## The pieces a course is built from. `w` is its width in tiles; `orb` marks the
+## ones that can hold a skill orb, and the generator fills those left to right.
+const SEGMENTS := {
+	"flat":   {"w": 5,  "orb": false},   # breathing room
+	"gap":    {"w": 6,  "orb": false},   # a pit to clear
+	"spikes": {"w": 6,  "orb": false},   # a strip of ground you must jump
+	"rover":  {"w": 9,  "orb": false},   # a patrol to time
+	"burst":  {"w": 7,  "orb": false},   # a pulse to read
+	"ledge":  {"w": 9,  "orb": true},    # orb on a ledge over a pit
+	"stair":  {"w": 10, "orb": true},    # orb at the top of a two-step climb
+	"lift":   {"w": 11, "orb": true},    # orb over a gap only a lift crosses
+	"tower":  {"w": 9,  "orb": true},    # orb at the top of a zig-zag climb
+}
+
+## What each world is built from when its JSON doesn't say, and the colour its
+## tiles are cut from. The order is the difficulty curve: world 1 only asks you
+## to jump, and every world after it adds exactly one new thing to read.
+const DEFAULT_COURSES := [
+	["ledge", "gap", "ledge", "flat", "stair"],
+	["ledge", "spikes", "stair", "spikes", "ledge"],
+	["ledge", "rover", "stair", "rover", "ledge"],
+	["tower", "gap", "lift", "spikes", "tower"],
+	["ledge", "burst", "stair", "burst", "tower"],
+	["rover", "tower", "spikes", "lift", "burst", "stair"],
+]
+const DEFAULT_PALETTES := ["blue", "green", "red", "violet", "orange", "red"]
 
 var world: AdventureWorld
 var state: AdventureState
@@ -35,6 +61,8 @@ var _console: Interactable
 var _portal: Interactable
 var _near: Interactable = null
 var _level_w := 0
+var _hazards: Array = []
+var _hazard_grace := 0.0          # brief immunity after a setback
 var _safe_pos := Vector2.ZERO     # last spot the player stood on solid ground
 var _intro_shown: Dictionary = {} # world index -> true
 
@@ -90,15 +118,45 @@ func _ready() -> void:
 
 # --- building a world's course ----------------------------------------------
 
-## Lay out one course as a grid of solid tiles plus the spots that matter.
+## What a world is built from: its own `course` if the JSON names one, else the
+## default recipe for its position in the climb. Never returns a course with
+## fewer orb slots than the world has orbs.
+func _course_for(index: int) -> Array:
+	var course: Array = world.world_at(index).get("course", [])
+	if course.is_empty():
+		course = DEFAULT_COURSES[index % DEFAULT_COURSES.size()]
+	course = course.duplicate()
+	var slots := 0
+	for seg in course:
+		if SEGMENTS.get(seg, {}).get("orb", false):
+			slots += 1
+	while slots < adv.orbs_total(index):
+		course.append("ledge")
+		slots += 1
+	return course
+
+
+func _palette_for(index: int) -> String:
+	var fallback: String = DEFAULT_PALETTES[index % DEFAULT_PALETTES.size()]
+	return str(world.world_at(index).get("palette", fallback))
+
+
+## Lay a course out as a grid of solid tiles plus the things that sit on it.
 ## Deterministic: the same world always builds the same level, whether or not
 ## its orbs have already been taken.
-func _plan_level(orb_count: int) -> Dictionary:
+func _plan_level(index: int) -> Dictionary:
+	var orb_count: int = adv.orbs_total(index)
+	var course := _course_for(index)
 	var solid: Dictionary = {}
 	var orb_cells: Array = []
-	var width: int = START_W + orb_count * SECTION_W + END_W
+	var hazards: Array = []
+	var lifts: Array = []
 
-	# Earth everywhere, then carve the pits out of it.
+	var width := START_W + END_W
+	for seg in course:
+		width += int(SEGMENTS.get(seg, {}).get("w", 5))
+
+	# Earth everywhere, then carve each segment out of it.
 	for x in width:
 		for y in range(GROUND_ROW, LEVEL_H):
 			solid[Vector2i(x, y)] = true
@@ -107,42 +165,78 @@ func _plan_level(orb_count: int) -> Dictionary:
 		solid[Vector2i(0, y)] = true
 		solid[Vector2i(width - 1, y)] = true
 
-	for i in orb_count:
-		var base: int = START_W + i * SECTION_W
-		if i % 2 == 0:
-			# "Hop the gap": a 3-wide pit with the orb floating over it, on a
-			# ledge one jump up. Clearing the pit and taking the orb are two
-			# different jumps, so skipping ahead is always possible.
-			for x in range(base + 4, base + 7):
-				_carve_pit(solid, x)
-			var row: int = GROUND_ROW - PLATFORM_RISE
-			for x in range(base + 4, base + 7):
-				solid[Vector2i(x, row)] = true
-			orb_cells.append(Vector2i(base + 5, row - 1))
-		else:
-			# "Staircase": a step, then a higher ledge — each one rise apart, so
-			# the climb is two ordinary jumps rather than one heroic one. The
-			# step sits over solid ground and the pit comes after it, so the
-			# route reads left to right: hop up, hop across, take the orb.
-			for x in range(base + 4, base + 6):
-				_carve_pit(solid, x)
-			var step_row: int = GROUND_ROW - PLATFORM_RISE
-			for x in range(base + 2, base + 4):
-				solid[Vector2i(x, step_row)] = true
-			var top_row: int = step_row - PLATFORM_RISE
-			for x in range(base + 5, base + 8):
-				solid[Vector2i(x, top_row)] = true
-			orb_cells.append(Vector2i(base + 6, top_row - 1))
+	var base := START_W
+	for seg in course:
+		var want_orb: bool = SEGMENTS.get(seg, {}).get("orb", false) and orb_cells.size() < orb_count
+		_carve_segment(str(seg), base, solid, orb_cells, hazards, lifts, want_orb)
+		base += int(SEGMENTS.get(seg, {}).get("w", 5))
 
-	var end_base: int = START_W + orb_count * SECTION_W
 	return {
 		"w": width,
 		"solid": solid,
 		"orb_cells": orb_cells,
-		"console_x": end_base + 4,
-		"portal_x": end_base + 10,
+		"hazards": hazards,
+		"lifts": lifts,
+		"palette": _palette_for(index),
+		"console_x": base + 4,
+		"portal_x": base + 10,
 		"spawn": Vector2i(2, GROUND_ROW),
 	}
+
+
+## Write one segment into the level. Every ledge is PLATFORM_RISE above the
+## surface you jump from and every pit is at most 3 wide, except a lift's, which
+## is meant to be uncrossable on foot — ui_smoke holds this to those rules.
+func _carve_segment(seg: String, base: int, solid: Dictionary, orbs: Array,
+		hazards: Array, lifts: Array, want_orb: bool) -> void:
+	var r2: int = GROUND_ROW - PLATFORM_RISE
+	var r4: int = GROUND_ROW - PLATFORM_RISE * 2
+	var r6: int = GROUND_ROW - PLATFORM_RISE * 3
+	match seg:
+		"gap":
+			for x in range(base + 2, base + 5):
+				_carve_pit(solid, x)
+		"spikes":
+			for x in range(base + 2, base + 4):
+				hazards.append({"kind": Hazard.Kind.SPIKES, "cell": Vector2i(x, GROUND_ROW - 1)})
+		"rover":
+			hazards.append({"kind": Hazard.Kind.ROVER, "cell": Vector2i(base + 4, GROUND_ROW - 1),
+				"from": base + 2, "to": base + 7})
+		"burst":
+			hazards.append({"kind": Hazard.Kind.BURST, "cell": Vector2i(base + 3, GROUND_ROW - 1)})
+		"ledge":
+			# The orb floats over the pit, on a ledge one jump up: clearing the
+			# pit and taking the orb are different jumps, so you can always skip.
+			for x in range(base + 3, base + 6):
+				_carve_pit(solid, x)
+				solid[Vector2i(x, r2)] = true
+			if want_orb:
+				orbs.append(Vector2i(base + 4, r2 - 1))
+		"stair":
+			for x in range(base + 4, base + 6):
+				_carve_pit(solid, x)
+			for x in range(base + 2, base + 4):
+				solid[Vector2i(x, r2)] = true
+			for x in range(base + 5, base + 8):
+				solid[Vector2i(x, r4)] = true
+			if want_orb:
+				orbs.append(Vector2i(base + 6, r4 - 1))
+		"lift":
+			for x in range(base + 2, base + 9):
+				_carve_pit(solid, x)
+			lifts.append({"from": base + 2, "to": base + 8, "row": GROUND_ROW - 1, "tiles": 2})
+			if want_orb:
+				orbs.append(Vector2i(base + 5, GROUND_ROW - 3))
+		"tower":
+			# A zig-zag climb: left, right, left, with the orb at the top.
+			for x in range(base + 2, base + 4):
+				solid[Vector2i(x, r2)] = true
+			for x in range(base + 5, base + 7):
+				solid[Vector2i(x, r4)] = true
+			for x in range(base + 2, base + 4):
+				solid[Vector2i(x, r6)] = true
+			if want_orb:
+				orbs.append(Vector2i(base + 2, r6 - 1))
 
 
 func _carve_pit(solid: Dictionary, x: int) -> void:
@@ -162,9 +256,19 @@ func _load_world(index: int) -> void:
 	add_child(_room)
 
 	var orb_count: int = adv.orbs_total(index)
-	var plan := _plan_level(orb_count)
+	var plan := _plan_level(index)
 	_level_w = plan.w
 	_build_level_geometry(plan)
+
+	_hazards.clear()
+	for h in plan.hazards:
+		var hz := Hazard.make(h.kind, h.cell)
+		if h.has("from"):
+			hz.patrol(int(h.from), int(h.to))
+		_room.add_child(hz)
+		_hazards.append(hz)
+	for l in plan.lifts:
+		_room.add_child(MovingPlatform.make(int(l.from), int(l.to), int(l.row), int(l.tiles)))
 
 	# Skill orbs (only the ones still uncollected — the ground stays the same).
 	var world_id := str(world.world_at(index).get("id", ""))
@@ -187,6 +291,7 @@ func _load_world(index: int) -> void:
 	_player.position = Vector2((plan.spawn.x + 0.5) * TILE, plan.spawn.y * TILE)
 	_player.velocity = Vector2.ZERO
 	_safe_pos = _player.position
+	_hazard_grace = 0.0
 
 	_refresh_hud()
 	if not _resumed and not _intro_shown.has(index):
@@ -212,12 +317,13 @@ func _build_level_geometry(plan: Dictionary) -> void:
 		# as floor and everything buried below as wall, so the course reads at a
 		# glance as ground, ledges and pits.
 		var exposed: bool = not solid.has(Vector2i(c.x, c.y - 1))
-		var art := "floor" if exposed else "wall"
+		var pal: String = plan.palette
+		var art: String = pal + "_floor" if exposed else pal + "_wall"
 		var roll: int = abs(hash(c)) % 100
-		if exposed and roll < 16:
-			art = "floor_alt"
+		if exposed and roll < 22:
+			art = pal + "_floor_alt"
 		elif not exposed and roll < 34:
-			art = "wall_alt"
+			art = pal + "_wall_alt"
 		var spr := Sprite2D.new()
 		spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		spr.texture = SpriteFactory.texture(art)
@@ -575,17 +681,24 @@ func _process(delta: float) -> void:
 			continue
 		var spr: Sprite2D = node.get_meta("spr")
 		spr.position.y = node.get_meta("base_y") + sin(Time.get_ticks_msec() / 1000.0 * 3.0 + o.index) * 4.0
+	_hazard_grace = maxf(0.0, _hazard_grace - delta)
 	if _overlay.visible or _dialogue.visible:
 		if _near:
 			_near.show_prompt(false); _near = null
 		return
 
-	# Remember the last solid footing, and fish the player out of a pit rather
-	# than punishing them for it — mistakes here are always recoverable.
-	if _player.is_on_floor():
+	# Remember the last solid footing — but never a spot inside a hazard, or a
+	# setback would drop you straight back into the thing that got you.
+	if _player.is_on_floor() and _clear_of_hazards(_player.global_position):
 		_safe_pos = _player.global_position
 	elif _player.global_position.y > (LEVEL_H + 3) * TILE:
-		_respawn()
+		_setback()
+
+	if _hazard_grace <= 0.0:
+		for hz in _hazards:
+			if is_instance_valid(hz) and hz.is_live() and hz.overlaps_body(_player):
+				_setback()
+				break
 
 	for o in _orbs.duplicate():
 		var node: Node2D = o.node
@@ -606,11 +719,21 @@ func _process(delta: float) -> void:
 		if _near: _near.show_prompt(true)
 
 
-func _respawn() -> void:
+func _clear_of_hazards(p: Vector2) -> bool:
+	for hz in _hazards:
+		if is_instance_valid(hz) and p.distance_to(hz.global_position) < TILE * 1.6:
+			return false
+	return true
+
+
+## The only consequence in the whole mode: you are put back down on the last
+## ground you stood on. No health, no lives, no run to lose.
+func _setback() -> void:
 	_player.global_position = _safe_pos
 	_player.velocity = Vector2.ZERO
-	_player.modulate = Color(1, 1, 1, 0.25)
-	create_tween().tween_property(_player, "modulate:a", 1.0, 0.45)
+	_hazard_grace = 1.0
+	_player.modulate = Color(1.0, 0.45, 0.6, 0.35)
+	create_tween().tween_property(_player, "modulate", Color.WHITE, 0.5)
 
 
 func _unhandled_input(event: InputEvent) -> void:

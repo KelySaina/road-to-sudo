@@ -21,6 +21,8 @@
   "worlds": [
     {
       "id": "w1",
+      "palette": "blue",
+      "course": ["ledge", "gap", "ledge", "flat", "stair"],
       "name": "World 1 — The Filesystem",
       "subtitle": "look, read, and run",
       "cwd": "~",
@@ -66,6 +68,8 @@
     },
     {
       "id": "w2",
+      "palette": "green",
+      "course": ["ledge", "spikes", "stair", "spikes", "ledge"],
       "name": "World 2 — The Log Swamp",
       "subtitle": "filter the flood with grep",
       "cwd": "/var/log",
@@ -106,6 +110,8 @@
     },
     {
       "id": "w3",
+      "palette": "red",
+      "course": ["ledge", "rover", "stair", "rover", "ledge"],
       "name": "World 3 — The Process Foundry",
       "subtitle": "see what runs, stop what steals",
       "cwd": "~",
@@ -148,6 +154,8 @@
     },
     {
       "id": "w4",
+      "palette": "violet",
+      "course": ["tower", "gap", "lift", "spikes", "tower"],
       "name": "World 4 — The Tangled Archive",
       "subtitle": "search a whole tree with find",
       "cwd": "~",
@@ -190,6 +198,8 @@
     },
     {
       "id": "w5",
+      "palette": "orange",
+      "course": ["ledge", "burst", "stair", "burst", "tower"],
       "name": "World 5 — The Cutting Room",
       "subtitle": "slice columns, count the culprit",
       "cwd": "/var/data",
@@ -230,6 +240,8 @@
     },
     {
       "id": "w6",
+      "palette": "red",
+      "course": ["rover", "tower", "spikes", "lift", "burst", "stair"],
       "name": "World 6 — The Throne of root",
       "subtitle": "become root, end the impostor",
       "cwd": "/opt",
