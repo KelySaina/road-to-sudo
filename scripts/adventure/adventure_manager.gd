@@ -69,7 +69,7 @@ func all_orbs_collected(index: int) -> bool:
 	return orbs_collected_count(index) >= orbs_total(index)
 
 
-## Walk into an orb: learn its skill. Returns the lesson dict for the 2D card,
+## Reach an orb: learn its skill. Returns the lesson dict for the 2D card and
 ## or {} if it was already collected.
 func collect_orb(index: int, orb_index: int) -> Dictionary:
 	var orbs: Array = world.orbs(index)
@@ -132,6 +132,18 @@ func engage_trial(index: int) -> void:
 	state_changed.emit()
 
 
+## Lay a world's files and processes out so an orb's example command actually
+## has something to work on, WITHOUT opening the trial: no objective, no success
+## check, nothing graded. Used by the prompt you get when you take an orb.
+func prepare_practice(index: int) -> void:
+	state.world_index = index
+	var wd: Dictionary = world.world_at(index)
+	_apply_setup(wd.get("trial", {}).get("setup", {}))
+	if wd.has("cwd"):
+		_session.set_cwd(ConditionEvaluator._path(wd.cwd, _session))
+	_in_trial = false
+
+
 func disengage() -> void:
 	_in_trial = false
 	while _session.pop_user():
@@ -150,7 +162,7 @@ func observe(outcome: ExecutionOutcome) -> void:
 		match e.name:
 			"adv_hint": _handle_hint()
 			"adv_look": _handle_look()
-			"adv_move": narrate.emit("Just walk — WASD or the arrows. Consoles and portals take E.", "dim")
+			"adv_move": narrate.emit("Just run and jump — A/D or the arrows, Space to jump. Consoles and portals take E.", "dim")
 	if _won or not _in_trial:
 		return
 	var trial: Dictionary = current_world().get("trial", {})
@@ -250,7 +262,7 @@ func _apply_setup(setup: Dictionary) -> void:
 
 func _handle_hint() -> void:
 	if not _in_trial:
-		narrate.emit("No trial open here. Collect the skill orbs, then use the console.", "dim")
+		narrate.emit("Nothing to solve at this prompt — try the command out. The trial waits at the console, once you have every orb.", "dim")
 		return
 	if reveal_hint() == "":
 		narrate.emit("No more hints — trust what you've learned. `talk <command>` teaches any tool.", "dim")

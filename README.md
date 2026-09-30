@@ -22,7 +22,7 @@ Backing up /home/player/projects...
 
 This is an early build with a lot in it: a full **13-level campaign (60
 challenges)** that takes you from `whoami` to taking **root on a burning
-production server**, plus a **2D RPG adventure mode**. A few advanced topics
+production server**, plus a **2D platformer adventure mode**. A few advanced topics
 (networking, services, packages, SSH, git) are the next waves.
 
 ---
@@ -48,12 +48,12 @@ GODOT=/path/to/godot tools/run_tests.sh
 
 This runs:
 
-- `tests/run_tests.gd`: 231 assertions over the VFS, permissions, parser,
+- `tests/run_tests.gd`: 508 assertions over the VFS, permissions, parser,
   every command, progression and achievements. It plays **every challenge's
   solution plus alternative solutions**, and checks that wrong answers and
   half-fixes do not pass.
 - `tests/adventure_smoke.gd`: plays the whole RPG region end to end — every
-  fight, the damage traps, the respawning boss and the death/reboot — 38
+  fight, the damage traps, the respawning boss and the death/reboot — 62
   assertions.
 - `tests/ui_smoke.tscn`: boots the real main scene with its autoloads. It
   plays the whole campaign through the terminal widget, sends real key
@@ -73,6 +73,9 @@ Dev helpers (they need a display, not `--headless`):
 | Key | Action |
 |---|---|
 | `Enter` | run the command, or continue after an objective |
+| `A` `D` / `←` `→` | run (Adventure mode) |
+| `Space` / `W` | jump (Adventure mode) |
+| `E` | act on a console or portal (Adventure mode) |
 | `Tab` | complete a command, path or `:meta` command; ambiguous matches are listed |
 | `↑` / `↓` | move through history |
 | `Ctrl+L` | clear the screen (same as `clear`) |
@@ -143,19 +146,22 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   touch — `exit` brings you home.
 - **Final · Road to sudo**: a broken production server, no hand-holding —
   investigate, `sudo -i`, stop the rogue root process, and hold the throne.
-- **Adventure mode — "The Ascent to Root" (Skill Worlds):** a top-down 2D game
-  built on one loop — **learn a skill, then prove it.** You steer an operator
-  (WASD / arrows) through six worlds. Each world scatters glowing **skill orbs**
-  — walk into one and you learn a command (a card shows what it does and an
-  example, and it drops into your kit). Collect them all and the world's
-  **trial console** unlocks: press **E** and solve a real problem with exactly
-  those skills — make a script run (`chmod`), name a log intruder
-  (`grep|sort|uniq`), stop a miner (`ps`,`kill`)… Any valid solution passes,
-  you get a "what you learned", and the **portal** to the next world opens. No
-  HP, no combat — just learn → apply → advance. It ends at the Throne of root:
-  the **sudo orb** earns you the right, and you become root to end the impostor
-  (*"YOU MADE IT."*). Trial XP feeds the same ranks; the run is saved. Pixel art
-  by Kenney (CC0). Full write-up: [docs/ADVENTURE.md](docs/ADVENTURE.md).
+- **Adventure mode — "The Ascent to Root" (Skill Worlds):** a side-scrolling 2D
+  **platformer** built on one loop — **learn a skill, then prove it.** You run
+  (`A`/`D`) and jump (`Space`) an operator through six worlds, each one a course
+  of solid ground, pits and ledges. Glowing **skill orbs** sit on the ledges, so
+  every command costs you a jump. Reach one and you learn it — a card explains
+  the command, and then it drops you onto a **real prompt to try it on**: the
+  world's files are laid out so the example actually runs, and nothing there is
+  graded. Take every orb and the world's **trial console** unlocks: press **E**
+  and solve a real problem with exactly those skills — make a script run
+  (`chmod`), name a log intruder (`grep|sort|uniq`), stop a miner (`ps`,`kill`)…
+  Any valid solution passes, you get a "what you learned", and the **portal** to
+  the next world opens. No HP and nothing kills you — fall in a pit and you're
+  set back on the last ground you stood on. It ends at the Throne of root: the
+  **sudo orb** earns you the right, and you become root to end the impostor
+  (*"YOU MADE IT."*). Trial XP feeds the same ranks; the run is saved.
+  Full write-up: [docs/ADVENTURE.md](docs/ADVENTURE.md).
 - **Practice Lab:** a separate sandbox machine with no objectives and no
   score.
 - **73 simulated commands:**
@@ -222,14 +228,14 @@ road-to-sudo/
 │   ├── challenges/          Challenge, ChallengeLibrary, ChallengeManager,
 │   │                        ConditionEvaluator
 │   ├── adventure/           AdventureWorld, AdventureState, AdventureManager
-│   ├── world2d/             SpriteFactory, Player2D, Interactable, Blocker,
-│   │                        World2D (the 2D overworld)
+│   ├── world2d/             SpriteFactory, Player2D (platformer controller),
+│   │                        Interactable, Blocker, World2D (the 2D courses)
 │   ├── progression/         PlayerProfile, Progression, DifficultySettings,
 │   │                        AchievementSystem
 │   └── ui/                  UiTheme + one script per scene
 ├── data/
 │   ├── machines/            workstation.json, sandbox.json, mainframe.json
-│   ├── adventure/           world.json (RPG region) + map.json (2D room layout)
+│   ├── adventure/           worlds.json (the six skill worlds)
 │   ├── levels/              ordered chapters listing challenge ids
 │   ├── challenges/          one JSON file per challenge
 │   ├── achievements.json, difficulty.json, progression.json
@@ -286,10 +292,20 @@ Full details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Credits
 
-Pixel art: **Kenney** (https://kenney.nl) — *Tiny Dungeon* and *Tiny Town*,
-both **CC0 1.0** (public domain). Only the tiles used are bundled, under
-`assets/tiles/` with their licenses and a `CREDITS.md`. Everything else
-(engine, game, terminal font fallback) is original.
+Everything here is original — engine, game, terminal font fallback, and the
+pixel art. Adventure mode is set inside a failing mainframe, so its art is
+machine rather than masonry: deck plating with a lit edge, circuit substrate, a
+CRT workstation, a portal and an operator in a visor. Those sprites are authored
+as 16x16 colour maps in
+[scripts/world2d/sprite_factory.gd](scripts/world2d/sprite_factory.gd), in the
+same palette as the rest of the UI, so they live in a text diff rather than a
+binary. A PNG dropped in `assets/tiles/<name>.png` still overrides any name that
+has no built-in map.
+
+`assets/tiles/` also still holds the **Kenney** (https://kenney.nl) *Tiny
+Dungeon* / *Tiny Town* tiles (**CC0 1.0**, public domain) that the earlier
+top-down build used, with their licenses and a `CREDITS.md`. Nothing loads them
+any more.
 
 ## Known limitations of this slice
 

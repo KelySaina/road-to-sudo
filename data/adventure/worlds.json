@@ -8,14 +8,15 @@
     "The mainframe is failing, and root — its keeper — has gone dark.",
     "You climb it one WORLD at a time.",
     "",
-    "In every world, glowing SKILL ORBS teach you a command — walk into one to",
-    "learn it. Collect them all and the world's TRIAL unlocks: a real problem you",
-    "solve with exactly those skills. Pass the trial and the PORTAL to the next",
-    "world opens.",
+    "Every world is a course to run and jump through. Glowing SKILL ORBS sit on",
+    "the ledges — reach one and it teaches you a command, then drops you onto a",
+    "real prompt to try it on. Take them all and the world's TRIAL unlocks: an",
+    "actual problem you solve with exactly those skills. Pass it and the PORTAL",
+    "to the next world opens.",
     "",
-    "Move: WASD / arrows.   Act at a console/portal: E.   Learn more: `talk <cmd>`.",
+    "Run: A D or arrows.   Jump: Space or W.   Act at a console/portal: E.",
     "",
-    "Climb all the way to root."
+    "Fall in a pit and you just climb back out. Climb all the way to root."
   ],
   "worlds": [
     {
@@ -75,8 +76,8 @@
       ],
       "orbs": [
         {"skill": "grep", "teaches": "keep only the lines that match a pattern — your net in a flood of text", "example": "grep 'Failed password' auth.log"},
-        {"skill": "sort", "teaches": "sort lines; feed it counts and it orders them", "example": "sort"},
-        {"skill": "uniq", "teaches": "collapse repeats; `uniq -c` counts how often each line occurs", "example": "sort | uniq -c | sort -rn"}
+        {"skill": "sort", "teaches": "sort lines; feed it counts and it orders them", "example": "grep 'Accepted publickey' auth.log | sort"},
+        {"skill": "uniq", "teaches": "collapse repeats; `uniq -c` counts how often each line occurs", "example": "grep -o 'for [a-z]*' auth.log | sort | uniq -c | sort -rn"}
       ],
       "trial": {
         "name": "The Flood",
@@ -156,9 +157,9 @@
         "folder a plain `ls` will never show. Learn to search, then recover it."
       ],
       "orbs": [
-        {"skill": "find", "teaches": "search a whole directory tree for a file by name", "example": "find /etc -name backup.cfg"},
-        {"skill": "mkdir", "teaches": "make a new directory", "example": "mkdir ~/restored"},
-        {"skill": "cp", "teaches": "copy a file from one place to another", "example": "cp file.cfg ~/restored/"}
+        {"skill": "find", "teaches": "search a whole directory tree for a file by name", "example": "find /home -name '*.txt'"},
+        {"skill": "mkdir", "teaches": "make a new directory", "example": "mkdir ~/scratch"},
+        {"skill": "cp", "teaches": "copy a file from one place to another", "example": "cp ~/OPERATOR.txt /tmp/"}
       ],
       "trial": {
         "name": "The Buried Config",
@@ -199,8 +200,8 @@
       ],
       "orbs": [
         {"skill": "cut", "teaches": "slice out one column from each line; `-d, -f1` takes the first comma-field", "example": "cut -d, -f1 access.csv"},
-        {"skill": "sort", "teaches": "order lines — the setup for counting duplicates", "example": "sort"},
-        {"skill": "uniq", "teaches": "`uniq -c` counts each repeated line; add `sort -rn` to rank them", "example": "sort | uniq -c | sort -rn"}
+        {"skill": "sort", "teaches": "order lines — the setup for counting duplicates", "example": "cut -d, -f3 access.csv | sort"},
+        {"skill": "uniq", "teaches": "`uniq -c` counts each repeated line; add `sort -rn` to rank them", "example": "cut -d, -f2 access.csv | sort | uniq -c | sort -rn"}
       ],
       "trial": {
         "name": "The Ledger",
@@ -241,7 +242,7 @@
       "orbs": [
         {"skill": "id", "teaches": "show who you are and which groups you're in (like 'sudo')", "example": "id"},
         {"skill": "sudo", "teaches": "run as root when policy allows; `sudo -i` opens a root shell. Collecting this earns you the right.", "example": "sudo -i", "grant_group": "sudo"},
-        {"skill": "rm", "teaches": "delete a file — powerful and irreversible, so aim carefully", "example": "rm /opt/initd-imposter/imposterd"}
+        {"skill": "rm", "teaches": "delete a file — powerful and irreversible, so aim carefully", "example": "touch /tmp/junk.txt && rm /tmp/junk.txt"}
       ],
       "trial": {
         "name": "initd-imposter",

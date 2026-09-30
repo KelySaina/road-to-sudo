@@ -183,29 +183,129 @@ func _run() -> void:
 	await _frames(1)
 	check(not world._player.input_locked, "input freed after the intro")
 
-	# movement + wall collision
+	# platforming: run, land on the ground, jump, and bump into the end wall
+	await _phys(12)
+	check(world._player.is_on_floor(), "gravity settles the player onto the ground")
 	var start_pos: Vector2 = world._player.global_position
 	Input.action_press("move_right")
 	await _phys(18)
 	Input.action_release("move_right")
 	await _frames(1)
-	check(world._player.global_position.x > start_pos.x + 5.0, "player walks right")
-	world._player.global_position = Vector2(world.TILE * 1.5, world.TILE * 5.5)
+	check(world._player.global_position.x > start_pos.x + 5.0, "player runs right")
+
+	# Measure the real jump arc and hold the level generator to it: if a full
+	# jump can't clear a ledge, the orbs are unreachable and the mode is broken.
+	var ground_y: float = world._player.global_position.y
+	var peak: float = ground_y
+	Input.action_press("jump")
+	for i in 40:
+		await get_tree().physics_frame
+		peak = minf(peak, world._player.global_position.y)
+	var rise: float = ground_y - peak
+	var needed: float = world.PLATFORM_RISE * world.TILE
+	check(rise > needed, "a full jump (%d px) clears a ledge (%d px)" % [int(rise), int(needed)])
+	Input.action_release("jump")
+	await _phys(60)
+	check(world._player.is_on_floor(), "and gravity brings them back down")
+	check(absf(world._player.global_position.y - ground_y) < 2.0, "landing returns to the same ground height")
+
+	world._player.global_position = Vector2(world.TILE * 1.5, world.GROUND_ROW * world.TILE)
 	Input.action_press("move_left")
 	await _phys(20)
 	Input.action_release("move_left")
-	check(world._player.global_position.x > world.TILE, "wall blocks the player (no escaping the room)")
+	check(world._player.global_position.x > world.TILE, "wall blocks the player (no escaping the level)")
 
-	# collect every skill orb by walking onto it
+	# falling into a pit puts you back on solid ground instead of ending the run
+	var rescued_from: Vector2 = world._player.global_position
+	world._player.global_position = Vector2(rescued_from.x, (world.LEVEL_H + 5) * world.TILE)
+	await _phys(4)
+	check(world._player.global_position.y < world.LEVEL_H * world.TILE, "falling off the level respawns the player on solid ground")
+
+	# take every skill orb — each one teaches, then opens a prompt to try it on
 	var learned_before: int = Game.adventure.state.skills.size()
+	world._player.global_position = world._orbs[0].node.global_position
+	await _frames(2)
+	check(world._dialogue.visible, "touching an orb shows what the command does")
+	var first_skill: String = str(Game.adventure.state.skills[Game.adventure.state.skills.size() - 1])
+	_drain_dialogue(world)
+	await _frames(2)
+	check(world._overlay.visible, "the lesson hands over to a real prompt")
+	check(world._overlay_mode == "practice", "that prompt is practice, not the trial")
+	check(world._overlay_title.text.contains(first_skill), "practice prompt is titled for the skill: '%s'" % world._overlay_title.text)
+	check(not Game.adventure.in_trial(), "practice never opens a trial, so nothing is graded")
+	Game.submit("echo just poking around"); await _frames(2)
+	check(not world._practice_done, "an unrelated command doesn't count as trying the skill")
+	Game.submit(str(Game.adventure.world.orbs(0)[0].get("example", ""))); await _frames(2)
+	check(world._practice_done, "running the command is recognised as having tried it")
+	world._close_terminal(); await _frames(2)
+	check(not world._overlay.visible, "Esc leaves practice and returns to the course")
+	check(not world._player.input_locked, "and hands control back to the player")
+
 	for guard in 10:
 		if world._orbs.is_empty():
 			break
 		world._player.global_position = world._orbs[0].node.global_position
 		await _frames(2)
 		_drain_dialogue(world)
+		await _frames(2)
+		if world._overlay.visible:
+			world._close_terminal()
 		await _frames(1)
-	check(Game.adventure.all_orbs_collected(0), "all world-1 orbs collected by walking into them")
+	# Every course must be climbable: orbs sit on ledges, ledges are within one
+	# jump of a lower surface, and pits are narrow enough to clear.
+	var bad_orb := ""
+	var bad_ledge := ""
+	var bad_pit := ""
+	for wi in Game.adventure.world.count():
+		var plan: Dictionary = world._plan_level(Game.adventure.orbs_total(wi))
+		var solid: Dictionary = plan.solid
+		for cell in plan.orb_cells:
+			if not solid.has(Vector2i(cell.x, cell.y + 1)):
+				bad_orb = "world %d orb at %s floats with no ledge under it" % [wi + 1, cell]
+		# Exposed tops only — those are the surfaces you can actually stand on.
+		var surfaces: Dictionary = {}
+		var rows_above: Dictionary = {}   # row -> [x] for ledges above the ground
+		for cell in solid:
+			var c: Vector2i = cell
+			if solid.has(Vector2i(c.x, c.y - 1)):
+				continue
+			surfaces[c] = true
+			if c.y < world.GROUND_ROW and c.x > 0 and c.x < int(plan.w) - 1:
+				var xs: Array = rows_above.get(c.y, [])
+				xs.append(c.x)
+				rows_above[c.y] = xs
+		# A ledge is a contiguous run: reachable if ANY of its tiles is within a
+		# jump of a lower surface, since you can walk along the rest of it.
+		for row in rows_above:
+			var xs: Array = rows_above[row]
+			xs.sort()
+			var run: Array = []
+			for i in xs.size():
+				run.append(xs[i])
+				if i < xs.size() - 1 and xs[i + 1] == xs[i] + 1:
+					continue
+				var reachable := false
+				for x in run:
+					for dx in range(-3, 4):
+						for dy in range(1, world.PLATFORM_RISE + 1):
+							if surfaces.has(Vector2i(int(x) + dx, int(row) + dy)):
+								reachable = true
+				if not reachable:
+					bad_ledge = "world %d ledge on row %d at x%s is out of jump range" % [wi + 1, row, str(run)]
+				run = []
+		var run := 0
+		for x in int(plan.w):
+			if solid.has(Vector2i(x, world.GROUND_ROW)):
+				run = 0
+			else:
+				run += 1
+				if run > 3:
+					bad_pit = "world %d has a %d-tile pit at x=%d" % [wi + 1, run, x]
+	check(bad_orb == "", "every orb sits on a ledge (%s)" % bad_orb)
+	check(bad_ledge == "", "every ledge is within one jump of a lower surface (%s)" % bad_ledge)
+	check(bad_pit == "", "no pit is wider than a jump (%s)" % bad_pit)
+
+	check(Game.adventure.all_orbs_collected(0), "all world-1 orbs collected by reaching them")
 	check(Game.adventure.state.skills.size() > learned_before, "collecting orbs learns skills")
 	check(Game.adventure.can_engage_trial(0), "trial unlocks once every orb is collected")
 
@@ -250,6 +350,9 @@ func _run() -> void:
 		world._player.global_position = world._orbs[0].node.global_position
 		await _frames(2)
 		_drain_dialogue(world)
+		await _frames(2)
+		if world._overlay.visible:
+			world._close_terminal()
 		await _frames(1)
 	check(Game.session.machine.is_sudoer("player"), "the sudo orb made the player a sudoer")
 	world._interact(world._console)
