@@ -226,7 +226,24 @@ reactions are the training wheels.
 
 `data/machines/<id>.json` defines `hostname`, `users` (uid, gid, groups
 with the primary group first, home, shell), `sudoers`, `processes`,
-`services` and `files`, using the same file specs as `setup`.
+`services`, `net` and `files`, using the same file specs as `setup`.
+
+`net` is the networking model read by `ip` / `ss` / `ping` / `dig` / `curl`:
+
+```json
+"net": {
+  "interfaces": [{"name": "eth0", "ip": "10.10.0.7", "cidr": 24, "mac": "52:54:00:a1:b2:c3", "state": "UP"}],
+  "routes": [{"dst": "default", "via": "10.10.0.1", "dev": "eth0"}],
+  "dns": {"status.internal": "10.10.0.30"},
+  "listen": [{"proto": "tcp", "addr": "0.0.0.0", "port": 22, "process": "sshd", "pid": 641}],
+  "hosts": {"10.10.0.30": {"name": "status.internal", "up": true,
+    "ports": {"80": {"proto": "http", "status": 200, "headers": {}, "body": "OK\n"}}}}
+}
+```
+
+A loopback interface is always added for you. Name resolution reads
+`/etc/hosts` before `dns`, so a challenge can be *solved* by editing
+`/etc/hosts` (which is what `dig`, `ping` and `curl` then see).
 
 A `services` entry is a name → unit spec map, read by `systemctl` /
 `journalctl`:

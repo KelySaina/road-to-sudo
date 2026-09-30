@@ -44,6 +44,13 @@
       {"cmd": "systemctl enable", "desc": "start it on boot",           "ex": "sudo systemctl enable nginx"},
       {"cmd": "journalctl -u",    "desc": "read a service's log",       "ex": "journalctl -u nginx"}
     ]},
+    {"title": "Networking", "items": [
+      {"cmd": "ip addr",   "desc": "my interfaces and IP addresses", "ex": "ip a"},
+      {"cmd": "ss -tlnp",  "desc": "which ports are listening",      "ex": "ss -tlnp"},
+      {"cmd": "ping",      "desc": "is a host reachable?",           "ex": "ping -c3 gateway.lan"},
+      {"cmd": "dig",       "desc": "what IP does a name resolve to?","ex": "dig +short host.internal"},
+      {"cmd": "curl",      "desc": "make an HTTP request",           "ex": "curl http://host/health"}
+    ]},
     {"title": "Becoming root", "items": [
       {"cmd": "sudo",  "desc": "run one command as root",         "ex": "sudo cat /etc/shadow"},
       {"cmd": "su",    "desc": "switch user",                     "ex": "su - alice"}

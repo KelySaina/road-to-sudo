@@ -50,9 +50,28 @@ static func build(data: Dictionary, command_names: Array = []) -> Machine:
 		m.vfs.get_node_at(home).group = primary
 
 	apply_services(m, data.get("services", {}))
+	_build_net(m, data.get("net", {}))
 	_write_system_files(m)
 	apply_files(m.vfs, data.get("files", {}))
 	return m
+
+
+## Fills in the networking model, always guaranteeing a loopback interface.
+static func _build_net(m: Machine, spec: Dictionary) -> void:
+	var net: Dictionary = spec.duplicate(true)
+	var interfaces: Array = net.get("interfaces", [])
+	var has_lo := false
+	for iface in interfaces:
+		if str(iface.get("name", "")) == "lo":
+			has_lo = true
+	if not has_lo:
+		interfaces.push_front({"name": "lo", "ip": "127.0.0.1", "cidr": 8, "mac": "00:00:00:00:00:00", "state": "UNKNOWN"})
+	net["interfaces"] = interfaces
+	net["routes"] = net.get("routes", [])
+	net["dns"] = net.get("dns", {})
+	net["listen"] = net.get("listen", [])
+	net["hosts"] = net.get("hosts", {})
+	m.net = net
 
 
 ## Normalizes a name->spec map of systemd units onto the machine. Also used by
@@ -109,6 +128,8 @@ static func _content_of(spec: Dictionary) -> String:
 
 static func _write_system_files(m: Machine) -> void:
 	m.vfs.put_file("/etc/hostname", m.hostname + "\n")
+	if m.vfs.get_node_at("/etc/hosts") == null:
+		m.vfs.put_file("/etc/hosts", "127.0.0.1\tlocalhost\n127.0.1.1\t%s\n" % m.hostname)
 	m.vfs.put_file("/etc/os-release", "PRETTY_NAME=\"SudoOS 1.0 (Bootstrap)\"\nNAME=\"SudoOS\"\nID=sudoos\nID_LIKE=debian\nHOME_URL=\"https://example.invalid/road-to-sudo\"\n")
 	var passwd := PackedStringArray()
 	var group_members := {}

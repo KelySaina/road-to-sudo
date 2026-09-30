@@ -30,6 +30,16 @@ static func edit_distance(a: String, b: String) -> int:
 	return d[a.length()][b.length()]
 
 
+## A canonical form for anagram tests: the string's characters, sorted.
+## "sl" and "ls" share a signature; "sl" and "ss" do not.
+static func char_signature(s: String) -> String:
+	var chars: Array = []
+	for c in s:
+		chars.append(c)
+	chars.sort()
+	return "".join(chars)
+
+
 static func shared_prefix_length(a: String, b: String) -> int:
 	var n := mini(a.length(), b.length())
 	for i in n:

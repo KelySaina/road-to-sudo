@@ -1,0 +1,38 @@
+{
+  "id": "l8_ports",
+  "title": "An unexpected listener",
+  "level": "networking",
+  "machine": "netbox",
+  "xp": 150,
+  "time_limit": 220,
+  "briefing": [
+    "A security scan of net-01 came back dirty: something is listening on a port",
+    "that shouldn't be open. Known-good services are ssh (22), the web server",
+    "(80) and the app (8080). Anything else is suspicious.",
+    "",
+    "Find the rogue listener."
+  ],
+  "tips": [
+    "`ss -tlnp` lists every listening TCP port and the process behind it.",
+    "One port stands out — and its process isn't a normal service."
+  ],
+  "objective": "Find the port the rogue backdoor is listening on, and write just that port number to ~/finding.txt.",
+  "expert_objective": "Identify the backdoor's listening port; record the number in ~/finding.txt.",
+  "hints": [
+    "List listeners with owners: `ss -tlnp`. Compare against 22/80/8080.",
+    "There's a 'nc' (netcat) process listening — that's the backdoor. Note its port.",
+    "The odd one out is port 4444 (process nc). `echo 4444 > ~/finding.txt`."
+  ],
+  "solution": "ss -tlnp\necho 4444 > ~/finding.txt",
+  "setup": {
+    "remove": ["~/finding.txt"],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/finding.txt",
+    "regex": "^\\s*4444\\s*$"
+  },
+  "explanation": "`ss -tlnp` is the fastest way to answer 'what is this box exposing to the network?'. A listener you can't account for — here a netcat shell on 4444 — is a classic backdoor. Enumerate the expected ports, and whatever's left is your lead.",
+  "teaches": ["networking", "ss", "security", "incident-response"]
+}

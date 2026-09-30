@@ -73,6 +73,13 @@ func _run() -> void:
 		screen.terminal._on_submitted(line)
 		await _frames(1)
 	await _shot("08_services")
+	# Level 8 — Networking: the operator's toolkit on net-01.
+	Game.start_challenge("l8_ports")
+	await _frames()
+	for line in ["ip addr show eth0", "ss -tlnp", "ping -c 2 backup.lan"]:
+		screen.terminal._on_submitted(line)
+		await _frames(1)
+	await _shot("09_networking")
 	Game.submit(":menu")
 	await _frames()
 	menu = main.host.get_child(main.host.get_child_count() - 1)

@@ -68,10 +68,13 @@ func all_names() -> Array:
 	return names
 
 
-## "Did you mean" candidates: closest edit distance first, then the longest
-## shared prefix (lss -> ls before less). Only the best distance tier is kept.
+## "Did you mean" candidates: closest edit distance first; within a tier a pure
+## rearrangement of the same letters (a transposition, the commonest typo — sl
+## -> ls) wins, then the longest shared prefix (lss -> ls before less). Only the
+## best distance tier is kept.
 func suggest(typo: String, max_distance: int = 2) -> Array:
 	var lowered := typo.to_lower()
+	var typo_sig := StringTools.char_signature(lowered)
 	var scored: Array = []
 	for n in all_names():
 		# A one-letter command (l, alias for look) is a poor suggestion for a
@@ -80,7 +83,8 @@ func suggest(typo: String, max_distance: int = 2) -> Array:
 			continue
 		var d := StringTools.edit_distance(lowered, n)
 		if d <= max_distance:
-			scored.append([d, -StringTools.shared_prefix_length(lowered, n), n])
+			var anagram := 0 if n.length() == lowered.length() and StringTools.char_signature(n) == typo_sig else 1
+			scored.append([d, anagram, -StringTools.shared_prefix_length(lowered, n), n])
 	if scored.is_empty():
 		return []
 	scored.sort()
@@ -88,5 +92,5 @@ func suggest(typo: String, max_distance: int = 2) -> Array:
 	var out: Array = []
 	for s in scored:
 		if s[0] == best and out.size() < 3:
-			out.append(s[2])
+			out.append(s[3])
 	return out

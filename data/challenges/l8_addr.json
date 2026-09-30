@@ -1,0 +1,38 @@
+{
+  "id": "l8_addr",
+  "title": "Know your address",
+  "level": "networking",
+  "machine": "netbox",
+  "fresh_machine": true,
+  "xp": 120,
+  "time_limit": 180,
+  "briefing": [
+    "New box: net-01. Before anything else, an operator needs to know how the",
+    "machine is wired — starting with its own IP address.",
+    "",
+    "Interfaces and addresses come from the `ip` command."
+  ],
+  "tips": [
+    "`ip addr` (or `ip a`) lists every interface. 'lo' is loopback; the real one is 'eth0'.",
+    "The address is the number after 'inet', before the /24."
+  ],
+  "objective": "Find net-01's IPv4 address on eth0 and save just the address (no /24) to ~/ip.txt.",
+  "expert_objective": "Record eth0's IPv4 to ~/ip.txt.",
+  "hints": [
+    "List addresses: `ip addr show eth0`. Look at the 'inet' line.",
+    "The address is 10.10.0.7 (the part before /24). Write it to the file.",
+    "`echo 10.10.0.7 > ~/ip.txt`."
+  ],
+  "solution": "ip addr show eth0\necho 10.10.0.7 > ~/ip.txt",
+  "setup": {
+    "remove": ["~/ip.txt"],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/ip.txt",
+    "regex": "^\\s*10\\.10\\.0\\.7\\s*$"
+  },
+  "explanation": "`ip addr` is the modern way to read a host's network config (the old `ifconfig` is deprecated). Every interface has a name and, usually, an 'inet' address with a /prefix — that /24 means the first 24 bits are the network, the rest is this host.",
+  "teaches": ["networking", "ip", "addressing"]
+}

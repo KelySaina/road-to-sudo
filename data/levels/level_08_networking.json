@@ -1,0 +1,14 @@
+{
+  "id": "networking",
+  "order": 8,
+  "title": "Level 8 — Networking",
+  "subtitle": "ip, ss, ping, dig and curl: finding your way around the wire",
+  "description": "Servers live on networks. Learn the operator's toolkit: read your own addresses and routes (ip), see what's listening (ss), test reachability (ping), resolve names (dig), and talk to services (curl) — then use them to hunt a backdoor and fix a broken name.",
+  "machine": "netbox",
+  "challenges": [
+    "l8_addr",
+    "l8_ports",
+    "l8_curl",
+    "l8_dns"
+  ]
+}

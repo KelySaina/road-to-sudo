@@ -12,6 +12,9 @@ var processes: Array = []
 ## systemd-style units. name -> {"description", "active", "enabled", "sub",
 ## "exec", "main_pid", "since", "journal": [String], "needs": {condition}}
 var services: Dictionary = {}
+## Networking model: {"interfaces", "routes", "dns", "listen", "hosts"}.
+## Read by ip / ss / ping / curl / dig. See MachineBuilder for the shape.
+var net: Dictionary = {}
 var sudoers: Array = []
 var next_pid: int = 1000
 
@@ -105,12 +108,62 @@ static func _stamp() -> String:
 	return "%s %02d %02d:%02d:%02d" % [MON[t.month], t.day, t.hour, t.minute, t.second]
 
 
+# --- networking --------------------------------------------------------------
+
+## Resolves a name to an IPv4 string, checking /etc/hosts first (so editing it
+## fixes resolution), then the machine's DNS table. An IP passes through. "".
+func resolve_host(name: String) -> String:
+	if _is_ipv4(name):
+		return name
+	for entry in _etc_hosts():
+		if name in entry.names:
+			return entry.ip
+	var dns: Dictionary = net.get("dns", {})
+	return str(dns.get(name, ""))
+
+
+## The peer at an IP, from net.hosts: {"name", "up", "ports": {port: {...}}}. {}.
+func host_at(ip: String) -> Dictionary:
+	return net.get("hosts", {}).get(ip, {})
+
+
+func _etc_hosts() -> Array:
+	var out: Array = []
+	var node := vfs.get_node_at("/etc/hosts")
+	if node == null or node.is_dir():
+		return out
+	for raw in node.content.split("\n"):
+		var line := raw.strip_edges()
+		if line == "" or line.begins_with("#"):
+			continue
+		var parts := line.split(" ", false)
+		var fields: Array = []
+		for p in parts:
+			for q in p.split("\t", false):
+				if q != "":
+					fields.append(q)
+		if fields.size() >= 2:
+			out.append({"ip": fields[0], "names": fields.slice(1)})
+	return out
+
+
+static func _is_ipv4(s: String) -> bool:
+	var octets := s.split(".")
+	if octets.size() != 4:
+		return false
+	for o in octets:
+		if not str(o).is_valid_int() or int(o) < 0 or int(o) > 255:
+			return false
+	return true
+
+
 func to_dict() -> Dictionary:
 	return {
 		"hostname": hostname,
 		"users": users,
 		"processes": processes,
 		"services": services,
+		"net": net,
 		"sudoers": sudoers,
 		"next_pid": next_pid,
 		"fs": vfs.to_dict(),
@@ -123,6 +176,7 @@ static func from_dict(d: Dictionary) -> Machine:
 	m.users = d.get("users", {})
 	m.processes = d.get("processes", [])
 	m.services = d.get("services", {})
+	m.net = d.get("net", {})
 	m.sudoers = d.get("sudoers", [])
 	m.next_pid = int(d.get("next_pid", 1000))
 	m.vfs = VirtualFileSystem.from_dict(d.get("fs", {}))

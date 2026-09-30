@@ -1,0 +1,64 @@
+{
+  "hostname": "net-01",
+  "users": {
+    "root":   {"uid": 0,    "gid": 0,    "groups": ["root"],                    "home": "/root",        "shell": "/bin/bash", "gecos": "root"},
+    "player": {"uid": 1000, "gid": 1000, "groups": ["player", "users", "sudo"], "home": "/home/player", "shell": "/bin/bash", "gecos": "Network Operator"}
+  },
+  "processes": [
+    {"pid": 1,    "user": "root",   "cpu": 0.0, "mem": 0.4, "stat": "Ss", "cmd": "/sbin/init"},
+    {"pid": 641,  "user": "root",   "cpu": 0.1, "mem": 0.6, "stat": "Ss", "cmd": "sshd: /usr/sbin/sshd -D [listener]"},
+    {"pid": 812,  "user": "www-data","cpu": 0.2, "mem": 1.1, "stat": "S", "cmd": "nginx: worker process"},
+    {"pid": 990,  "user": "app",    "cpu": 0.3, "mem": 2.0, "stat": "Ssl","cmd": "node /srv/app/server.js"},
+    {"pid": 6613, "user": "www-data","cpu": 0.0, "mem": 0.2, "stat": "S", "cmd": "nc -lp 4444 -e /bin/sh"},
+    {"pid": 1337, "user": "player", "cpu": 0.0, "mem": 0.1, "stat": "S",  "cmd": "-bash", "tty": "pts/0"}
+  ],
+  "net": {
+    "interfaces": [
+      {"name": "eth0", "ip": "10.10.0.7", "cidr": 24, "mac": "52:54:00:a1:b2:c3", "state": "UP"}
+    ],
+    "routes": [
+      {"dst": "default", "via": "10.10.0.1", "dev": "eth0"},
+      {"dst": "10.10.0.0/24", "dev": "eth0", "src": "10.10.0.7"}
+    ],
+    "dns": {
+      "gateway.lan": "10.10.0.1",
+      "status.internal": "10.10.0.30",
+      "backup.lan": "10.10.0.20"
+    },
+    "listen": [
+      {"proto": "tcp", "addr": "0.0.0.0",   "port": 22,   "process": "sshd",     "pid": 641},
+      {"proto": "tcp", "addr": "0.0.0.0",   "port": 80,   "process": "nginx",    "pid": 812},
+      {"proto": "tcp", "addr": "0.0.0.0",   "port": 8080, "process": "node",     "pid": 990},
+      {"proto": "tcp", "addr": "127.0.0.1", "port": 5432, "process": "postgres", "pid": 933},
+      {"proto": "tcp", "addr": "0.0.0.0",   "port": 4444, "process": "nc",       "pid": 6613}
+    ],
+    "hosts": {
+      "10.10.0.1":  {"name": "gateway.lan", "up": true, "ports": {}},
+      "10.10.0.20": {"name": "backup.lan",  "up": false, "ports": {}},
+      "10.10.0.30": {"name": "status.internal", "up": true, "ports": {
+        "80": {"proto": "http", "status": 200, "headers": {"Server": "nginx/1.24.0", "Content-Type": "text/plain"},
+          "body": "service: status.internal\nstate: healthy\nbuild: 4821\ntoken=NEON-7731\n"}
+      }},
+      "127.0.0.1": {"name": "localhost", "up": true, "ports": {
+        "80": {"proto": "http", "status": 200, "headers": {"Server": "nginx/1.24.0", "Content-Type": "text/html"},
+          "body": "<h1>It works.</h1>\n"}
+      }}
+    }
+  },
+  "files": {
+    "/home/player": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+    "/home/player/README.txt": {"owner": "player", "group": "player", "mode": "644", "lines": [
+      "net-01 — a networked box. You're the network operator on call.",
+      "",
+      "Five tools do almost everything here:",
+      "  ip     — this host's interfaces, addresses and routes",
+      "  ss     — which ports are listening (and which process owns them)",
+      "  ping   — is a host reachable?",
+      "  dig    — what IP does a name resolve to? (host too)",
+      "  curl   — make an HTTP request and read the reply",
+      "",
+      "Names resolve via /etc/hosts first, then DNS."
+    ]},
+    "/etc/motd": {"content": "\nnet-01 — network operations host\n\n"}
+  }
+}

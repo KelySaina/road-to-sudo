@@ -1,0 +1,37 @@
+{
+  "id": "l8_curl",
+  "title": "Ask the service",
+  "level": "networking",
+  "machine": "netbox",
+  "xp": 150,
+  "time_limit": 220,
+  "briefing": [
+    "The status service at status.internal exposes a health endpoint. Ops wants",
+    "its current build token recorded for the deploy log.",
+    "",
+    "Fetch http://status.internal/health and capture the reply."
+  ],
+  "tips": [
+    "`curl URL` fetches a page and prints the body. Redirect it to a file with >.",
+    "The reply contains a line like token=XXimage. You need the whole reply saved."
+  ],
+  "objective": "Fetch http://status.internal/health and save the response body to ~/health.txt.",
+  "expert_objective": "Record status.internal's /health reply in ~/health.txt.",
+  "hints": [
+    "First check the name resolves: `dig +short status.internal` (or just curl it).",
+    "Fetch and save: `curl http://status.internal/health > ~/health.txt`.",
+    "`curl -s http://status.internal/health > ~/health.txt` — then `cat ~/health.txt` to see the token."
+  ],
+  "solution": "dig +short status.internal\ncurl http://status.internal/health > ~/health.txt",
+  "setup": {
+    "remove": ["~/health.txt"],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_contains",
+    "path": "~/health.txt",
+    "text": "NEON-7731"
+  },
+  "explanation": "`curl` is how you talk to a web service from the shell — health checks, APIs, debugging a proxy. The body prints to stdout, so a redirect (`> file`) or a pipe (`| grep`) captures exactly what the server said.",
+  "teaches": ["networking", "curl", "http"]
+}

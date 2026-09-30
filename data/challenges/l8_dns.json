@@ -1,0 +1,38 @@
+{
+  "id": "l8_dns",
+  "title": "The name won't resolve",
+  "level": "networking",
+  "machine": "netbox",
+  "xp": 180,
+  "time_limit": 300,
+  "briefing": [
+    "The deploy scripts talk to a host they call 'api.internal' — but it doesn't",
+    "resolve, so every call fails with 'Could not resolve host'.",
+    "",
+    "DNS doesn't know that name. The fix an operator reaches for: pin it in",
+    "/etc/hosts, which the resolver checks before DNS. Point api.internal at the",
+    "same box the status service runs on."
+  ],
+  "tips": [
+    "`dig api.internal` returns nothing (NXDOMAIN). `dig +short status.internal` gives you the IP to reuse.",
+    "/etc/hosts lines are 'IP  name'. It's root-owned — become root with sudo -i to edit it."
+  ],
+  "objective": "Make api.internal resolve to the status host (10.10.0.30) by adding it to /etc/hosts.",
+  "expert_objective": "api.internal doesn't resolve. Map it to 10.10.0.30 in /etc/hosts.",
+  "hints": [
+    "Find the target IP: `dig +short status.internal` → 10.10.0.30. Confirm the problem: `dig api.internal` is NXDOMAIN.",
+    "Edit /etc/hosts as root: `sudo -i`, then append the mapping.",
+    "As root: `echo \"10.10.0.30 api.internal\" >> /etc/hosts`, then check with `dig +short api.internal`."
+  ],
+  "solution": "dig +short status.internal\ndig api.internal\nsudo -i\necho \"10.10.0.30 api.internal\" >> /etc/hosts\ndig +short api.internal",
+  "setup": {
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "/etc/hosts",
+    "regex": "10\\.10\\.0\\.30\\s+api\\.internal"
+  },
+  "explanation": "Name resolution checks /etc/hosts before it ever asks DNS. That makes /etc/hosts the quickest fix (and a common gotcha) when a name won't resolve — one 'IP  name' line and the host is reachable by that name. dig is how you see what a name currently resolves to, or that it doesn't.",
+  "teaches": ["networking", "dns", "dig", "hosts-file"]
+}
