@@ -20,9 +20,9 @@ Backing up /home/player/projects...
     +150 XP   +50 no-hint bonus
 ```
 
-This is the **first vertical slice**: the full engine plus Level 0,
-"First Contact", with 10 challenges that go from `whoami` to debugging a
-small production incident.
+This is an early build: the full engine, a two-level campaign (16 challenges,
+from `whoami` to debugging a production incident to wrangling the filesystem),
+and a 2D RPG adventure mode. More levels are on the way.
 
 ---
 
