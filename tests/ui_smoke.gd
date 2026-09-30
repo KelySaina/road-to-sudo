@@ -46,11 +46,11 @@ func _phys(n: int) -> void:
 		await get_tree().physics_frame
 
 
-func _find_obj(world, node_id: String, want_kind: int = -1):
-	for it in world._objects:
-		if it.node_id == node_id and (want_kind == -1 or it.kind == want_kind):
-			return it
-	return null
+func _drain_dialogue(world) -> void:
+	for i in 12:
+		if not world._dialogue.visible:
+			break
+		world._advance_dialogue()
 
 
 func _frames(n: int = 2) -> void:
@@ -169,18 +169,17 @@ func _run() -> void:
 	check(reloaded.achievements.size() == Game.profile.achievements.size(), "achievements persisted")
 	check(not SaveManager.load_world("campaign").is_empty(), "campaign world persisted")
 
-	# --- Adventure (2D RPG) through the real World2D scene ---
+	# --- Adventure (skill worlds) through the real World2D scene ---
 	Game.submit(":menu"); await _frames(3)
 	menu = main.host.get_child(main.host.get_child_count() - 1)
 	menu.adventure_requested.emit(); await _frames(4)
 	var world = main.host.get_child(main.host.get_child_count() - 1)
 	check(world.name == "World2D", "World2D scene shown for adventure")
 	check(world._player != null, "player character spawned")
-	check(world._objects.size() >= 12, "interactables placed (%d)" % world._objects.size())
-	check(_find_obj(world, "archive", Interactable.Kind.NPC) != null, "every fight room has a teacher NPC")
-	check(world._dialogue.visible, "intro dialogue shown on entry")
-	while world._dialogue.visible:
-		world._advance_dialogue()
+	check(world._orbs.size() == Game.adventure.orbs_total(0), "world 1 skill orbs placed (%d)" % world._orbs.size())
+	check(world._console != null and world._portal != null, "trial console and portal placed")
+	check(world._dialogue.visible, "world intro shown on entry")
+	_drain_dialogue(world)
 	await _frames(1)
 	check(not world._player.input_locked, "input freed after the intro")
 
@@ -191,64 +190,71 @@ func _run() -> void:
 	Input.action_release("move_right")
 	await _frames(1)
 	check(world._player.global_position.x > start_pos.x + 5.0, "player walks right")
-	# shove into the left wall of the room and confirm it stops
 	world._player.global_position = Vector2(world.TILE * 1.5, world.TILE * 5.5)
 	Input.action_press("move_left")
 	await _phys(20)
 	Input.action_release("move_left")
 	check(world._player.global_position.x > world.TILE, "wall blocks the player (no escaping the room)")
 
-	# engage the gate console and solve it with real Linux commands
-	var gate_obj = _find_obj(world, "gate", Interactable.Kind.CONSOLE)
-	world._player.global_position = gate_obj.global_position + Vector2(0, 44)
+	# collect every skill orb by walking onto it
+	var learned_before: int = Game.adventure.state.skills.size()
+	for guard in 10:
+		if world._orbs.is_empty():
+			break
+		world._player.global_position = world._orbs[0].node.global_position
+		await _frames(2)
+		_drain_dialogue(world)
+		await _frames(1)
+	check(Game.adventure.all_orbs_collected(0), "all world-1 orbs collected by walking into them")
+	check(Game.adventure.state.skills.size() > learned_before, "collecting orbs learns skills")
+	check(Game.adventure.can_engage_trial(0), "trial unlocks once every orb is collected")
+
+	# engage the trial console and solve it with real Linux commands
+	world._player.global_position = world._console.global_position + Vector2(0, 44)
 	await _frames(2)
-	world._interact(gate_obj)
+	world._interact(world._console)
 	await _frames(2)
-	check(world._overlay.visible, "terminal overlay opens at a console")
-	check(Game.adventure.state.current == "gate", "engaged the gate node")
+	check(world._overlay.visible, "terminal overlay opens at the trial console")
 	Game.submit("cd /var"); await _frames(1)
 	check(world._terminal.prompt_path.text.contains("/var"), "overlay prompt follows cd: '%s'" % world._terminal.prompt_path.text)
 	Game.submit("cd"); await _frames(1)
 	Game.submit("chmod +x keycard.sh"); Game.submit("./keycard.sh"); await _frames(2)
-	check(Game.adventure.state.is_cleared("gate"), "gate cleared through the 2D console")
-	check(gate_obj.is_cleared(), "gate console shows as cleared")
-	var gate_door_open := false
-	for b in world._blockers:
-		if b.data.get("needs_cleared", "") == "gate":
-			gate_door_open = b.is_open()
-	check(gate_door_open, "the door to the Swamp opens after clearing the gate")
+	check(Game.adventure.is_passed(0), "world-1 trial passed through the 2D console")
+	check(world._console.is_cleared(), "console shows as cleared")
 	world._close_terminal(); await _frames(2)
 	check(not world._overlay.visible, "closing steps back to the world")
-	check(not world._player.input_locked, "player can move again after the fight")
+	check(not world._player.input_locked, "player can move again after the trial")
 
-	# talk to an NPC
-	var tux = _find_obj(world, "home")
-	world._interact(tux)
-	await _frames(1)
-	check(world._dialogue.visible, "talking to an NPC opens a dialogue box")
-	for i in 8:
-		if not world._dialogue.visible: break
-		world._advance_dialogue()
-	check(not world._dialogue.visible, "advancing dialogue closes it")
+	# step through the portal to world 2
+	world._player.global_position = world._portal.global_position + Vector2(0, 44)
+	await _frames(2)
+	world._interact(world._portal)
+	await _frames(3)
+	check(Game.adventure.current_index() == 1, "portal advances to world 2")
+	check(world._orbs.size() == Game.adventure.orbs_total(1), "world 2 room rebuilt with its own orbs")
 
 	# save persists the adventure
 	Game.save_now()
 	check(SaveManager.load_world("adventure").has("adv_state"), "adventure state persisted")
 
-	# fast-forward to the boss and win
-	for f in ["keycard", "intel", "cpu_freed"]:
-		Game.adventure.state.add_flag(f)
-	for n in ["gate", "swamp", "foundry", "archive", "cutting"]:
-		Game.adventure.state.cleared[n] = true
-	var gk = _find_obj(world, "gatekeeper")
-	world._interact(gk)  # grants sudo_access
-	check(Game.adventure.state.has_flag("sudo_access"), "gatekeeper grants sudo")
-	while world._dialogue.visible:
-		world._advance_dialogue()
-	var core_obj = _find_obj(world, "core")
-	world._interact(core_obj)
+	# fast-forward to the final world and win it
+	for i in 5:
+		Game.adventure.state.mark_passed(str(Game.adventure.world.world_at(i).get("id", "")))
+	Game.adventure.state.world_index = 5
+	world._load_world(5)
 	await _frames(2)
-	check(world._overlay.visible, "boss console opens")
+	_drain_dialogue(world)
+	for guard in 10:
+		if world._orbs.is_empty():
+			break
+		world._player.global_position = world._orbs[0].node.global_position
+		await _frames(2)
+		_drain_dialogue(world)
+		await _frames(1)
+	check(Game.session.machine.is_sudoer("player"), "the sudo orb made the player a sudoer")
+	world._interact(world._console)
+	await _frames(2)
+	check(world._overlay.visible, "final trial console opens")
 	Game.submit("sudo -i")
 	Game.submit("rm /opt/initd-imposter/imposterd")
 	var imp := -1
@@ -256,7 +262,7 @@ func _run() -> void:
 		if str(pr.cmd).contains("imposterd"): imp = int(pr.pid)
 	Game.submit("kill %d" % imp)
 	await _frames(3)
-	check(not Game.adventure.is_active(), "boss defeated — adventure won in 2D")
+	check(not Game.adventure.is_active(), "final trial won the adventure in 2D")
 	check(Game.profile.achievements.has("the_ascent"), "The Ascent achievement unlocked")
 
 	# Expert + skip basics: starts at t08, no solutions, :skip works.

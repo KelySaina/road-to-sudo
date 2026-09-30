@@ -1,18 +1,17 @@
 class_name AdventureWorld
 extends RefCounted
-## A story world loaded from data/adventure/*.json. Nodes are kept as raw
-## dictionaries (one file, no class-per-node); accessors read the fields.
+## Adventure content: an ordered list of WORLDS. Each world has skill orbs (a
+## command to learn) and a trial (a real, state-checked challenge you solve with
+## those skills). Loaded from data/adventure/worlds.json; worlds stay raw dicts.
 
-const DATA_PATH := "res://data/adventure/world.json"
+const DATA_PATH := "res://data/adventure/worlds.json"
 
 var id: String = ""
 var title: String = ""
 var machine: String = "mainframe"
-var start: String = ""
-var max_hp: int = 30
 var intro: Array = []
 var outro: Array = []
-var nodes: Dictionary = {}   # id -> raw node dict
+var worlds: Array = []   # ordered list of raw world dicts
 
 
 static func load_default() -> AdventureWorld:
@@ -24,44 +23,53 @@ static func from_dict(d: Dictionary) -> AdventureWorld:
 	w.id = d.get("id", "adventure")
 	w.title = d.get("title", "Adventure")
 	w.machine = d.get("machine", "mainframe")
-	w.start = d.get("start", "")
-	w.max_hp = int(d.get("max_hp", 30))
 	w.intro = d.get("intro", [])
 	w.outro = d.get("outro", [])
-	w.nodes = d.get("nodes", {})
+	w.worlds = d.get("worlds", [])
 	return w
 
 
-func node(node_id: String) -> Dictionary:
-	return nodes.get(node_id, {})
+func count() -> int:
+	return worlds.size()
 
 
-func has_node(node_id: String) -> bool:
-	return nodes.has(node_id)
+func world_at(index: int) -> Dictionary:
+	return worlds[index] if index >= 0 and index < worlds.size() else {}
 
 
-func node_name(node_id: String) -> String:
-	return node(node_id).get("name", node_id)
+func index_of(world_id: String) -> int:
+	for i in worlds.size():
+		if str(worlds[i].get("id", "")) == world_id:
+			return i
+	return -1
 
 
-func is_battle(node_id: String) -> bool:
-	return node(node_id).get("type", "story") in ["battle", "boss"]
+func world_name(index: int) -> String:
+	return str(world_at(index).get("name", "World %d" % (index + 1)))
 
 
-## {"exit key (direction)": "destination id"}
-func exits(node_id: String) -> Dictionary:
-	return node(node_id).get("exits", {})
+func orbs(index: int) -> Array:
+	return world_at(index).get("orbs", [])
+
+
+func trial(index: int) -> Dictionary:
+	return world_at(index).get("trial", {})
+
+
+func is_final(index: int) -> bool:
+	return bool(world_at(index).get("final", false)) or index == worlds.size() - 1
 
 
 func validate() -> Array:
 	var problems: Array = []
-	if not has_node(start):
-		problems.append("start node '%s' does not exist" % start)
-	for nid in nodes:
-		for dir in exits(nid):
-			if not has_node(exits(nid)[dir]):
-				problems.append("%s: exit '%s' points to unknown node '%s'" % [nid, dir, exits(nid)[dir]])
-		var n: Dictionary = node(nid)
-		if is_battle(nid) and n.get("battle", {}).get("success", {}).is_empty():
-			problems.append("%s: battle has no success condition" % nid)
+	if worlds.is_empty():
+		problems.append("no worlds defined")
+	for i in worlds.size():
+		var wd: Dictionary = worlds[i]
+		if orbs(i).is_empty():
+			problems.append("%s: no skill orbs" % wd.get("id", i))
+		if trial(i).get("success", {}).is_empty():
+			problems.append("%s: trial has no success condition" % wd.get("id", i))
+		if trial(i).get("hints", []).is_empty():
+			problems.append("%s: trial has no hints" % wd.get("id", i))
 	return problems

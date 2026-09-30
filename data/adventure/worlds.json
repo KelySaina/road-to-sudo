@@ -1,0 +1,295 @@
+{
+  "id": "ascent",
+  "title": "The Ascent to Root",
+  "machine": "mainframe",
+  "intro": [
+    "THE ASCENT TO ROOT",
+    "",
+    "The mainframe is failing, and root — its keeper — has gone dark.",
+    "You climb it one WORLD at a time.",
+    "",
+    "In every world, glowing SKILL ORBS teach you a command — walk into one to",
+    "learn it. Collect them all and the world's TRIAL unlocks: a real problem you",
+    "solve with exactly those skills. Pass the trial and the PORTAL to the next",
+    "world opens.",
+    "",
+    "Move: WASD / arrows.   Act at a console/portal: E.   Learn more: `talk <cmd>`.",
+    "",
+    "Climb all the way to root."
+  ],
+  "worlds": [
+    {
+      "id": "w1",
+      "name": "World 1 — The Filesystem",
+      "subtitle": "look, read, and run",
+      "cwd": "~",
+      "intro": [
+        "You wake at a cold prompt. East, a blast door seals the way — beside it a",
+        "keycard script someone dropped. It won't run as it is.",
+        "Collect the three skills, then make the keycard run."
+      ],
+      "orbs": [
+        {"skill": "ls", "teaches": "list what's in a folder; `ls -l` also shows each file's permissions", "example": "ls -l keycard.sh"},
+        {"skill": "cat", "teaches": "print a file's contents to the screen so you can read it", "example": "cat keycard.sh"},
+        {"skill": "chmod", "teaches": "change a file's permissions; `+x` adds the 'execute' bit so it can run", "example": "chmod +x keycard.sh"}
+      ],
+      "trial": {
+        "name": "The Rusted Gate",
+        "objective": "Make keycard.sh runnable and run it to open the gate.",
+        "setup": {
+          "files": {
+            "~/keycard.sh": {"owner": "player", "group": "player", "mode": "644", "lines": [
+              "#!/bin/bash",
+              "# Emergency keycard. Run me to open the east gate.",
+              "echo 'keycard accepted — the gate grinds open'",
+              "touch /home/player/.gate_open"
+            ]}
+          },
+          "remove": ["~/.gate_open"]
+        },
+        "success": {"type": "file_exists", "path": "~/.gate_open"},
+        "hints": [
+          "Look first: `ls -l keycard.sh`. Compared to a program you can run, it's missing the `x` (execute) letter.",
+          "Add the execute bit: `chmod +x keycard.sh`.",
+          "Then run it from here: `./keycard.sh`  (the `./` means 'the file in this directory')."
+        ],
+        "learned": [
+          "`chmod +x file` adds the execute bit, so a program is allowed to run.",
+          "`./file` runs a program that lives in the current directory."
+        ],
+        "reactions": [
+          {"when": {"all": [{"type": "command_ran", "name": ["cat", "less", "more"]}, {"not": {"type": "command_ran", "name": "chmod"}}]},
+           "say": "Reading the script won't run it. Check its permissions with `ls -l keycard.sh` — the missing letter is `x`. Add it: `chmod +x keycard.sh`."}
+        ]
+      }
+    },
+    {
+      "id": "w2",
+      "name": "World 2 — The Log Swamp",
+      "subtitle": "filter the flood with grep",
+      "cwd": "/var/log",
+      "intro": [
+        "The floor turns to churning logs — thousands of lines pour through",
+        "/var/log. Somewhere in the flood, an intruder hammers a login over and",
+        "over. Learn to filter, then name them."
+      ],
+      "orbs": [
+        {"skill": "grep", "teaches": "keep only the lines that match a pattern — your net in a flood of text", "example": "grep 'Failed password' auth.log"},
+        {"skill": "sort", "teaches": "sort lines; feed it counts and it orders them", "example": "sort"},
+        {"skill": "uniq", "teaches": "collapse repeats; `uniq -c` counts how often each line occurs", "example": "sort | uniq -c | sort -rn"}
+      ],
+      "trial": {
+        "name": "The Flood",
+        "objective": "Name the intruder drowning /var/log/auth.log with failed logins, and write just that name into ~/intel.txt.",
+        "setup": {
+          "files": {
+            "/var/log/auth.log": {"mode": "644", "generator": "auth_log", "params": {"seed": 1919, "lines": 4000, "intruder": "wraith", "intruder_hits": 88, "intruder_ip": "203.0.113.66"}}
+          },
+          "remove": ["~/intel.txt"]
+        },
+        "success": {"type": "file_matches", "path": "~/intel.txt", "regex": "^\\s*wraith\\s*$"},
+        "hints": [
+          "Don't scroll 4000 lines. Filter to the failures: `grep 'Failed password' /var/log/auth.log`.",
+          "One name repeats far more than the rest. Count them: pipe into `grep -o 'for [a-z]*' | sort | uniq -c | sort -rn`.",
+          "The name is 'wraith'. Record it: `echo wraith > ~/intel.txt`."
+        ],
+        "learned": [
+          "`grep PATTERN file` keeps only lines that match. A pipe `|` feeds one command into the next,",
+          "so `grep ... | sort | uniq -c | sort -rn` counts and ranks — the sysadmin's bread and butter."
+        ],
+        "reactions": [
+          {"when": {"all": [{"type": "command_ran", "name": ["cat", "less", "more"]}, {"not": {"type": "command_ran", "name": "grep"}}]},
+           "say": "That's thousands of lines — don't read them, filter them. `grep 'Failed password' /var/log/auth.log` keeps only the failures."}
+        ]
+      }
+    },
+    {
+      "id": "w3",
+      "name": "World 3 — The Process Foundry",
+      "subtitle": "see what runs, stop what steals",
+      "cwd": "~",
+      "orbs": [
+        {"skill": "ps", "teaches": "list running programs (processes) with their PID and CPU use", "example": "ps aux"},
+        {"skill": "top", "teaches": "a live view of processes, sorted by who's using the most CPU", "example": "top"},
+        {"skill": "kill", "teaches": "stop a process by its PID (the number ps shows)", "example": "kill 6660"}
+      ],
+      "intro": [
+        "Heat rolls off the CPU cores — one is pinned at 99%. Something is burning",
+        "cycles it never earned. Learn to read the process table, then stop the thief",
+        "without harming the honest workers."
+      ],
+      "trial": {
+        "name": "The Miner",
+        "objective": "A rogue process is devouring the CPU. Find it with ps and stop it — but spare the backup daemon.",
+        "setup": {
+          "processes": [
+            {"pid": 6660, "user": "player", "cpu": 99.2, "mem": 3.1, "stat": "R", "cmd": "./xmrig --coin monero --tls -o pool.wraith.onion"},
+            {"pid": 6120, "user": "player", "cpu": 0.3, "mem": 0.8, "stat": "S", "cmd": "backup-daemon --nightly /home"}
+          ]
+        },
+        "success": {"type": "process_absent", "cmd_contains": "xmrig"},
+        "hints": [
+          "See what's running and who's greedy: `ps aux`. The thief burns far more CPU than anything else.",
+          "Note its PID (the number). Stop it: `kill <pid>`. Read before you strike — one process only pretends to be junk.",
+          "The miner runs './xmrig ...'. `kill` its PID. Do NOT kill the backup-daemon; that one is friendly."
+        ],
+        "learned": [
+          "`ps aux` lists every process with its PID and CPU%. `kill <PID>` stops one.",
+          "Read before you strike — a name in the list isn't always what it seems."
+        ],
+        "reactions": [
+          {"when": {"type": "event", "name": "process_killed", "data_contains": {"cmd": "backup-daemon"}},
+           "say": "That was the backup daemon, not the miner — the honest worker. The miner (xmrig) is still running; find it with `ps aux` and kill THAT pid."},
+          {"when": {"all": [{"type": "command_ran", "name": ["ls", "dir", "cat"]}, {"not": {"type": "command_ran", "name": "ps"}}]},
+           "say": "You won't find a process with `ls` — processes aren't files. List what's running with `ps aux` and look for the greedy one."}
+        ]
+      }
+    },
+    {
+      "id": "w4",
+      "name": "World 4 — The Tangled Archive",
+      "subtitle": "search a whole tree with find",
+      "cwd": "~",
+      "intro": [
+        "Shelves tower into the dark, packed with decades of files. The system needs",
+        "its backup config, but something buried it deep under /etc — in a hidden",
+        "folder a plain `ls` will never show. Learn to search, then recover it."
+      ],
+      "orbs": [
+        {"skill": "find", "teaches": "search a whole directory tree for a file by name", "example": "find /etc -name backup.cfg"},
+        {"skill": "mkdir", "teaches": "make a new directory", "example": "mkdir ~/restored"},
+        {"skill": "cp", "teaches": "copy a file from one place to another", "example": "cp file.cfg ~/restored/"}
+      ],
+      "trial": {
+        "name": "The Buried Config",
+        "objective": "Find the file named backup.cfg buried under /etc, and copy it into ~/restored/.",
+        "setup": {
+          "files": {
+            "/etc/skel/.cache/hoard/deep/backup.cfg": {"owner": "root", "group": "root", "mode": "644", "lines": [
+              "# system backup policy", "schedule=nightly", "keep=7", "target=/srv/backup"
+            ]}
+          },
+          "remove": ["~/restored"]
+        },
+        "success": {"type": "file_contains", "path": "~/restored/backup.cfg", "text": "schedule=nightly"},
+        "hints": [
+          "You don't know where it is — so search. `find /etc -name backup.cfg` prints its full path.",
+          "Make a home for it first: `mkdir ~/restored`.",
+          "Then copy it: `cp <the path find printed> ~/restored/`. Tab-completion helps with the long path."
+        ],
+        "learned": [
+          "`find PATH -name NAME` searches a whole directory tree for you — even hidden folders.",
+          "`mkdir` makes a directory; `cp SRC DST` copies a file into it."
+        ],
+        "reactions": [
+          {"when": {"all": [{"type": "command_ran", "name": ["ls", "dir", "cat", "less"]}, {"not": {"type": "command_ran", "name": "find"}}]},
+           "say": "Buried means buried — and it's in a hidden folder, so a plain `ls` will never show it. Search the whole tree by name: `find /etc -name backup.cfg`."}
+        ]
+      }
+    },
+    {
+      "id": "w5",
+      "name": "World 5 — The Cutting Room",
+      "subtitle": "slice columns, count the culprit",
+      "cwd": "/var/data",
+      "intro": [
+        "Blades of light slice the dark. A ledger of every access to the machine",
+        "scrolls past — /var/data/access.csv — and one account recurs far too often.",
+        "Learn to cut a column and count it, then name the culprit."
+      ],
+      "orbs": [
+        {"skill": "cut", "teaches": "slice out one column from each line; `-d, -f1` takes the first comma-field", "example": "cut -d, -f1 access.csv"},
+        {"skill": "sort", "teaches": "order lines — the setup for counting duplicates", "example": "sort"},
+        {"skill": "uniq", "teaches": "`uniq -c` counts each repeated line; add `sort -rn` to rank them", "example": "sort | uniq -c | sort -rn"}
+      ],
+      "trial": {
+        "name": "The Ledger",
+        "objective": "In /var/data/access.csv, find the username that appears most often, and write just that name into ~/culprit.txt.",
+        "setup": {
+          "files": {
+            "/var/data/access.csv": {"mode": "644", "generator": "access_log", "params": {"seed": 404, "rows": 600, "culprit": "nemo"}}
+          },
+          "remove": ["~/culprit.txt"]
+        },
+        "success": {"type": "file_matches", "path": "~/culprit.txt", "regex": "^\\s*nemo\\s*$"},
+        "hints": [
+          "Each row is `user,resource,action` — you only want the first column. `cut -d, -f1 access.csv`.",
+          "Count how often each name appears: pipe through `sort | uniq -c | sort -rn` — the biggest count rises to the top.",
+          "The top name is 'nemo'. Record it: `echo nemo > ~/culprit.txt`."
+        ],
+        "learned": [
+          "`cut -d, -f1` keeps just the first comma-separated column.",
+          "`sort | uniq -c | sort -rn` counts each unique line and ranks them — the single most useful pipeline you'll learn."
+        ],
+        "reactions": [
+          {"when": {"all": [{"type": "command_ran", "name": ["cat", "less", "more", "head", "tail"]}, {"not": {"type": "command_ran", "name": "cut"}}]},
+           "say": "600 rows is too many to eyeball. Slice out the first column with `cut`, then count: `cut -d, -f1 access.csv | sort | uniq -c | sort -rn`."}
+        ]
+      }
+    },
+    {
+      "id": "w6",
+      "name": "World 6 — The Throne of root",
+      "subtitle": "become root, end the impostor",
+      "cwd": "/opt",
+      "final": true,
+      "intro": [
+        "The throne room of the kernel. On the throne sits an impostor — a daemon",
+        "wearing root's face, kept alive by its own launcher in /opt/initd-imposter.",
+        "You've earned the right to become root. Take the throne."
+      ],
+      "orbs": [
+        {"skill": "id", "teaches": "show who you are and which groups you're in (like 'sudo')", "example": "id"},
+        {"skill": "sudo", "teaches": "run as root when policy allows; `sudo -i` opens a root shell. Collecting this earns you the right.", "example": "sudo -i", "grant_group": "sudo"},
+        {"skill": "rm", "teaches": "delete a file — powerful and irreversible, so aim carefully", "example": "rm /opt/initd-imposter/imposterd"}
+      ],
+      "trial": {
+        "name": "initd-imposter",
+        "objective": "Become root, destroy the impostor's launcher, then end its process for good.",
+        "setup": {
+          "files": {
+            "/opt/initd-imposter/imposterd": {"owner": "root", "group": "root", "mode": "755", "lines": [
+              "#!/bin/bash", "# I am always restarted. Remove me and the mask falls.", "exec /opt/initd-imposter/mask"
+            ]},
+            "/opt/initd-imposter/README": {"owner": "root", "group": "root", "lines": [
+              "initd-imposter", "It relaunches itself from ./imposterd whenever killed.", "Delete the launcher, THEN kill the process. Requires root."
+            ]}
+          },
+          "processes": [
+            {"pid": 1313, "user": "root", "cpu": 61.0, "mem": 8.0, "stat": "Rs", "cmd": "/opt/initd-imposter/imposterd --pretend-init"}
+          ]
+        },
+        "success": {"all": [
+          {"type": "user_is", "user": "root"},
+          {"type": "path_missing", "path": "/opt/initd-imposter/imposterd"},
+          {"type": "process_absent", "cmd_contains": "imposterd"}
+        ]},
+        "hints": [
+          "As a mere user you can't touch root's things. Become root: `sudo -i` (you earned it). Then look: `ls /opt/initd-imposter` and `ps aux | grep imposter`.",
+          "It respawns from its launcher. As root, remove the launcher first — `rm /opt/initd-imposter/imposterd` — THEN kill the process.",
+          "Full sequence: `sudo -i`; `rm /opt/initd-imposter/imposterd`; `kill 1313`. Stay root — the throne answers only to root."
+        ],
+        "learned": [
+          "`sudo -i` opens a root shell when policy allows it. As root, `rm` and `kill` obey without question —",
+          "which is exactly why root has to be earned. Order matters: remove what respawns it, THEN stop it."
+        ],
+        "reactions": [
+          {"when": {"all": [{"type": "event", "name": "process_killed", "data_contains": {"cmd": "imposterd"}}, {"type": "file_exists", "path": "/opt/initd-imposter/imposterd"}]},
+           "say": "You struck it down — but its launcher still stands, so it RISES again. Remove /opt/initd-imposter/imposterd first, THEN kill it.",
+           "respawn": {"pid": 1313, "user": "root", "cpu": 61.0, "mem": 8.0, "stat": "Rs", "cmd": "/opt/initd-imposter/imposterd --pretend-init"}}
+        ]
+      }
+    }
+  ],
+  "outro": [
+    "root@mainframe:~#",
+    "",
+    "YOU MADE IT.",
+    "Welcome to the other side of the prompt.",
+    "",
+    "You climbed from a borrowed shell to the throne of the machine — world by",
+    "world, skill by skill — and held its most dangerous prompt because you",
+    "finally understood it. That is what sudo really is: not power, but",
+    "responsibility you earned."
+  ]
+}

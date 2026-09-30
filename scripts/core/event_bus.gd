@@ -16,10 +16,9 @@ signal session_changed()
 signal campaign_finished()
 signal menu_requested()
 
-# Adventure (RPG) mode
+# Adventure (skill-worlds) mode
 signal adventure_started()
 signal adventure_node(node_id: String)
 signal adventure_state_changed()
 signal adventure_won()
-signal player_damaged(amount: int, hp: int)
-signal player_rebooted()
+signal skill_learned(skill: String, lesson: Dictionary)

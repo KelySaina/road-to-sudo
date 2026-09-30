@@ -143,19 +143,19 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   touch — `exit` brings you home.
 - **Final · Road to sudo**: a broken production server, no hand-holding —
   investigate, `sudo -i`, stop the rogue root process, and hold the throne.
-- **Adventure mode — "The Ascent to Root" (a 2D RPG):** a real top-down game.
-  You steer an operator (WASD / arrows) through the mainframe's rooms, walk up
-  to consoles, NPCs and monsters, and press **E**. Consoles open a **terminal
-  overlay** where you fight with real Linux commands; NPCs (Tux the old daemon,
-  the Archivist, the Gatekeeper of sudo) give story and hints; locked **doors**
-  open as you clear each room. You have **HP** — reckless commands (killing the
-  wrong process, deleting the wrong file) cost health, and at 0 the machine
-  reboots you to a checkpoint. It ends with a boss, `initd-imposter`, a daemon
-  wearing root's face that respawns from its launcher until you destroy it and
-  claim the throne with `sudo -i`. Six rooms, keys, and XP that feeds the same
-  ranks. Every fight ends with a short "what you learned" note, and `learn`
-  opens a cheat sheet at any prompt. Pixel art by Kenney (CC0). Full write-up:
-  [docs/ADVENTURE.md](docs/ADVENTURE.md).
+- **Adventure mode — "The Ascent to Root" (Skill Worlds):** a top-down 2D game
+  built on one loop — **learn a skill, then prove it.** You steer an operator
+  (WASD / arrows) through six worlds. Each world scatters glowing **skill orbs**
+  — walk into one and you learn a command (a card shows what it does and an
+  example, and it drops into your kit). Collect them all and the world's
+  **trial console** unlocks: press **E** and solve a real problem with exactly
+  those skills — make a script run (`chmod`), name a log intruder
+  (`grep|sort|uniq`), stop a miner (`ps`,`kill`)… Any valid solution passes,
+  you get a "what you learned", and the **portal** to the next world opens. No
+  HP, no combat — just learn → apply → advance. It ends at the Throne of root:
+  the **sudo orb** earns you the right, and you become root to end the impostor
+  (*"YOU MADE IT."*). Trial XP feeds the same ranks; the run is saved. Pixel art
+  by Kenney (CC0). Full write-up: [docs/ADVENTURE.md](docs/ADVENTURE.md).
 - **Practice Lab:** a separate sandbox machine with no objectives and no
   score.
 - **73 simulated commands:**

@@ -57,8 +57,7 @@ func _load_profile(p: PlayerProfile) -> void:
 	adventure.state_changed.connect(func(): EventBus.adventure_state_changed.emit())
 	adventure.node_entered.connect(func(nid): EventBus.adventure_node.emit(nid))
 	adventure.battle_won.connect(_on_battle_won)
-	adventure.player_damaged.connect(func(amt, hp): EventBus.player_damaged.emit(amt, hp))
-	adventure.player_rebooted.connect(func(): EventBus.player_rebooted.emit())
+	adventure.skill_learned.connect(func(skill, lesson): EventBus.skill_learned.emit(skill, lesson))
 	adventure.adventure_won.connect(_on_adventure_won)
 
 
@@ -114,30 +113,8 @@ func start_practice() -> void:
 	EventBus.session_changed.emit()
 
 
-func start_adventure() -> void:
-	mode = "adventure"
-	challenges.current = null
-	var world := AdventureWorld.load_default()
-	for problem in world.validate():
-		push_warning("adventure world: %s" % problem)
-	var saved := SaveManager.load_world(ADVENTURE_SLOT)
-	var state: AdventureState
-	if not saved.is_empty() and saved.has("adv_state"):
-		_restore_world(saved)
-		state = AdventureState.from_dict(saved.adv_state)
-	else:
-		_boot(world.machine)
-		state = AdventureState.new()
-		state.max_hp = world.max_hp
-		state.hp = world.max_hp
-		EventBus.narrate.emit("\n".join(PackedStringArray(world.intro)), "story")
-	adventure.begin(world, state, session)
-	EventBus.adventure_started.emit()
-	EventBus.session_changed.emit()
-
-
-## Prepares Adventure (RPG) mode for the 2D overworld. Returns true when a
-## saved journey was resumed. The World2D scene drives engagement from here.
+## Prepares Adventure (skill-worlds) mode for the 2D overworld. Returns true
+## when a saved journey was resumed. The World2D scene drives everything.
 func start_adventure2d() -> bool:
 	mode = "adventure"
 	challenges.current = null
@@ -154,8 +131,6 @@ func start_adventure2d() -> bool:
 	else:
 		_boot(world.machine)
 		state = AdventureState.new()
-		state.max_hp = world.max_hp
-		state.hp = world.max_hp
 	adventure.prepare(world, state, session)
 	EventBus.adventure_started.emit()
 	EventBus.session_changed.emit()
@@ -345,9 +320,9 @@ func _on_hint_revealed(_c: Challenge, index: int, text: String) -> void:
 
 
 func _on_battle_won(node_id: String, reward: Dictionary) -> void:
-	# Adventure XP is awarded once per node, then feeds the same rank ladder.
-	if int(reward.get("xp", 0)) > 0 and not adventure.state.xp_awarded.has(node_id):
-		adventure.state.xp_awarded[node_id] = true
+	# A trial is passed once (the manager guards re-entry), so its XP is awarded
+	# once here, feeding the same rank ladder as the campaign.
+	if int(reward.get("xp", 0)) > 0:
 		progression.award(int(reward.xp))
 	achievements.check_event("battle_won", {"node": node_id})
 	save_now()
