@@ -93,6 +93,8 @@ static func evaluate(cond: Dictionary, state: Dictionary) -> bool:
 			return session.machine.service_active(cond.service) == bool(cond.get("expect", true))
 		"service_enabled":
 			return session.machine.service_enabled(cond.service) == bool(cond.get("expect", true))
+		"package_installed":
+			return session.machine.package_installed(cond.package) == bool(cond.get("expect", true))
 		"has_flag":
 			return session.adventure != null and session.adventure.state.has_flag(cond.flag)
 	push_warning("Unknown condition type: %s" % cond.get("type", "?"))

@@ -80,6 +80,13 @@ func _run() -> void:
 		screen.terminal._on_submitted(line)
 		await _frames(1)
 	await _shot("09_networking")
+	# Level 9 — Packages: search, dependency-resolving install, audit.
+	Game.start_challenge("l9_install")
+	await _frames()
+	for line in ["apt search tcpdump", "sudo apt install tcpdump", "dpkg -l openssl"]:
+		screen.terminal._on_submitted(line)
+		await _frames(1)
+	await _shot("10_packages")
 	Game.submit(":menu")
 	await _frames()
 	menu = main.host.get_child(main.host.get_child_count() - 1)

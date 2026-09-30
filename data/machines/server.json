@@ -21,6 +21,25 @@
     "postgresql": {"description": "PostgreSQL RDBMS", "active": true, "enabled": true, "main_pid": 933, "exec": "/usr/lib/postgresql/16/bin/postgres", "since": "Mon 2026-09-30 08:59:42 UTC"},
     "nginx":      {"description": "A high performance web server and a reverse proxy server", "active": true, "enabled": true, "main_pid": 812, "exec": "/usr/sbin/nginx -g 'daemon off;'", "since": "Mon 2026-09-30 08:59:43 UTC"}
   },
+  "packages": {
+    "bash":              {"version": "5.2.15-2+b7",     "section": "shells",  "installed": true,  "description": "GNU Bourne Again SHell"},
+    "coreutils":         {"version": "9.4-3",           "section": "utils",   "installed": true,  "description": "GNU core utilities"},
+    "systemd":           {"version": "254.5-1",         "section": "admin",   "installed": true,  "description": "system and service manager"},
+    "openssh-server":    {"version": "9.4p1-1",         "section": "net",     "installed": true,  "description": "secure shell (SSH) server, for remote access"},
+    "nginx":             {"version": "1.24.0-1",        "section": "httpd",   "installed": true,  "description": "small, powerful, scalable web/proxy server"},
+    "postgresql-16":     {"version": "16.2-1",          "section": "database","installed": true,  "description": "object-relational SQL database server"},
+    "openssl":           {"version": "3.0.11-1~deb12u2","section": "utils",   "installed": true,  "description": "Secure Sockets Layer toolkit — cryptographic utility"},
+    "python3":           {"version": "3.11.2-6",        "section": "python",  "installed": true,  "description": "interactive high-level object-oriented language"},
+    "curl":              {"version": "8.5.0-2",         "section": "web",     "installed": true,  "description": "command line tool for transferring data with URL syntax"},
+    "vim-tiny":          {"version": "9.0.1378-2",      "section": "editors", "installed": true,  "description": "Vi IMproved - enhanced vi editor - compact version"},
+    "netcat-traditional":{"version": "1.10-47",         "section": "net",     "installed": true,  "description": "TCP/IP swiss army knife (classic netcat, -e can spawn shells)"},
+    "tcpdump":           {"version": "4.99.4-3",        "section": "net",     "installed": false, "description": "command-line network traffic analyzer", "depends": ["libpcap0.8"]},
+    "libpcap0.8":        {"version": "1.10.4-4",        "section": "libs",    "installed": false, "description": "system interface for user-level packet capture"},
+    "jq":                {"version": "1.7.1-3",         "section": "utils",   "installed": false, "description": "lightweight and flexible command-line JSON processor"},
+    "htop":              {"version": "3.2.2-2",         "section": "utils",   "installed": false, "description": "interactive processes viewer"},
+    "git":               {"version": "2.43.0-1",        "section": "vcs",     "installed": false, "description": "fast, scalable, distributed revision control system"},
+    "tree":              {"version": "2.1.1-2",         "section": "utils",   "installed": false, "description": "displays an indented directory tree, in color"}
+  },
   "files": {
     "/home/player": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
     "/home/player/README.txt": {"owner": "player", "group": "player", "mode": "644", "lines": [

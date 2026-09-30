@@ -1,0 +1,37 @@
+{
+  "id": "l9_install",
+  "title": "Get the right tool",
+  "level": "packages",
+  "machine": "server",
+  "fresh_machine": true,
+  "xp": 130,
+  "time_limit": 200,
+  "briefing": [
+    "Back on app-01. The runbook for the next task says: capture traffic with",
+    "tcpdump. You try to run it — 'command not found'. It isn't installed.",
+    "",
+    "Software comes from packages, managed with apt. Find it and install it."
+  ],
+  "tips": [
+    "`apt search tcpdump` finds the package; `apt install` adds it (with sudo).",
+    "Installing changes the whole system, so it needs root — prefix with sudo."
+  ],
+  "objective": "Install the tcpdump package so it's available on app-01.",
+  "expert_objective": "app-01 is missing tcpdump. Install it.",
+  "hints": [
+    "Confirm it exists in the repo: `apt search tcpdump`.",
+    "Install it as root: `sudo apt install tcpdump`.",
+    "`sudo apt install tcpdump` — it will also pull the dependency it needs."
+  ],
+  "solution": "apt search tcpdump\nsudo apt install tcpdump",
+  "setup": {
+    "cwd": "~"
+  },
+  "success": {
+    "type": "package_installed",
+    "package": "tcpdump",
+    "expect": true
+  },
+  "explanation": "apt is how software gets onto a Debian/Ubuntu machine. `search` finds a package, `install` adds it — and pulls in whatever it depends on automatically. Because it changes the system for everyone, installing needs root.",
+  "teaches": ["packages", "apt", "sudo"]
+}

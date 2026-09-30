@@ -1,0 +1,38 @@
+{
+  "id": "l9_find",
+  "title": "What doesn't belong",
+  "level": "packages",
+  "machine": "server",
+  "xp": 150,
+  "time_limit": 240,
+  "briefing": [
+    "The audit continues. app-01 is a web/database box, so its installed packages",
+    "should be web, database and system tooling — nothing that helps an attacker.",
+    "",
+    "One installed package in the 'net' section stands out: an old netcat whose",
+    "-e option can hand someone a shell. Find it by name."
+  ],
+  "tips": [
+    "`apt list --installed` or `dpkg -l` lists everything installed.",
+    "Look in the net-related packages for the classic netcat (its description mentions spawning shells)."
+  ],
+  "objective": "Identify the risky netcat package that's installed and write its exact package name to ~/risky.txt.",
+  "expert_objective": "Name the installed package that shouldn't be on a server; put it in ~/risky.txt.",
+  "hints": [
+    "List what's installed: `apt list --installed` (or `dpkg -l`). Scan the net section.",
+    "It's the traditional netcat — the description warns that -e can spawn shells.",
+    "The package is netcat-traditional. `echo netcat-traditional > ~/risky.txt`."
+  ],
+  "solution": "apt list --installed\necho netcat-traditional > ~/risky.txt",
+  "setup": {
+    "remove": ["~/risky.txt"],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_contains",
+    "path": "~/risky.txt",
+    "text": "netcat-traditional"
+  },
+  "explanation": "Auditing installed software is core hardening: attackers love tools that are already present ('living off the land'). netcat-traditional's -e flag turns it into a ready-made backdoor, so on a server it's exactly the kind of thing a review should flag.",
+  "teaches": ["packages", "apt", "dpkg", "security"]
+}

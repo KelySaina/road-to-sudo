@@ -20,7 +20,7 @@ Backing up /home/player/projects...
     +150 XP   +50 no-hint bonus
 ```
 
-This is an early build with a lot in it: a full **10-level campaign (48
+This is an early build with a lot in it: a full **11-level campaign (52
 challenges)** that takes you from `whoami` to taking **root on a burning
 production server**, plus a **2D RPG adventure mode**. A few advanced topics
 (networking, services, packages, SSH, git) are the next waves.
@@ -95,7 +95,7 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   basics"), Continue, **Adventure**, Practice Lab, Achievements, Settings and
   Exit.
   Starting over and resetting progress each ask for confirmation first.
-- **Campaign — 10 levels, 48 challenges** (state-checked, so any valid solution
+- **Campaign — 11 levels, 52 challenges** (state-checked, so any valid solution
   passes), ending by taking root on a production server:
 - **Level 0 · First Contact**, 10 challenges:
   1. *Who are you?* (`whoami` / `id`)
@@ -130,6 +130,9 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   hunt a backdoor listener with `ss -tlnp`, pull a health endpoint with `curl`,
   and fix a name that won't resolve by mapping it in `/etc/hosts` (`dig`,
   `ping`).
+- **Level 9 · Package Management**, 4: install a missing tool with `apt`
+  (dependencies pulled in for you), audit an installed version with `dpkg`,
+  spot a risky package that shouldn't be on a server, and `apt remove` it.
 - **Final · Road to sudo**: a broken production server, no hand-holding —
   investigate, `sudo -i`, stop the rogue root process, and hold the throne.
 - **Adventure mode — "The Ascent to Root" (a 2D RPG):** a real top-down game.
@@ -147,7 +150,7 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   [docs/ADVENTURE.md](docs/ADVENTURE.md).
 - **Practice Lab:** a separate sandbox machine with no objectives and no
   score.
-- **67 simulated commands:**
+- **69 simulated commands:**
   - basics: `pwd cd ls echo clear help man history learn`  (`learn` is a
     friendly cheat sheet of what every command does, with examples)
   - files: `cat less touch mkdir rmdir rm cp mv find tree stat file`
@@ -157,6 +160,7 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   - processes: `ps top kill pkill pgrep`
   - services: `systemctl journalctl`
   - network: `ip ss ping dig/host curl`
+  - packages: `apt/apt-get dpkg`
   - system: `hostname uname date`
   - shell: `bash/sh env/printenv export unset which exit true false`
 - **Shell features:** pipes, `>`, `>>`, `<`, `2>`, `2>&1`, `>&2`, `&&`,
@@ -300,19 +304,17 @@ These are honest gaps, not bugs:
 
 ## Roadmap (next steps)
 
-Levels 0–8 and the Final (Road to sudo) are **built** — 48 challenges. Level 7
-(Services) added a `services` table to `Machine` plus `systemctl` / `journalctl`;
-Level 8 (Networking) added a `net` model (interfaces, routes, DNS, listening
-sockets, reachable hosts) plus `ip` / `ss` / `ping` / `dig` / `curl`. The
-pattern for the remaining topics is the same — a small subsystem on the machine,
-a command or two, and a level of state-checked challenges:
-1. **Packages** (a package DB): `apt`, `dpkg`.
-2. **SSH** (remote `Machine`s + keys in `~/.ssh`): `ssh`, `scp`, `ssh-keygen`.
+Levels 0–9 and the Final (Road to sudo) are **built** — 52 challenges. Each
+recent level added a small subsystem to `Machine` and a command or two: Level 7
+(Services) a `services` table + `systemctl` / `journalctl`; Level 8 (Networking)
+a `net` model + `ip` / `ss` / `ping` / `dig` / `curl`; Level 9 (Packages) a
+`packages` database + `apt` / `dpkg`. The pattern for what's left is the same:
+1. **SSH** (remote `Machine`s + keys in `~/.ssh`): `ssh`, `scp`, `ssh-keygen`.
    The `net` model already gives every host reachable peers to build on.
-3. **Git** (a mini in-VFS repo model): `git init/add/commit/log/status`.
-4. **Bash control flow:** `if` / `for` / `while` in the script interpreter (the
+2. **Git** (a mini in-VFS repo model): `git init/add/commit/log/status`.
+3. **Bash control flow:** `if` / `for` / `while` in the script interpreter (the
    parser already produces a list/pipeline AST to build on), plus `$(…)`.
-5. **More Adventure regions:** the RPG engine is data-driven — new regions,
+4. **More Adventure regions:** the RPG engine is data-driven — new regions,
    NPCs, enemies and bosses are JSON in `data/adventure/`. Each new subsystem
    above can also become a new zone.
 

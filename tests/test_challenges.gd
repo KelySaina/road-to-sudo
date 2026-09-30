@@ -17,7 +17,7 @@ func _play(mgr: ChallengeManager, shell: Shell, lines: Array) -> bool:
 
 func test_library_is_valid() -> void:
 	var lib := ChallengeLibrary.load_default()
-	check_eq(lib.order.size(), 48, "full campaign in order")
+	check_eq(lib.order.size(), 52, "full campaign in order")
 	for cid in lib.order:
 		var c := lib.get_challenge(cid)
 		check(c.validate().is_empty(), "%s validates: %s" % [cid, str(c.validate())])
@@ -57,6 +57,9 @@ func test_alternative_solutions() -> void:
 		"l8_addr": ["ip a", "echo 10.10.0.7 > ip.txt"],
 		"l8_curl": ["curl http://status.internal/ > health.txt"],
 		"l8_dns": ["sudo -i", "echo 10.10.0.30 api.internal >> /etc/hosts"],
+		"l9_install": ["sudo apt-get install tcpdump"],
+		"l9_audit": ["dpkg -s openssl", "echo 3.0.11-1~deb12u2 > openssl.txt"],
+		"l9_remove": ["sudo apt purge netcat-traditional"],
 	}
 	for cid in cases:
 		var c := lib.get_challenge(cid)
@@ -103,6 +106,15 @@ func test_wrong_answers_do_not_pass() -> void:
 	shell = new_shell("netbox")
 	mgr.begin(lib.get_challenge("l8_dns"), shell.session)
 	check(not _play(mgr, shell, ["sudo -i", "echo 10.10.0.7 api.internal >> /etc/hosts"]), "wrong IP in /etc/hosts does not resolve the name")
+	# Packages: install and remove both need root.
+	mgr = _manager()
+	shell = new_shell("server")
+	mgr.begin(lib.get_challenge("l9_install"), shell.session)
+	check(not _play(mgr, shell, ["apt install tcpdump"]), "apt install needs privilege")
+	mgr = _manager()
+	shell = new_shell("server")
+	mgr.begin(lib.get_challenge("l9_remove"), shell.session)
+	check(not _play(mgr, shell, ["apt remove netcat-traditional"]), "apt remove needs privilege")
 
 
 func test_hints_and_scoring() -> void:

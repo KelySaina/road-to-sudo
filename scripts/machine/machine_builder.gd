@@ -51,6 +51,7 @@ static func build(data: Dictionary, command_names: Array = []) -> Machine:
 
 	apply_services(m, data.get("services", {}))
 	_build_net(m, data.get("net", {}))
+	apply_packages(m, data.get("packages", {}))
 	_write_system_files(m)
 	apply_files(m.vfs, data.get("files", {}))
 	return m
@@ -72,6 +73,21 @@ static func _build_net(m: Machine, spec: Dictionary) -> void:
 	net["listen"] = net.get("listen", [])
 	net["hosts"] = net.get("hosts", {})
 	m.net = net
+
+
+## Normalizes the package database. Each entry holds both "is it installed" and
+## the repo metadata, so apt (search/install/remove) and dpkg share one table.
+static func apply_packages(m: Machine, specs: Dictionary) -> void:
+	for name in specs:
+		var s: Dictionary = (specs[name] as Dictionary).duplicate(true)
+		var base: Dictionary = m.packages.get(name, {})
+		m.packages[name] = {
+			"version": s.get("version", base.get("version", "1.0-1")),
+			"description": s.get("description", base.get("description", name)),
+			"section": s.get("section", base.get("section", "utils")),
+			"installed": bool(s.get("installed", base.get("installed", false))),
+			"depends": s.get("depends", base.get("depends", [])),
+		}
 
 
 ## Normalizes a name->spec map of systemd units onto the machine. Also used by

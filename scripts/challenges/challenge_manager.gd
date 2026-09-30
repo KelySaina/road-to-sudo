@@ -85,6 +85,8 @@ func _apply_setup(setup: Dictionary, session: ShellSession) -> void:
 		m.processes.append(pr)
 	if setup.has("services"):
 		MachineBuilder.apply_services(m, setup.services)
+	if setup.has("packages"):
+		MachineBuilder.apply_packages(m, setup.packages)
 	if setup.has("cwd"):
 		session.set_cwd(ConditionEvaluator._path(setup.cwd, session))
 

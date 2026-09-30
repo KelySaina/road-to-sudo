@@ -15,6 +15,10 @@ var services: Dictionary = {}
 ## Networking model: {"interfaces", "routes", "dns", "listen", "hosts"}.
 ## Read by ip / ss / ping / curl / dig. See MachineBuilder for the shape.
 var net: Dictionary = {}
+## Package database (both installed and available). name -> {"version",
+## "description", "section", "installed": bool, "depends": [names]}.
+## Read by apt / dpkg.
+var packages: Dictionary = {}
 var sudoers: Array = []
 var next_pid: int = 1000
 
@@ -147,6 +151,12 @@ func _etc_hosts() -> Array:
 	return out
 
 
+# --- packages ----------------------------------------------------------------
+
+func package_installed(name: String) -> bool:
+	return packages.has(name) and bool(packages[name].get("installed", false))
+
+
 static func _is_ipv4(s: String) -> bool:
 	var octets := s.split(".")
 	if octets.size() != 4:
@@ -164,6 +174,7 @@ func to_dict() -> Dictionary:
 		"processes": processes,
 		"services": services,
 		"net": net,
+		"packages": packages,
 		"sudoers": sudoers,
 		"next_pid": next_pid,
 		"fs": vfs.to_dict(),
@@ -177,6 +188,7 @@ static func from_dict(d: Dictionary) -> Machine:
 	m.processes = d.get("processes", [])
 	m.services = d.get("services", {})
 	m.net = d.get("net", {})
+	m.packages = d.get("packages", {})
 	m.sudoers = d.get("sudoers", [])
 	m.next_pid = int(d.get("next_pid", 1000))
 	m.vfs = VirtualFileSystem.from_dict(d.get("fs", {}))

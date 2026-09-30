@@ -121,7 +121,7 @@ which means the player's home.
 }
 ```
 
-They run in this order: `restore`, `files`, `remove`, `processes`, `services`, `cwd`.
+They run in this order: `restore`, `files`, `remove`, `processes`, `services`, `packages`, `cwd`. (`packages` is a name→spec map that installs/overrides package DB entries, mirroring the machine's `packages`.)
 
 `services` declares or overrides systemd units on the machine (see *Adding a
 machine* for the full unit spec). A unit that fails to start until something is
@@ -168,6 +168,7 @@ Composites: `{"all": [...]}`, `{"any": [...]}`, `{"not": {...}}`.
 | `event` | `name`, `data?` (equality), `data_contains?` | a command emitted that event |
 | `process_running` / `process_absent` | `pid` or `cmd_contains` | process table state |
 | `service_active` / `service_enabled` | `service`, `expect?` (default `true`) | a systemd unit is running / set to start at boot |
+| `package_installed` | `package`, `expect?` (default `true`) | a package is (or isn't) installed |
 
 `scope` is `"any"` (the default: anything since the challenge started) or
 `"last"` (only the line just entered).
@@ -226,7 +227,9 @@ reactions are the training wheels.
 
 `data/machines/<id>.json` defines `hostname`, `users` (uid, gid, groups
 with the primary group first, home, shell), `sudoers`, `processes`,
-`services`, `net` and `files`, using the same file specs as `setup`.
+`services`, `net`, `packages` and `files`, using the same file specs as
+`setup`. A `packages` entry is `name -> {version, description, section,
+installed, depends?}`; `apt` reads and mutates it, `dpkg` reads it.
 
 `net` is the networking model read by `ip` / `ss` / `ping` / `dig` / `curl`:
 

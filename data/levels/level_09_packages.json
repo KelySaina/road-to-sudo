@@ -1,0 +1,14 @@
+{
+  "id": "packages",
+  "order": 9,
+  "title": "Level 9 — Package Management",
+  "subtitle": "apt and dpkg: installing, auditing and removing software",
+  "description": "Every server is a pile of packages. Learn to add what you need (apt install), find out exactly what's on the box and at which version (dpkg, apt list), and — just as important for security — take off what shouldn't be there (apt remove).",
+  "machine": "server",
+  "challenges": [
+    "l9_install",
+    "l9_audit",
+    "l9_find",
+    "l9_remove"
+  ]
+}

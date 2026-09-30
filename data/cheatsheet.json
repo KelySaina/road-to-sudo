@@ -51,6 +51,12 @@
       {"cmd": "dig",       "desc": "what IP does a name resolve to?","ex": "dig +short host.internal"},
       {"cmd": "curl",      "desc": "make an HTTP request",           "ex": "curl http://host/health"}
     ]},
+    {"title": "Packages (software)", "items": [
+      {"cmd": "apt search", "desc": "find a package",              "ex": "apt search tcpdump"},
+      {"cmd": "apt install","desc": "install it (needs sudo)",     "ex": "sudo apt install tcpdump"},
+      {"cmd": "apt remove", "desc": "uninstall it (needs sudo)",   "ex": "sudo apt remove telnet"},
+      {"cmd": "dpkg -l",    "desc": "what's installed, which version","ex": "dpkg -l openssl"}
+    ]},
     {"title": "Becoming root", "items": [
       {"cmd": "sudo",  "desc": "run one command as root",         "ex": "sudo cat /etc/shadow"},
       {"cmd": "su",    "desc": "switch user",                     "ex": "su - alice"}

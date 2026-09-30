@@ -1,0 +1,40 @@
+{
+  "id": "l9_remove",
+  "title": "Reduce the attack surface",
+  "level": "packages",
+  "machine": "server",
+  "xp": 150,
+  "time_limit": 200,
+  "briefing": [
+    "You flagged netcat-traditional. Sign-off says: remove it. Nothing on app-01",
+    "needs it, and leaving a ready-made backdoor tool installed is asking for",
+    "trouble.",
+    "",
+    "Uninstall it with apt."
+  ],
+  "tips": [
+    "`apt remove PKG` uninstalls a package (with sudo).",
+    "Confirm afterwards with `dpkg -l netcat-traditional` — it should no longer be 'ii'."
+  ],
+  "objective": "Uninstall the netcat-traditional package from app-01.",
+  "expert_objective": "Remove netcat-traditional from app-01.",
+  "hints": [
+    "Remove it as root: `sudo apt remove netcat-traditional`.",
+    "`sudo apt remove netcat-traditional` (or `sudo apt purge netcat-traditional` to drop its config too).",
+    "After removal, `dpkg -s netcat-traditional` reports it is not installed."
+  ],
+  "solution": "sudo apt remove netcat-traditional",
+  "setup": {
+    "packages": {
+      "netcat-traditional": {"installed": true}
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "package_installed",
+    "package": "netcat-traditional",
+    "expect": false
+  },
+  "explanation": "Removing software you don't need is one of the cheapest security wins there is: every package that isn't installed is one an attacker can't abuse. `apt remove` uninstalls the program; `apt purge` also deletes its config files.",
+  "teaches": ["packages", "apt", "security", "hardening"]
+}

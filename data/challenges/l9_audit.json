@@ -1,0 +1,38 @@
+{
+  "id": "l9_audit",
+  "title": "Version audit",
+  "level": "packages",
+  "machine": "server",
+  "xp": 140,
+  "time_limit": 200,
+  "briefing": [
+    "A security bulletin lands: a bug affects some OpenSSL builds. Before you can",
+    "tell whether app-01 is exposed, you need to know exactly which version of",
+    "the openssl package is installed.",
+    "",
+    "dpkg is the fastest way to answer 'what version is installed?'."
+  ],
+  "tips": [
+    "`dpkg -l openssl` (or `dpkg -s openssl`) prints the installed version.",
+    "Record the upstream version — the 3.x.y part at the front."
+  ],
+  "objective": "Find the installed openssl package version and write its upstream number (the 3.x.y part) to ~/openssl.txt.",
+  "expert_objective": "Record app-01's installed openssl version in ~/openssl.txt.",
+  "hints": [
+    "Query it: `dpkg -l openssl`. The Version column shows 3.0.11-1~deb12u2.",
+    "The upstream version is the leading 3.0.11. Write it to the file.",
+    "`echo 3.0.11 > ~/openssl.txt`."
+  ],
+  "solution": "dpkg -l openssl\necho 3.0.11 > ~/openssl.txt",
+  "setup": {
+    "remove": ["~/openssl.txt"],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_contains",
+    "path": "~/openssl.txt",
+    "text": "3.0.11"
+  },
+  "explanation": "Patch management starts with 'what do we actually run?'. `dpkg -l <pkg>` (or `dpkg -s`) gives the exact installed version — the number you compare against a CVE's 'fixed in' line to decide if a box needs updating.",
+  "teaches": ["packages", "dpkg", "security", "versions"]
+}
