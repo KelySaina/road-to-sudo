@@ -9,6 +9,9 @@ var vfs: VirtualFileSystem = VirtualFileSystem.new()
 var users: Dictionary = {}
 ## Each process: {"pid", "user", "cpu", "mem", "stat", "cmd"}
 var processes: Array = []
+## systemd-style units. name -> {"description", "active", "enabled", "sub",
+## "exec", "main_pid", "since", "journal": [String], "needs": {condition}}
+var services: Dictionary = {}
 var sudoers: Array = []
 var next_pid: int = 1000
 
@@ -73,11 +76,41 @@ func kill(pid: int) -> bool:
 	return false
 
 
+# --- services (systemd units) ------------------------------------------------
+
+func has_service(unit: String) -> bool:
+	return services.has(unit)
+
+
+func service_active(unit: String) -> bool:
+	return bool(services.get(unit, {}).get("active", false))
+
+
+func service_enabled(unit: String) -> bool:
+	return bool(services.get(unit, {}).get("enabled", false))
+
+
+## Appends a line to a unit's journal, timestamped like journald.
+func journal(unit: String, line: String) -> void:
+	if not services.has(unit):
+		return
+	var log: Array = services[unit].get("journal", [])
+	log.append("%s %s %s[%d]: %s" % [_stamp(), hostname, unit, int(services[unit].get("main_pid", 1)), line])
+	services[unit]["journal"] = log
+
+
+static func _stamp() -> String:
+	var t := Time.get_datetime_dict_from_system()
+	const MON := ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+	return "%s %02d %02d:%02d:%02d" % [MON[t.month], t.day, t.hour, t.minute, t.second]
+
+
 func to_dict() -> Dictionary:
 	return {
 		"hostname": hostname,
 		"users": users,
 		"processes": processes,
+		"services": services,
 		"sudoers": sudoers,
 		"next_pid": next_pid,
 		"fs": vfs.to_dict(),
@@ -89,6 +122,7 @@ static func from_dict(d: Dictionary) -> Machine:
 	m.hostname = d.get("hostname", "localhost")
 	m.users = d.get("users", {})
 	m.processes = d.get("processes", [])
+	m.services = d.get("services", {})
 	m.sudoers = d.get("sudoers", [])
 	m.next_pid = int(d.get("next_pid", 1000))
 	m.vfs = VirtualFileSystem.from_dict(d.get("fs", {}))

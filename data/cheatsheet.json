@@ -38,6 +38,12 @@
       {"cmd": "ps",    "desc": "list running processes",          "ex": "ps aux"},
       {"cmd": "kill",  "desc": "stop a process by its PID",       "ex": "kill 1234"}
     ]},
+    {"title": "Services (background daemons)", "items": [
+      {"cmd": "systemctl status", "desc": "is a service running?",      "ex": "systemctl status nginx"},
+      {"cmd": "systemctl start",  "desc": "start it now (needs sudo)",  "ex": "sudo systemctl start nginx"},
+      {"cmd": "systemctl enable", "desc": "start it on boot",           "ex": "sudo systemctl enable nginx"},
+      {"cmd": "journalctl -u",    "desc": "read a service's log",       "ex": "journalctl -u nginx"}
+    ]},
     {"title": "Becoming root", "items": [
       {"cmd": "sudo",  "desc": "run one command as root",         "ex": "sudo cat /etc/shadow"},
       {"cmd": "su",    "desc": "switch user",                     "ex": "su - alice"}

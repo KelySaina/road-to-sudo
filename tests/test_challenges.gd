@@ -17,7 +17,7 @@ func _play(mgr: ChallengeManager, shell: Shell, lines: Array) -> bool:
 
 func test_library_is_valid() -> void:
 	var lib := ChallengeLibrary.load_default()
-	check_eq(lib.order.size(), 40, "full campaign in order")
+	check_eq(lib.order.size(), 44, "full campaign in order")
 	for cid in lib.order:
 		var c := lib.get_challenge(cid)
 		check(c.validate().is_empty(), "%s validates: %s" % [cid, str(c.validate())])
@@ -51,11 +51,15 @@ func test_alternative_solutions() -> void:
 		"t08_needle": ["grep Failed /var/log/auth.log | tail -n 3", "echo mallory > intruder.txt"],
 		"t09_permission": ["chmod 755 backup.sh", "./backup.sh"],
 		"t10_first_incident": ["mkdir -p /home/player/reports", "chmod 600 /opt/reportd/report.conf", "cd /opt/reportd", "./run_report.sh"],
+		"l7_start": ["sudo systemctl start nginx"],
+		"l7_stop": ["sudo systemctl disable --now telnet"],
+		"l7_failed": ["sudo -i", "echo 'port = 9090' > /etc/webapp/webapp.conf", "systemctl restart webapp"],
 	}
 	for cid in cases:
+		var c := lib.get_challenge(cid)
 		var mgr := _manager()
-		var shell := new_shell()
-		mgr.begin(lib.get_challenge(cid), shell.session)
+		var shell := new_shell(c.machine if c.machine != "" else "workstation")
+		mgr.begin(c, shell.session)
 		check(_play(mgr, shell, cases[cid]), "%s: alternative solution accepted" % cid)
 
 
@@ -73,6 +77,20 @@ func test_wrong_answers_do_not_pass() -> void:
 	shell = new_shell()
 	mgr.begin(lib.get_challenge("t10_first_incident"), shell.session)
 	check(not _play(mgr, shell, ["mkdir ~/reports", "/opt/reportd/run_report.sh"]), "half a fix is not a fix")
+	# Services: a stop without a disable, a start without privilege, a start
+	# without fixing the config — none of these should count.
+	mgr = _manager()
+	shell = new_shell("server")
+	mgr.begin(lib.get_challenge("l7_stop"), shell.session)
+	check(not _play(mgr, shell, ["sudo systemctl stop telnet"]), "stopping without disabling is not enough")
+	mgr = _manager()
+	shell = new_shell("server")
+	mgr.begin(lib.get_challenge("l7_start"), shell.session)
+	check(not _play(mgr, shell, ["systemctl start nginx"]), "systemctl start needs privilege")
+	mgr = _manager()
+	shell = new_shell("server")
+	mgr.begin(lib.get_challenge("l7_failed"), shell.session)
+	check(not _play(mgr, shell, ["sudo systemctl start webapp"]), "starting a broken service does not fix it")
 
 
 func test_hints_and_scoring() -> void:

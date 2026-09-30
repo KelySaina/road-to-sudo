@@ -49,9 +49,32 @@ static func build(data: Dictionary, command_names: Array = []) -> Machine:
 		m.vfs.ensure_dir(home).owner = user_name
 		m.vfs.get_node_at(home).group = primary
 
+	apply_services(m, data.get("services", {}))
 	_write_system_files(m)
 	apply_files(m.vfs, data.get("files", {}))
 	return m
+
+
+## Normalizes a name->spec map of systemd units onto the machine. Also used by
+## challenge setup so a challenge can declare (or override) its own services.
+static func apply_services(m: Machine, specs: Dictionary) -> void:
+	for unit in specs:
+		var s: Dictionary = (specs[unit] as Dictionary).duplicate(true)
+		var active: bool = bool(s.get("active", false))
+		var base: Dictionary = m.services.get(unit, {})
+		var unit_full: String = unit if unit.contains(".") else unit + ".service"
+		m.services[unit] = {
+			"unit": unit_full,
+			"description": s.get("description", base.get("description", unit + " service")),
+			"active": active,
+			"enabled": bool(s.get("enabled", base.get("enabled", false))),
+			"sub": s.get("sub", ("running" if active else "dead")),
+			"exec": s.get("exec", base.get("exec", "/usr/sbin/" + unit)),
+			"main_pid": int(s.get("main_pid", base.get("main_pid", 0))),
+			"since": s.get("since", base.get("since", "Mon 2026-09-30 09:12:04 UTC")),
+			"journal": s.get("journal", base.get("journal", [])),
+			"needs": s.get("needs", base.get("needs", {})),
+		}
 
 
 ## Applies a path->spec map. Used by machine definitions and challenge setup.

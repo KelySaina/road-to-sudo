@@ -66,6 +66,13 @@ func _run() -> void:
 		screen.terminal._on_submitted(line)
 		await _frames(1)
 	await _shot("06_pipes")
+	# Level 7 — Services: the diagnostic loop on app-01.
+	Game.start_challenge("l7_failed")
+	await _frames()
+	for line in ["systemctl status webapp", "journalctl -u webapp"]:
+		screen.terminal._on_submitted(line)
+		await _frames(1)
+	await _shot("08_services")
 	Game.submit(":menu")
 	await _frames()
 	menu = main.host.get_child(main.host.get_child_count() - 1)

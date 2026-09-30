@@ -116,11 +116,18 @@ which means the player's home.
   "files":   {"<path>": <file spec>},
   "remove":  ["~/projects"],
   "processes": [{"pid": 4444, "user": "player", "cpu": 97.0, "mem": 2.1, "cmd": "./miner"}],
+  "services": {"nginx": {"active": false, "enabled": true, "sub": "dead"}},
   "cwd": "~"
 }
 ```
 
-They run in this order: `restore`, `files`, `remove`, `processes`, `cwd`.
+They run in this order: `restore`, `files`, `remove`, `processes`, `services`, `cwd`.
+
+`services` declares or overrides systemd units on the machine (see *Adding a
+machine* for the full unit spec). A unit that fails to start until something is
+fixed can carry a `needs` condition tree (same grammar as `success`): `systemctl
+start` only brings it up when `needs` evaluates true — e.g.
+`"needs": {"not": {"type": "file_contains", "path": "/etc/webapp/webapp.conf", "text": "port = 0"}}`.
 
 - `restore` copies paths from the machine's **original definition**. Use it
   for files an earlier challenge might have let the player delete, so the
@@ -160,6 +167,7 @@ Composites: `{"all": [...]}`, `{"any": [...]}`, `{"not": {...}}`.
 | `output_contains` / `output_matches` | `text` or `regex`, `scope?` | some command's stdout showed it |
 | `event` | `name`, `data?` (equality), `data_contains?` | a command emitted that event |
 | `process_running` / `process_absent` | `pid` or `cmd_contains` | process table state |
+| `service_active` / `service_enabled` | `service`, `expect?` (default `true`) | a systemd unit is running / set to start at boot |
 
 `scope` is `"any"` (the default: anything since the challenge started) or
 `"last"` (only the line just entered).
@@ -217,8 +225,28 @@ reactions are the training wheels.
 ## Adding a machine
 
 `data/machines/<id>.json` defines `hostname`, `users` (uid, gid, groups
-with the primary group first, home, shell), `sudoers`, `processes` and
-`files`, using the same file specs as `setup`.
+with the primary group first, home, shell), `sudoers`, `processes`,
+`services` and `files`, using the same file specs as `setup`.
+
+A `services` entry is a name → unit spec map, read by `systemctl` /
+`journalctl`:
+
+```json
+"services": {
+  "nginx": {
+    "description": "A high performance web server",
+    "active": true, "enabled": true, "sub": "running",
+    "main_pid": 812, "exec": "/usr/sbin/nginx -g 'daemon off;'",
+    "since": "Mon 2026-09-30 08:59:43 UTC",
+    "journal": ["Sep 30 08:59:43 app-01 systemd[1]: Started nginx."],
+    "needs": {}
+  }
+}
+```
+
+Only `active`/`enabled` are really needed; the rest have sane defaults.
+`active` = running now, `enabled` = starts at boot. Changing a unit requires
+root, so challenges expect the player to use `sudo`.
 
 `MachineBuilder` adds the standard layout for you:
 

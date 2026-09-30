@@ -1,0 +1,39 @@
+{
+  "id": "l7_enable",
+  "title": "Survive the reboot",
+  "level": "services",
+  "machine": "server",
+  "xp": 130,
+  "time_limit": 180,
+  "briefing": [
+    "nginx is running again — but you notice it isn't set to start at boot.",
+    "",
+    "If app-01 reboots tonight, the site stays down until someone starts it by",
+    "hand. 'active' (running now) and 'enabled' (starts at boot) are separate."
+  ],
+  "tips": [
+    "Check the boot setting with: systemctl is-enabled nginx.",
+    "`enable` wires a service to start automatically; `start` only affects right now."
+  ],
+  "objective": "Make nginx start automatically on boot — leave it enabled.",
+  "expert_objective": "Ensure nginx comes up on its own after a reboot.",
+  "hints": [
+    "Confirm the problem: `systemctl is-enabled nginx` prints 'disabled'.",
+    "Wire it to boot: `sudo systemctl enable nginx`.",
+    "`sudo systemctl enable nginx` — it creates a symlink into multi-user.target.wants."
+  ],
+  "solution": "systemctl is-enabled nginx\nsudo systemctl enable nginx",
+  "setup": {
+    "services": {
+      "nginx": {"active": true, "enabled": false, "sub": "running", "main_pid": 812}
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "service_enabled",
+    "service": "nginx",
+    "expect": true
+  },
+  "explanation": "enable and start solve different problems. `start` runs a service now; `enable` makes systemd start it on every boot. Production services almost always want both — running today, and running again after the next reboot.",
+  "teaches": ["services", "systemctl", "boot"]
+}

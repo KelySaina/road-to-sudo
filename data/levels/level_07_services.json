@@ -1,0 +1,14 @@
+{
+  "id": "services",
+  "order": 7,
+  "title": "Level 7 — Services & the Journal",
+  "subtitle": "systemctl and journalctl: the daemons that run the box",
+  "description": "Real servers are kept alive by services — background daemons managed by systemd. Learn to inspect them (status), control them (start, stop, enable, disable), and, when one dies, read the journal to find out why and bring it back.",
+  "machine": "server",
+  "challenges": [
+    "l7_start",
+    "l7_enable",
+    "l7_stop",
+    "l7_failed"
+  ]
+}

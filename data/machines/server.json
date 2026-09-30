@@ -1,0 +1,41 @@
+{
+  "hostname": "app-01",
+  "users": {
+    "root":     {"uid": 0,    "gid": 0,    "groups": ["root"],                     "home": "/root",        "shell": "/bin/bash", "gecos": "root"},
+    "player":   {"uid": 1000, "gid": 1000, "groups": ["player", "users", "sudo"],  "home": "/home/player", "shell": "/bin/bash", "gecos": "On-call Operator"},
+    "www-data": {"uid": 33,   "gid": 33,   "groups": ["www-data"],                 "home": "/var/www",     "shell": "/usr/sbin/nologin"},
+    "postgres": {"uid": 114,  "gid": 120,  "groups": ["postgres"],                 "home": "/var/lib/postgresql", "shell": "/bin/bash"}
+  },
+  "sudoers": [],
+  "processes": [
+    {"pid": 1,    "user": "root",     "cpu": 0.0, "mem": 0.4, "stat": "Ss", "cmd": "/sbin/init"},
+    {"pid": 212,  "user": "root",     "cpu": 0.0, "mem": 0.9, "stat": "Ss", "cmd": "/lib/systemd/systemd-journald"},
+    {"pid": 502,  "user": "root",     "cpu": 0.0, "mem": 0.3, "stat": "Ss", "cmd": "/usr/sbin/cron -f"},
+    {"pid": 641,  "user": "root",     "cpu": 0.1, "mem": 0.6, "stat": "Ss", "cmd": "sshd: /usr/sbin/sshd -D [listener]"},
+    {"pid": 933,  "user": "postgres", "cpu": 0.3, "mem": 4.2, "stat": "Ss", "cmd": "/usr/lib/postgresql/16/bin/postgres -D /var/lib/postgresql/16/main"},
+    {"pid": 1337, "user": "player",   "cpu": 0.0, "mem": 0.1, "stat": "S",  "cmd": "-bash", "tty": "pts/0"}
+  ],
+  "services": {
+    "ssh":        {"description": "OpenSSH server daemon", "active": true, "enabled": true, "main_pid": 641, "exec": "/usr/sbin/sshd -D", "since": "Mon 2026-09-30 08:59:41 UTC"},
+    "cron":       {"description": "Regular background program processing daemon", "active": true, "enabled": true, "main_pid": 502, "exec": "/usr/sbin/cron -f", "since": "Mon 2026-09-30 08:59:41 UTC"},
+    "postgresql": {"description": "PostgreSQL RDBMS", "active": true, "enabled": true, "main_pid": 933, "exec": "/usr/lib/postgresql/16/bin/postgres", "since": "Mon 2026-09-30 08:59:42 UTC"},
+    "nginx":      {"description": "A high performance web server and a reverse proxy server", "active": true, "enabled": true, "main_pid": 812, "exec": "/usr/sbin/nginx -g 'daemon off;'", "since": "Mon 2026-09-30 08:59:43 UTC"}
+  },
+  "files": {
+    "/home/player": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+    "/home/player/README.txt": {"owner": "player", "group": "player", "mode": "644", "lines": [
+      "app-01 — the box that serves the website.",
+      "",
+      "You are on call. Services (daemons) run in the background here and are",
+      "managed with systemctl. Two words matter:",
+      "  active   = running right now",
+      "  enabled  = set to start automatically at boot",
+      "They are independent. Check any service with: systemctl status <name>.",
+      "Changing a service needs privilege — you are in the sudo group, so",
+      "prefix commands with sudo (e.g. sudo systemctl restart nginx)."
+    ]},
+    "/etc/motd": {"content": "\napp-01 — production application server\nManaged host. All actions are logged.\n\n"},
+    "/var/www": {"dir": true, "owner": "www-data", "group": "www-data", "mode": "755"},
+    "/var/www/index.html": {"owner": "www-data", "group": "www-data", "mode": "644", "content": "<h1>It works.</h1>\n"}
+  }
+}

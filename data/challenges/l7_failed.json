@@ -1,0 +1,61 @@
+{
+  "id": "l7_failed",
+  "title": "Why won't it start?",
+  "level": "services",
+  "machine": "server",
+  "xp": 200,
+  "time_limit": 300,
+  "briefing": [
+    "The internal app, 'webapp', is in a failed state and the team is blocked.",
+    "",
+    "Someone edited its config and now it won't come up. `systemctl start` just",
+    "fails. The journal — systemd's log — will tell you exactly why.",
+    "",
+    "Read the journal, fix the config, then start it."
+  ],
+  "tips": [
+    "`journalctl -u webapp` shows what webapp logged when it tried to start.",
+    "Its config lives at /etc/webapp/webapp.conf. It's root-owned — become root with `sudo -i` to edit it."
+  ],
+  "objective": "Diagnose why webapp fails to start (read its journal), fix /etc/webapp/webapp.conf, and get the service active.",
+  "expert_objective": "webapp is failed on app-01. Find the cause in the journal, fix it, restore the service.",
+  "hints": [
+    "See the failure: `systemctl status webapp` (failed), then the reason: `journalctl -u webapp`. It names an invalid port '0' in /etc/webapp/webapp.conf.",
+    "The config is root-owned. Become root: `sudo -i`. Then set a real port, e.g. `echo \"port = 8080\" > /etc/webapp/webapp.conf`.",
+    "As root: `echo \"port = 8080\" > /etc/webapp/webapp.conf`, then `systemctl start webapp`. Status should turn active."
+  ],
+  "solution": "systemctl status webapp\njournalctl -u webapp\nsudo -i\necho \"port = 8080\" > /etc/webapp/webapp.conf\nsystemctl start webapp",
+  "setup": {
+    "files": {
+      "/etc/webapp": {"dir": true, "owner": "root", "group": "root", "mode": "755"},
+      "/etc/webapp/webapp.conf": {"owner": "root", "group": "root", "mode": "644", "content": "port = 0\n"}
+    },
+    "services": {
+      "webapp": {
+        "description": "Internal web application",
+        "active": false,
+        "enabled": true,
+        "sub": "failed",
+        "main_pid": 0,
+        "exec": "/usr/local/bin/webapp --config /etc/webapp/webapp.conf",
+        "since": "Mon 2026-09-30 09:41:02 UTC",
+        "needs": {"not": {"type": "file_contains", "path": "/etc/webapp/webapp.conf", "text": "port = 0"}},
+        "journal": [
+          "Sep 30 09:41:02 app-01 systemd[1]: Starting Internal web application...",
+          "Sep 30 09:41:02 app-01 webapp[2210]: FATAL: invalid port '0' in /etc/webapp/webapp.conf",
+          "Sep 30 09:41:02 app-01 systemd[1]: webapp.service: Main process exited, code=exited, status=1/FAILURE",
+          "Sep 30 09:41:02 app-01 systemd[1]: webapp.service: Failed with result 'exit-code'.",
+          "Sep 30 09:41:02 app-01 systemd[1]: Failed to start Internal web application."
+        ]
+      }
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "service_active",
+    "service": "webapp",
+    "expect": true
+  },
+  "explanation": "This is the real service-debugging loop: status tells you a unit failed, the journal tells you WHY, you fix the root cause, and you start it again. A service won't magically recover — systemctl start re-reads the config, so the fix has to land in the file first.",
+  "teaches": ["services", "journalctl", "debugging", "config"]
+}

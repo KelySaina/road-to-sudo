@@ -1,0 +1,40 @@
+{
+  "id": "l7_start",
+  "title": "The site is down",
+  "level": "services",
+  "machine": "server",
+  "fresh_machine": true,
+  "xp": 130,
+  "time_limit": 180,
+  "briefing": [
+    "Welcome to app-01 — the server that runs the website. You're on call.",
+    "",
+    "The site is throwing 'connection refused'. The web server, nginx, is a",
+    "background service (a daemon). Services are managed with systemctl."
+  ],
+  "tips": [
+    "See a service's state with: systemctl status nginx.",
+    "'active' means running now. Starting a service needs privilege — use sudo."
+  ],
+  "objective": "Bring the nginx web service back up so it is active (running).",
+  "expert_objective": "app-01: the web tier is down. Restore it.",
+  "hints": [
+    "First look: `systemctl status nginx`. The Active line will say 'inactive (dead)'.",
+    "Start it. Changing a service needs root, so prefix with sudo: `sudo systemctl start nginx`.",
+    "`sudo systemctl start nginx`, then confirm with `systemctl status nginx` (Active: active (running))."
+  ],
+  "solution": "systemctl status nginx\nsudo systemctl start nginx",
+  "setup": {
+    "services": {
+      "nginx": {"active": false, "enabled": true, "sub": "dead", "main_pid": 0}
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "service_active",
+    "service": "nginx",
+    "expect": true
+  },
+  "explanation": "systemctl is how you drive the services running on a modern Linux box. `status` inspects one, `start` brings it up. Because a stopped service affects everyone on the machine, starting it needs root — that's what sudo is for.",
+  "teaches": ["services", "systemctl", "sudo"]
+}

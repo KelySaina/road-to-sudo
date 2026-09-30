@@ -1,0 +1,48 @@
+{
+  "id": "l7_stop",
+  "title": "Shut the back door",
+  "level": "services",
+  "machine": "server",
+  "xp": 150,
+  "time_limit": 220,
+  "briefing": [
+    "A security scan flags app-01: the ancient 'telnet' service is running.",
+    "",
+    "telnet sends passwords in clear text across the network. It should never",
+    "run on a production box — and right now it's active AND enabled at boot."
+  ],
+  "tips": [
+    "`systemctl list-units` shows everything running. Look for telnet.",
+    "Two fixes are needed: stop it now, and disable it so it never comes back."
+  ],
+  "objective": "Shut down the insecure telnet service and stop it from ever starting again — it must end up inactive and disabled.",
+  "expert_objective": "Remove the telnet attack surface from app-01, now and at boot.",
+  "hints": [
+    "Confirm it's up: `systemctl status telnet` (active, enabled).",
+    "Stop it now: `sudo systemctl stop telnet`. Then keep it off at boot: `sudo systemctl disable telnet`.",
+    "One line does both: `sudo systemctl disable --now telnet`."
+  ],
+  "solution": "systemctl status telnet\nsudo systemctl stop telnet\nsudo systemctl disable telnet",
+  "setup": {
+    "services": {
+      "telnet": {
+        "description": "Telnet server (INSECURE, plaintext logins)",
+        "active": true,
+        "enabled": true,
+        "sub": "running",
+        "main_pid": 770,
+        "exec": "/usr/sbin/in.telnetd",
+        "since": "Mon 2026-09-30 08:59:44 UTC"
+      }
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {"type": "service_active", "service": "telnet", "expect": false},
+      {"type": "service_enabled", "service": "telnet", "expect": false}
+    ]
+  },
+  "explanation": "Hardening a box means removing what shouldn't run. `stop` ends the process now; `disable` stops it starting at the next boot. You need both — a service you only stopped will quietly return after a reboot. `disable --now` does the pair in one go.",
+  "teaches": ["services", "systemctl", "security", "hardening"]
+}
