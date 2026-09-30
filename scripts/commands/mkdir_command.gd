@@ -17,7 +17,7 @@ func execute(ctx: CommandContext) -> int:
 	var parents: bool = opts.flags.has("p") or opts.flags.has("parents")
 	var code := 0
 	for d in opts.operands:
-		var res := ctx.vfs().make_dir(ctx.resolve(d), ctx.access(), parents)
+		var res := ctx.vfs().make_dir(ctx.resolve(d), ctx.access(), parents, ctx.session.dir_create_mode())
 		if not res.ok:
 			code = ctx.fail("cannot create directory '%s'" % d, res.error)
 		elif opts.flags.has("v"):

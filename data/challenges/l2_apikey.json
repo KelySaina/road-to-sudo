@@ -1,0 +1,54 @@
+{
+  "id": "l2_apikey",
+  "title": "Needle in the config",
+  "level": "text",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": [
+    "A 60-line config hides one API key. Don't scroll — search."
+  ],
+  "tips": [
+    "`grep WORD file` prints only the lines that contain WORD."
+  ],
+  "objective": "Find the API key in ~/service.ini and print the line that contains it.",
+  "hints": [
+    "You want only the line mentioning the key. grep filters to matching lines.",
+    "The key line contains 'api_key'. `grep api_key service.ini`.",
+    "`grep api_key ~/service.ini`"
+  ],
+  "solution": "grep api_key ~/service.ini",
+  "setup": {
+    "files": {
+      "~/service.ini": {
+        "owner": "player",
+        "group": "player",
+        "lines": [
+          "[service]",
+          "name = reportd",
+          "port = 8080",
+          "workers = 4",
+          "timeout = 30",
+          "retries = 5",
+          "loglevel = info",
+          "cache = true",
+          "region = eu-west",
+          "api_key = SK-9F3A2B7C1D",
+          "tls = on",
+          "gzip = true"
+        ]
+      }
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "output_contains",
+    "text": "SK-9F3A2B7C1D"
+  },
+  "explanation": "`grep` is the fastest way to find a line in a file — or across many with -r. You'll reach for it more than any other command.",
+  "unlocks": [
+    "grep"
+  ],
+  "teaches": [
+    "grep"
+  ]
+}

@@ -15,6 +15,8 @@ var previous_cwd: String = ""
 var env: Dictionary = {}
 var history: Array = []
 var last_exit_code: int = 0
+## Default-permission mask for new files/dirs (022 octal = 18). See `umask`.
+var umask: int = 18
 ## Script positional parameters ($1..$9); empty for the interactive shell.
 var positional: Array = []
 ## Every simple command that ran: {"name", "args", "exit_code", "stdout", "stderr", "depth", "user", "cwd"}
@@ -48,6 +50,15 @@ func _reset_env() -> void:
 
 func home() -> String:
 	return machine.home_of(user)
+
+
+## Mode a newly created file/dir gets, after the umask removes bits.
+func file_create_mode() -> int:
+	return 438 & ~umask  # 0666 & ~umask
+
+
+func dir_create_mode() -> int:
+	return 511 & ~umask  # 0777 & ~umask
 
 
 func access() -> AccessContext:

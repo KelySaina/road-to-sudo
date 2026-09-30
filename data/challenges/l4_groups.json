@@ -1,0 +1,47 @@
+{
+  "id": "l4_groups",
+  "title": "Whose groups?",
+  "level": "users",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": [
+    "Groups grant shared access. Let's see which teams alice is on."
+  ],
+  "tips": [
+    "`groups USER` lists the groups a user belongs to."
+  ],
+  "objective": "Write the list of groups alice belongs to into ~/alice_groups.txt.",
+  "hints": [
+    "There's a command named after exactly what you want, and it takes a username.",
+    "`groups alice` lists her groups. Send it to the file.",
+    "`groups alice > ~/alice_groups.txt`"
+  ],
+  "solution": "groups alice > ~/alice_groups.txt",
+  "setup": {
+    "remove": [
+      "~/alice_groups.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {
+        "type": "file_contains",
+        "path": "~/alice_groups.txt",
+        "text": "sudo"
+      },
+      {
+        "type": "file_contains",
+        "path": "~/alice_groups.txt",
+        "text": "users"
+      }
+    ]
+  },
+  "explanation": "Group membership decides shared access — and membership in `sudo` (or `wheel`) is what lets someone run commands as root. alice is in sudo; you are not.",
+  "unlocks": [
+    "groups"
+  ],
+  "teaches": [
+    "groups"
+  ]
+}

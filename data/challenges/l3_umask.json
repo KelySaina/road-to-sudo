@@ -1,0 +1,41 @@
+{
+  "id": "l3_umask",
+  "title": "Private by default",
+  "level": "permissions",
+  "machine": "workstation",
+  "xp": 130,
+  "briefing": [
+    "Setting permissions after the fact is tedious. The umask decides what NEW files get.",
+    "",
+    "Make it so every new file you create is private, then prove it."
+  ],
+  "tips": [
+    "`umask 077` removes all group/other bits, so new files are 600 and new dirs 700."
+  ],
+  "objective": "Set your umask so new files are owner-only, then create ~/diary.txt — it should end up mode 600.",
+  "hints": [
+    "The umask subtracts permission bits from new files. To leave only the owner, mask out everything else.",
+    "`umask 077` masks all group and other bits. Then `touch diary.txt` and it's born 600.",
+    "`umask 077`, then `touch ~/diary.txt`"
+  ],
+  "solution": "umask 077\ntouch ~/diary.txt",
+  "setup": {
+    "remove": [
+      "~/diary.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "mode_is",
+    "path": "~/diary.txt",
+    "mode": "600"
+  },
+  "explanation": "New files start from 666 and directories from 777, then the umask REMOVES bits: with umask 077 a file becomes 600 and a dir 700. Set it in your shell profile so everything you make is private from birth.",
+  "unlocks": [
+    "umask"
+  ],
+  "teaches": [
+    "umask",
+    "permissions"
+  ]
+}

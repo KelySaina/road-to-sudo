@@ -1,0 +1,11 @@
+{
+  "id": "final",
+  "order": 99,
+  "title": "Final — Road to sudo",
+  "subtitle": "Everything, all at once. Become root.",
+  "description": "A broken production server, no hand-holding, and the pager in your hand. Use everything you've learned to investigate, take root, and save PROD-01.",
+  "machine": "prodserver",
+  "challenges": [
+    "final_road_to_sudo"
+  ]
+}

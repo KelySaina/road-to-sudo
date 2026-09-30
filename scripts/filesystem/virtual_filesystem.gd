@@ -134,17 +134,20 @@ func write_file(abs_path: String, content: String, access: AccessContext = null,
 	return VfsResult.success(node)
 
 
-func touch(abs_path: String, access: AccessContext = null) -> VfsResult:
+func touch(abs_path: String, access: AccessContext = null, mode: int = -1) -> VfsResult:
 	var existing := lookup(abs_path, access)
 	if existing.ok:
 		if access != null and not existing.node.is_dir() and not Permissions.can(existing.node, access, Permissions.WRITE):
 			return VfsResult.fail(EACCES)
 		existing.node.mtime = _now()
 		return existing
-	return write_file(abs_path, "", access)
+	var res := write_file(abs_path, "", access)
+	if res.ok and mode >= 0:
+		res.node.mode = mode
+	return res
 
 
-func make_dir(abs_path: String, access: AccessContext = null, parents: bool = false) -> VfsResult:
+func make_dir(abs_path: String, access: AccessContext = null, parents: bool = false, mode: int = -1) -> VfsResult:
 	var normalized := PathUtils.normalize(abs_path)
 	var existing := get_node_at(normalized)
 	if existing != null:
@@ -158,7 +161,7 @@ func make_dir(abs_path: String, access: AccessContext = null, parents: bool = fa
 	var parent_res := _parent_for_create(normalized, access)
 	if not parent_res.ok:
 		return parent_res
-	var node := VFSNode.make_dir(PathUtils.basename(normalized), _owner_of(access), _group_of(access), DEFAULT_DIR_MODE)
+	var node := VFSNode.make_dir(PathUtils.basename(normalized), _owner_of(access), _group_of(access), mode if mode >= 0 else DEFAULT_DIR_MODE)
 	node.mtime = _now()
 	parent_res.node.children[node.name] = node
 	return VfsResult.success(node)

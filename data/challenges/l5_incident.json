@@ -1,0 +1,101 @@
+{
+  "id": "l5_incident",
+  "title": "Clear the outbreak",
+  "level": "processes",
+  "machine": "workstation",
+  "xp": 160,
+  "time_limit": 240,
+  "briefing": [
+    "Incident: the box is at 100%. A miner AND a swarm of runaway workers are choking it.",
+    "Stop all of it and bring the load back down."
+  ],
+  "tips": [
+    "Kill by name with pkill — one command per culprit."
+  ],
+  "objective": "Stop the rogue miner and every runaway 'worker-loop' process.",
+  "hints": [
+    "There are two problems: a single miner and many identical workers. Deal with each by name.",
+    "`pkill xmrig` for the miner, `pkill worker-loop` for the swarm. `ps aux` confirms.",
+    "`pkill xmrig`, then `pkill worker-loop`"
+  ],
+  "solution": "pkill xmrig\npkill worker-loop",
+  "setup": {
+    "processes": [
+      {
+        "pid": 9001,
+        "user": "player",
+        "cpu": 90.0,
+        "mem": 5.0,
+        "stat": "S",
+        "cmd": "./xmrig --coin monero"
+      },
+      {
+        "pid": 9100,
+        "user": "player",
+        "cpu": 8.0,
+        "mem": 0.5,
+        "stat": "S",
+        "cmd": "worker-loop --spin"
+      },
+      {
+        "pid": 9101,
+        "user": "player",
+        "cpu": 8.0,
+        "mem": 0.5,
+        "stat": "S",
+        "cmd": "worker-loop --spin"
+      },
+      {
+        "pid": 9102,
+        "user": "player",
+        "cpu": 8.0,
+        "mem": 0.5,
+        "stat": "S",
+        "cmd": "worker-loop --spin"
+      },
+      {
+        "pid": 9103,
+        "user": "player",
+        "cpu": 8.0,
+        "mem": 0.5,
+        "stat": "S",
+        "cmd": "worker-loop --spin"
+      },
+      {
+        "pid": 9104,
+        "user": "player",
+        "cpu": 8.0,
+        "mem": 0.5,
+        "stat": "S",
+        "cmd": "worker-loop --spin"
+      },
+      {
+        "pid": 9105,
+        "user": "player",
+        "cpu": 8.0,
+        "mem": 0.5,
+        "stat": "S",
+        "cmd": "worker-loop --spin"
+      }
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {
+        "type": "process_absent",
+        "cmd_contains": "xmrig"
+      },
+      {
+        "type": "process_absent",
+        "cmd_contains": "worker-loop"
+      }
+    ]
+  },
+  "explanation": "Real incidents are rarely one process — you triage with ps/top, then clear each class of offender with pkill by name. You now read and control the process table like an operator.",
+  "unlocks": [],
+  "teaches": [
+    "processes",
+    "incident-response"
+  ]
+}

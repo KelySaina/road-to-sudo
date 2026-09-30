@@ -1,0 +1,14 @@
+{
+  "id": "users",
+  "order": 4,
+  "title": "Level 4 — Users & Groups",
+  "subtitle": "id, groups, /etc/passwd and /etc/group",
+  "description": "Who are you, who else is here, and who holds root? Read the account and group files that the whole permission system rests on.",
+  "machine": "workstation",
+  "challenges": [
+    "l4_id",
+    "l4_home",
+    "l4_groups",
+    "l4_admin"
+  ]
+}

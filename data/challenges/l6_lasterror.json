@@ -1,0 +1,55 @@
+{
+  "id": "l6_lasterror",
+  "title": "Read the crash",
+  "level": "logs",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": [
+    "Level 6 — Logs & Debugging.",
+    "",
+    "A service died. Its log knows why — the last error line tells the story."
+  ],
+  "tips": [
+    "`grep ERROR file` keeps error lines; `tail -1` shows the last one."
+  ],
+  "objective": "Find the last ERROR line in ~/app.log and print it.",
+  "hints": [
+    "Filter the log to error lines, then take the final one.",
+    "`grep ERROR app.log | tail -1` shows the last error.",
+    "`grep ERROR ~/app.log | tail -1`"
+  ],
+  "solution": "grep ERROR ~/app.log | tail -1",
+  "setup": {
+    "files": {
+      "~/app.log": {
+        "owner": "player",
+        "group": "player",
+        "lines": [
+          "10:00:01 INFO  starting",
+          "10:00:02 INFO  cache warm",
+          "10:02:11 WARN  slow query 1200ms",
+          "10:03:40 ERROR db connection reset",
+          "10:04:05 INFO  retrying",
+          "10:05:59 WARN  slow query 2100ms",
+          "10:07:22 ERROR out of memory: killing worker",
+          "10:07:23 INFO  shutting down"
+        ]
+      }
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "output_contains",
+    "text": "out of memory"
+  },
+  "explanation": "Logs are read bottom-up when something breaks: the LAST error is usually the cause. grep filters to what matters, tail shows the end. Together they turn a wall of text into an answer.",
+  "unlocks": [
+    "tail",
+    "head"
+  ],
+  "teaches": [
+    "logs",
+    "grep",
+    "tail"
+  ]
+}

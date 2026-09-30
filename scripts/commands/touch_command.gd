@@ -14,7 +14,7 @@ func execute(ctx: CommandContext) -> int:
 		return usage_error(ctx, "missing file operand")
 	var code := 0
 	for f in opts.operands:
-		var res := ctx.vfs().touch(ctx.resolve(f), ctx.access())
+		var res := ctx.vfs().touch(ctx.resolve(f), ctx.access(), ctx.session.file_create_mode())
 		if not res.ok:
 			code = ctx.fail("cannot touch '%s'" % f, res.error)
 		else:

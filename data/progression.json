@@ -1,17 +1,60 @@
 {
   "xp_rules": {
-    "bonus_by_hints": [50, 25, 10, 0],
+    "bonus_by_hints": [
+      50,
+      25,
+      10,
+      0
+    ],
     "time_bonus": 25
   },
   "ranks": [
-    {"name": "Newbie", "xp": 0, "blurb": "Everyone starts at the prompt."},
-    {"name": "Terminal Tourist", "xp": 150, "blurb": "You know where you are. Mostly."},
-    {"name": "Shell Apprentice", "xp": 450, "blurb": "Files bend to your will."},
-    {"name": "Permission Wrangler", "xp": 900, "blurb": "rwx holds no mysteries."},
-    {"name": "Sysadmin Apprentice", "xp": 1500, "blurb": "You read logs for fun now."},
-    {"name": "Shell Wizard", "xp": 2600, "blurb": "Pipes within pipes."},
-    {"name": "Linux Operator", "xp": 4000, "blurb": "Production trusts you."},
-    {"name": "Root Candidate", "xp": 5800, "blurb": "One prompt away.", "requires": "t10_first_incident"},
-    {"name": "sudo", "xp": 8000, "blurb": "Welcome to the other side of the prompt.", "requires": "final_road_to_sudo"}
+    {
+      "name": "Newbie",
+      "xp": 0,
+      "blurb": "Everyone starts at the prompt."
+    },
+    {
+      "name": "Terminal Tourist",
+      "xp": 150,
+      "blurb": "You know where you are. Mostly."
+    },
+    {
+      "name": "Shell Apprentice",
+      "xp": 450,
+      "blurb": "Files bend to your will."
+    },
+    {
+      "name": "Permission Wrangler",
+      "xp": 900,
+      "blurb": "rwx holds no mysteries."
+    },
+    {
+      "name": "Sysadmin Apprentice",
+      "xp": 1500,
+      "blurb": "You read logs for fun now."
+    },
+    {
+      "name": "Shell Wizard",
+      "xp": 2600,
+      "blurb": "Pipes within pipes."
+    },
+    {
+      "name": "Linux Operator",
+      "xp": 3400,
+      "blurb": "Production trusts you."
+    },
+    {
+      "name": "Root Candidate",
+      "xp": 4200,
+      "blurb": "One prompt away.",
+      "requires": "t10_first_incident"
+    },
+    {
+      "name": "sudo",
+      "xp": 5200,
+      "blurb": "Welcome to the other side of the prompt.",
+      "requires": "final_road_to_sudo"
+    }
   ]
 }

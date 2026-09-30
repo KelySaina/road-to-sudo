@@ -1,0 +1,51 @@
+{
+  "id": "l6_fix",
+  "title": "Follow the log to the fix",
+  "level": "logs",
+  "machine": "workstation",
+  "xp": 160,
+  "time_limit": 240,
+  "briefing": [
+    "The reporter service keeps dying. Its log names exactly what's wrong.",
+    "Read it, and put right what it asks for."
+  ],
+  "tips": [
+    "The ERROR line names a file that's missing. Create it where it says."
+  ],
+  "objective": "Read ~/reporter.log, find the missing file it complains about, and create it (with its parent directories).",
+  "hints": [
+    "Filter the log to the error — it names a path that does not exist.",
+    "`grep ERROR reporter.log` shows it wants ~/.config/reporter/settings.ini. Make the folders, then the file.",
+    "`mkdir -p ~/.config/reporter`, then `touch ~/.config/reporter/settings.ini`"
+  ],
+  "solution": "grep ERROR ~/reporter.log\nmkdir -p ~/.config/reporter\ntouch ~/.config/reporter/settings.ini",
+  "setup": {
+    "files": {
+      "~/reporter.log": {
+        "owner": "player",
+        "group": "player",
+        "lines": [
+          "INFO  reporter starting",
+          "INFO  loading defaults",
+          "ERROR cannot open config /home/player/.config/reporter/settings.ini: No such file or directory",
+          "ERROR giving up, exiting"
+        ]
+      }
+    },
+    "remove": [
+      "~/.config/reporter"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_exists",
+    "path": "~/.config/reporter/settings.ini"
+  },
+  "explanation": "The whole debugging loop in one challenge: reproduce, READ THE LOG, find the root cause it names, fix exactly that, done. `mkdir -p` builds a whole path of directories at once. Logs almost always tell you what's wrong — if you read them.",
+  "unlocks": [],
+  "teaches": [
+    "logs",
+    "debugging",
+    "mkdir"
+  ]
+}

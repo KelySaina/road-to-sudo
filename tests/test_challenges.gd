@@ -17,7 +17,7 @@ func _play(mgr: ChallengeManager, shell: Shell, lines: Array) -> bool:
 
 func test_library_is_valid() -> void:
 	var lib := ChallengeLibrary.load_default()
-	check_eq(lib.order.size(), 16, "campaign challenges in order (Level 0 + Level 1)")
+	check_eq(lib.order.size(), 40, "full campaign in order")
 	for cid in lib.order:
 		var c := lib.get_challenge(cid)
 		check(c.validate().is_empty(), "%s validates: %s" % [cid, str(c.validate())])
@@ -28,9 +28,10 @@ func test_library_is_valid() -> void:
 func test_every_solution_completes() -> void:
 	var lib := ChallengeLibrary.load_default()
 	var mgr := _manager()
-	var shell := new_shell()
 	for cid in lib.order:
 		var c := lib.get_challenge(cid)
+		# boot the challenge's own machine (the finale runs on prodserver)
+		var shell := new_shell(c.machine if c.machine != "" else "workstation")
 		mgr.begin(c, shell.session)
 		check(not _play(mgr, shell, ["true"]), "%s is not complete before the player acts" % cid)
 		var solved := _play(mgr, shell, Array(c.solution.split("\n")))

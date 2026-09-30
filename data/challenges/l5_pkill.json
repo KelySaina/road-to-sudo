@@ -1,0 +1,62 @@
+{
+  "id": "l5_pkill",
+  "title": "Whack-a-mole",
+  "level": "processes",
+  "machine": "workstation",
+  "xp": 130,
+  "briefing": [
+    "A spam script forked itself. Three copies are hammering the mail queue.",
+    "Killing them one PID at a time is a losing game."
+  ],
+  "tips": [
+    "`pkill NAME` kills every process whose command matches NAME, all at once."
+  ],
+  "objective": "Kill all the spam-blast processes (there are several).",
+  "hints": [
+    "They all share a name. There's a command that kills by name, not PID.",
+    "`pkill` matches every process by command. `pgrep spam-blast` shows how many there are.",
+    "`pkill spam-blast`"
+  ],
+  "solution": "pkill spam-blast",
+  "setup": {
+    "processes": [
+      {
+        "pid": 7001,
+        "user": "player",
+        "cpu": 12.0,
+        "mem": 0.5,
+        "stat": "S",
+        "cmd": "spam-blast --to all"
+      },
+      {
+        "pid": 7002,
+        "user": "player",
+        "cpu": 11.0,
+        "mem": 0.5,
+        "stat": "S",
+        "cmd": "spam-blast --to all"
+      },
+      {
+        "pid": 7003,
+        "user": "player",
+        "cpu": 13.0,
+        "mem": 0.5,
+        "stat": "S",
+        "cmd": "spam-blast --to all"
+      }
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "process_absent",
+    "cmd_contains": "spam-blast"
+  },
+  "explanation": "`pkill NAME` signals every matching process in one shot, and `pgrep NAME` lists them without killing. When a program spawns many copies, killing by name beats chasing PIDs.",
+  "unlocks": [
+    "pgrep"
+  ],
+  "teaches": [
+    "pkill",
+    "pgrep"
+  ]
+}

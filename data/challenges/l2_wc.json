@@ -1,0 +1,41 @@
+{
+  "id": "l2_wc",
+  "title": "Count the accounts",
+  "level": "text",
+  "machine": "workstation",
+  "xp": 110,
+  "briefing": [
+    "Level 2 — Text & Pipes.",
+    "",
+    "Text is everything on Linux. Let's start by counting it."
+  ],
+  "tips": [
+    "`wc -l` counts lines. `< file` feeds a file into a command as its input."
+  ],
+  "objective": "Count how many user accounts are listed in /etc/passwd and write just that number into ~/count.txt.",
+  "hints": [
+    "Each account is one line in /etc/passwd. There's a command that counts lines.",
+    "`wc -l` counts lines. Feed it the file: `wc -l < /etc/passwd` prints just the number.",
+    "`wc -l < /etc/passwd > ~/count.txt`"
+  ],
+  "solution": "wc -l < /etc/passwd > ~/count.txt",
+  "setup": {
+    "remove": [
+      "~/count.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/count.txt",
+    "regex": "^\\s*4\\s*$"
+  },
+  "explanation": "`wc -l` counts lines, `-w` words, `-c` bytes. `< file` redirects a file to a command's input, and with no filename wc prints just the number — perfect for piping or saving.",
+  "unlocks": [
+    "wc"
+  ],
+  "teaches": [
+    "wc",
+    "redirect"
+  ]
+}

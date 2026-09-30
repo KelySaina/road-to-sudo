@@ -1,0 +1,72 @@
+{
+  "id": "l3_deploy_fix",
+  "title": "Permission denied, again",
+  "level": "permissions",
+  "machine": "workstation",
+  "xp": 150,
+  "time_limit": 180,
+  "briefing": [
+    "The release bot can't run the deploy script:",
+    "",
+    "  $ ./app/release.sh",
+    "  bash: ./app/release.sh: Permission denied",
+    "",
+    "You can read it. Something stops it from running."
+  ],
+  "tips": [
+    "`ls -l` shows the rwx bits. No x means it can't execute."
+  ],
+  "objective": "Make ~/app/release.sh runnable and run it (it writes ~/app/released.txt when it works).",
+  "hints": [
+    "The error is about the file itself. Inspect its permissions with `ls -l app/release.sh`.",
+    "It has no execute bit. `chmod +x app/release.sh` adds it.",
+    "`chmod +x app/release.sh`, then `./app/release.sh`"
+  ],
+  "solution": "chmod +x app/release.sh\n./app/release.sh",
+  "setup": {
+    "files": {
+      "~/app": {
+        "owner": "player",
+        "group": "player",
+        "dir": true
+      },
+      "~/app/release.sh": {
+        "owner": "player",
+        "group": "player",
+        "mode": "644",
+        "lines": [
+          "#!/bin/bash",
+          "echo releasing v2.0",
+          "echo ok > /home/player/app/released.txt"
+        ]
+      }
+    },
+    "remove": [
+      "~/app/released.txt"
+    ],
+    "cwd": "~"
+  },
+  "protected": [
+    "~/app/release.sh"
+  ],
+  "success": {
+    "all": [
+      {
+        "type": "mode_has",
+        "path": "~/app/release.sh",
+        "bits": "u+x"
+      },
+      {
+        "type": "file_exists",
+        "path": "~/app/released.txt"
+      }
+    ]
+  },
+  "explanation": "A script needs the execute bit to run as ./script.sh — reading it isn't enough. `chmod +x` grants it. (`bash script.sh` only needs read, because bash reads the file itself, but a cron job that calls ./script.sh still needs x.) You've mastered permissions.",
+  "unlocks": [],
+  "teaches": [
+    "permissions",
+    "execute-bit",
+    "incident-response"
+  ]
+}

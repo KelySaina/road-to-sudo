@@ -92,7 +92,7 @@ func _run() -> void:
 		check(Game.challenges.completed_pending_next, "%s completed via UI" % c.id)
 		screen.terminal._on_submitted("") # Enter to continue
 		await _frames(1)
-	check(Game.profile.completed.size() == 16, "all 16 completed (%d)" % Game.profile.completed.size())
+	check(Game.profile.completed.size() == 40, "all 40 completed (%d)" % Game.profile.completed.size())
 	check(Game.challenges.current == null, "campaign finished")
 	check(Game.profile.xp > 1000, "xp awarded (%d)" % Game.profile.xp)
 	for a in ["first_command", "who_am_i", "sudo_please", "pipe_dream", "permission_denied", "tutorial_done"]:
@@ -101,6 +101,9 @@ func _run() -> void:
 	check(text.contains("OBJECTIVE COMPLETE"), "completion printed")
 	check(text.contains("THE ROAD CONTINUES"), "ending printed")
 	check(text.contains("Level 1 — The Filesystem"), "Level 1 banner shown during the campaign")
+	check(text.contains("YOU MADE IT"), "the finale crowns the player")
+	check(Game.progression.current_rank().name == "sudo", "final rank is sudo (%s, %d XP)" % [Game.progression.current_rank().name, Game.profile.xp])
+	check(Game.profile.achievements.has("root_access"), "Root Access achievement unlocked")
 	check(text.contains("Did you mean"), "typo suggestion printed")
 
 	# Tab completion through the widget.
@@ -161,7 +164,7 @@ func _run() -> void:
 	var reloaded := SaveManager.load_profile()
 	SaveManager._cache = {}
 	reloaded = SaveManager.load_profile()
-	check(reloaded.completed.size() == 16, "completion persisted")
+	check(reloaded.completed.size() == 40, "completion persisted")
 	check(reloaded.xp == Game.profile.xp, "xp persisted")
 	check(reloaded.achievements.size() == Game.profile.achievements.size(), "achievements persisted")
 	check(not SaveManager.load_world("campaign").is_empty(), "campaign world persisted")

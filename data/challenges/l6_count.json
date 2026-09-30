@@ -1,0 +1,57 @@
+{
+  "id": "l6_count",
+  "title": "How bad is it?",
+  "level": "logs",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": [
+    "Before you fix anything, quantify it. How many errors are we talking about?"
+  ],
+  "tips": [
+    "`grep -c WORD file` counts matching lines instead of printing them."
+  ],
+  "objective": "Count how many ERROR lines are in ~/service.log and write the number into ~/errors.txt.",
+  "hints": [
+    "grep can count matches directly instead of printing them.",
+    "`grep -c ERROR service.log` prints the count. Redirect it to the file.",
+    "`grep -c ERROR ~/service.log > ~/errors.txt`"
+  ],
+  "solution": "grep -c ERROR ~/service.log > ~/errors.txt",
+  "setup": {
+    "files": {
+      "~/service.log": {
+        "owner": "player",
+        "group": "player",
+        "lines": [
+          "INFO ok",
+          "ERROR timeout",
+          "INFO ok",
+          "WARN retry",
+          "ERROR timeout",
+          "INFO ok",
+          "ERROR refused",
+          "INFO ok",
+          "ERROR refused",
+          "INFO ok",
+          "ERROR reset",
+          "INFO done"
+        ]
+      }
+    },
+    "remove": [
+      "~/errors.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/errors.txt",
+    "regex": "^\\s*5\\s*$"
+  },
+  "explanation": "`grep -c` counts matching lines — the fastest way to gauge severity ('5 errors' vs '5000 errors' is a very different night). Quantify first, then dig into the specifics.",
+  "unlocks": [],
+  "teaches": [
+    "grep",
+    "logs"
+  ]
+}

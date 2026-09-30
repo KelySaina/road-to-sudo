@@ -1,0 +1,69 @@
+{
+  "id": "l5_kill",
+  "title": "Stop the miner",
+  "level": "processes",
+  "machine": "workstation",
+  "xp": 130,
+  "briefing": [
+    "You've found the rogue miner. Shut it down.",
+    "",
+    "One legitimate process sits nearby — don't hit the wrong one."
+  ],
+  "tips": [
+    "`kill PID` stops a process. Read before you strike."
+  ],
+  "objective": "Stop the rogue cryptominer process (leave the backup-agent running).",
+  "hints": [
+    "Find the miner's PID with `ps aux`, then stop it by PID.",
+    "`kill <pid of cryptominer>`. Do NOT kill backup-agent.",
+    "`ps aux` shows cryptominer at PID 6666: `kill 6666`  (or `pkill cryptominer`)"
+  ],
+  "solution": "pkill cryptominer",
+  "setup": {
+    "processes": [
+      {
+        "pid": 6666,
+        "user": "player",
+        "cpu": 98.7,
+        "mem": 3.0,
+        "stat": "S",
+        "cmd": "./cryptominer --pool x"
+      },
+      {
+        "pid": 6100,
+        "user": "player",
+        "cpu": 0.4,
+        "mem": 0.9,
+        "stat": "S",
+        "cmd": "backup-agent --nightly"
+      }
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "process_absent",
+    "cmd_contains": "cryptominer"
+  },
+  "reactions": [
+    {
+      "when": {
+        "type": "event",
+        "name": "process_killed",
+        "data_contains": {
+          "cmd": "backup-agent"
+        }
+      },
+      "say": "That was the backup agent, not the miner! Read the command column before you kill.",
+      "kind": "warning"
+    }
+  ],
+  "explanation": "`kill PID` sends SIGTERM (a polite 'please stop'). `pkill NAME` kills by command name when you don't want to hunt for the PID. You may only kill your own processes unless you're root.",
+  "unlocks": [
+    "kill",
+    "pkill"
+  ],
+  "teaches": [
+    "kill",
+    "pkill"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "id": "l3_worldwrite",
+  "title": "Close the hole",
+  "level": "permissions",
+  "machine": "workstation",
+  "xp": 130,
+  "briefing": [
+    "shared.txt is world-writable (mode 666). Anyone could rewrite it. That's a security hole.",
+    "",
+    "Take write away from 'others' — leave everyone able to read it."
+  ],
+  "tips": [
+    "Symbolic chmod: `chmod o-w file` removes write for others without touching the rest."
+  ],
+  "objective": "Remove write permission for 'others' from ~/shared.txt (group and owner keep what they have).",
+  "hints": [
+    "You only want to change one bit: others' write. Symbolic chmod is surgical.",
+    "`o` = others, `-w` = remove write: `chmod o-w shared.txt`.",
+    "`chmod o-w shared.txt`  (or `chmod 664 shared.txt`)"
+  ],
+  "solution": "chmod o-w shared.txt",
+  "setup": {
+    "files": {
+      "~/shared.txt": {
+        "owner": "player",
+        "group": "player",
+        "mode": "666",
+        "content": "team notes\n"
+      }
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {
+        "type": "mode_lacks",
+        "path": "~/shared.txt",
+        "bits": "o+w"
+      },
+      {
+        "type": "mode_has",
+        "path": "~/shared.txt",
+        "bits": "o+r"
+      }
+    ]
+  },
+  "explanation": "World-writable files let anyone tamper with them — a classic vulnerability. `chmod o-w` removes just others' write. Symbolic mode (u/g/o with +/-/= and r/w/x) changes one thing without disturbing the rest.",
+  "unlocks": [],
+  "teaches": [
+    "permissions",
+    "security"
+  ]
+}

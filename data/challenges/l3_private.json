@@ -1,0 +1,49 @@
+{
+  "id": "l3_private",
+  "title": "Lock it down",
+  "level": "permissions",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": [
+    "Level 3 — Permissions.",
+    "",
+    "secrets.conf is readable by everyone on the machine. Make it yours alone."
+  ],
+  "tips": [
+    "`chmod 600 file` = owner may read+write, nobody else anything. (6 = rw, 0 = nothing.)"
+  ],
+  "objective": "Change ~/secrets.conf so only its owner can read and write it — no access for group or others.",
+  "hints": [
+    "You want rw for you, nothing for group or others. In octal that's three digits.",
+    "read=4 write=2 execute=1. Owner rw = 6, group 0, others 0 -> 600.",
+    "`chmod 600 secrets.conf`"
+  ],
+  "solution": "chmod 600 secrets.conf",
+  "setup": {
+    "files": {
+      "~/secrets.conf": {
+        "owner": "player",
+        "group": "player",
+        "mode": "644",
+        "lines": [
+          "password=hunter2",
+          "token=abc123"
+        ]
+      }
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "mode_is",
+    "path": "~/secrets.conf",
+    "mode": "600"
+  },
+  "explanation": "Each octal digit is read(4)+write(2)+execute(1), for owner/group/others. 600 = rw-------, 644 = rw-r--r--, 755 = rwxr-xr-x. Secrets should be 600; the world does not need to read your passwords.",
+  "unlocks": [
+    "chmod"
+  ],
+  "teaches": [
+    "permissions",
+    "octal"
+  ]
+}

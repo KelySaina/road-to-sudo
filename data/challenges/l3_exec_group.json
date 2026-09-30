@@ -1,0 +1,45 @@
+{
+  "id": "l3_exec_group",
+  "title": "Runnable, but not by everyone",
+  "level": "permissions",
+  "machine": "workstation",
+  "xp": 130,
+  "briefing": [
+    "deploy.sh should run for you and your team, but strangers shouldn't even see inside it."
+  ],
+  "tips": [
+    "`chmod 750` = owner rwx, group r-x, others nothing."
+  ],
+  "objective": "Set ~/deploy.sh to: owner read+write+execute, group read+execute, others no access.",
+  "hints": [
+    "Owner needs all three (7). Group needs read and execute (5). Others get nothing (0).",
+    "7=rwx, 5=r-x, 0=--- gives 750.",
+    "`chmod 750 deploy.sh`"
+  ],
+  "solution": "chmod 750 deploy.sh",
+  "setup": {
+    "files": {
+      "~/deploy.sh": {
+        "owner": "player",
+        "group": "player",
+        "mode": "644",
+        "lines": [
+          "#!/bin/bash",
+          "echo deploying"
+        ]
+      }
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "mode_is",
+    "path": "~/deploy.sh",
+    "mode": "750"
+  },
+  "explanation": "Symbolic chmod (u+x, go-w) tweaks bits; octal (750) sets them all at once. 7=rwx, 5=r-x, 0=---. Give exactly the access needed and no more — that's the principle of least privilege.",
+  "unlocks": [],
+  "teaches": [
+    "permissions",
+    "octal"
+  ]
+}

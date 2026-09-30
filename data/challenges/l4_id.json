@@ -1,0 +1,41 @@
+{
+  "id": "l4_id",
+  "title": "Know thyself",
+  "level": "users",
+  "machine": "workstation",
+  "xp": 110,
+  "briefing": [
+    "Level 4 — Users & Groups.",
+    "",
+    "Every action is checked against WHO you are: your user id and your groups."
+  ],
+  "tips": [
+    "`id` shows your uid, gid and groups. `id -u` prints just the numeric user id."
+  ],
+  "objective": "Write your numeric user id (uid) into ~/uid.txt.",
+  "hints": [
+    "There's a command that reports your identity in numbers.",
+    "`id` shows everything; `id -u` prints only the uid.",
+    "`id -u > ~/uid.txt`"
+  ],
+  "solution": "id -u > ~/uid.txt",
+  "setup": {
+    "remove": [
+      "~/uid.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/uid.txt",
+    "regex": "^\\s*1000\\s*$"
+  },
+  "explanation": "Your uid is your true name to the kernel — 0 is root, regular users start at 1000. Groups (gid and the extra groups from `id`) decide which 'group' permission bits apply to you.",
+  "unlocks": [
+    "id"
+  ],
+  "teaches": [
+    "users",
+    "uid"
+  ]
+}

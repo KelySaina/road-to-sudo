@@ -1,0 +1,88 @@
+{
+  "id": "final_road_to_sudo",
+  "title": "Road to sudo",
+  "level": "final",
+  "machine": "prodserver",
+  "fresh_machine": true,
+  "xp": 500,
+  "time_limit": 600,
+  "briefing": [
+    "FINAL — Road to sudo.",
+    "",
+    "09:58, your pager screams. PROD-01, the box that runs everything, is at",
+    "100% CPU. Read ~/INCIDENT.txt. Nothing else will be explained.",
+    "",
+    "This is everything, all at once."
+  ],
+  "expert_briefing": [
+    "PROD-01 down. You have sudo. Fix it. Take root."
+  ],
+  "tips": [
+    "Investigate with ps aux. A root-owned process needs root to stop it: `sudo -i` opens a root shell.",
+    "You've earned sudo. `sudo -i` makes you root; the prompt turns to #."
+  ],
+  "objective": "Investigate PROD-01, take root, and stop the rogue root-owned process that's melting the server.",
+  "expert_objective": "Restore PROD-01. End the rogue root process. Hold the throne.",
+  "hints": [
+    "Find what's eating the CPU: `ps aux` (or `top`). It runs as root, so you can't kill it as yourself.",
+    "Become root — you're trusted with it: `sudo -i`. The prompt turns to root@prod-01:~#.",
+    "As root, kill the rogue process by its PID (ps shows it): `sudo -i`, then `kill 1313`."
+  ],
+  "solution": "ps aux\nsudo -i\nkill 1313",
+  "setup": {
+    "processes": [
+      {
+        "pid": 1313,
+        "user": "root",
+        "cpu": 97.0,
+        "mem": 8.0,
+        "stat": "Rs",
+        "cmd": "/root/.hidden/kdevtmpfsi --miner"
+      }
+    ]
+  },
+  "success": {
+    "all": [
+      {
+        "type": "user_is",
+        "user": "root"
+      },
+      {
+        "type": "process_absent",
+        "cmd_contains": "kdevtmpfsi"
+      }
+    ]
+  },
+  "reactions": [
+    {
+      "when": {
+        "all": [
+          {
+            "type": "event",
+            "name": "permission_denied",
+            "data": {
+              "command": "kill"
+            }
+          },
+          {
+            "not": {
+              "type": "user_is",
+              "user": "root"
+            }
+          }
+        ]
+      },
+      "difficulty": [
+        "beginner",
+        "normal"
+      ],
+      "say": "Permission denied — that process belongs to root, and so must you, for a moment. Try `sudo -i`.",
+      "kind": "tip"
+    }
+  ],
+  "explanation": "YOU MADE IT.\n\nWelcome to the other side of the prompt.\n\nYou walked in as a user who didn't know their own name, and walked out having taken root on a burning production server — the honest way, by understanding the system well enough to hold its most dangerous prompt. That's what sudo really is: not power, but responsibility you earned.",
+  "unlocks": [],
+  "teaches": [
+    "everything"
+  ]
+}

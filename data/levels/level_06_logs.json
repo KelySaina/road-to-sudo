@@ -1,0 +1,14 @@
+{
+  "id": "logs",
+  "order": 6,
+  "title": "Level 6 — Logs & Debugging",
+  "subtitle": "grep, tail, and reading what the machine tells you",
+  "description": "When something breaks, the answer is almost always in a log. Read them: filter with grep, tail the end, correlate the clues, and fix what they name.",
+  "machine": "workstation",
+  "challenges": [
+    "l6_lasterror",
+    "l6_count",
+    "l6_breach",
+    "l6_fix"
+  ]
+}

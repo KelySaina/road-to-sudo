@@ -1,0 +1,57 @@
+{
+  "id": "l6_breach",
+  "title": "Who got in?",
+  "level": "logs",
+  "machine": "workstation",
+  "xp": 150,
+  "time_limit": 240,
+  "briefing": [
+    "The auth log shows an account battered with failures — and then, one success.",
+    "Find the account that was eventually compromised."
+  ],
+  "tips": [
+    "Failures say 'Failed password for X'. A break-in shows 'Accepted password for X'."
+  ],
+  "objective": "Find the account that had a successful login after many failures in ~/auth.log, and write its name into ~/breach.txt.",
+  "hints": [
+    "Among a storm of 'Failed password' lines, one 'Accepted password' slips through. Find it.",
+    "`grep 'Accepted password' auth.log` shows the single success — and the account name after 'for'.",
+    "The account is 'victim'. `echo victim > ~/breach.txt`"
+  ],
+  "solution": "grep 'Accepted password' ~/auth.log\necho victim > ~/breach.txt",
+  "setup": {
+    "files": {
+      "~/auth.log": {
+        "owner": "player",
+        "group": "player",
+        "lines": [
+          "03:00:01 sshd: Failed password for victim from 203.0.113.9",
+          "03:00:03 sshd: Failed password for victim from 203.0.113.9",
+          "03:00:05 sshd: Failed password for victim from 203.0.113.9",
+          "03:00:07 sshd: Failed password for victim from 203.0.113.9",
+          "03:00:09 sshd: Failed password for admin from 203.0.113.9",
+          "03:00:11 sshd: Failed password for victim from 203.0.113.9",
+          "03:00:13 sshd: Failed password for victim from 203.0.113.9",
+          "03:00:15 sshd: Accepted password for victim from 203.0.113.9",
+          "03:00:16 sshd: session opened for user victim"
+        ]
+      }
+    },
+    "remove": [
+      "~/breach.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/breach.txt",
+    "regex": "^\\s*victim\\s*$"
+  },
+  "explanation": "Correlating failures with a later success is bread-and-butter intrusion detection. grep for the anomaly (the lone 'Accepted' amid the 'Failed' storm) and you've named the compromised account.",
+  "unlocks": [],
+  "teaches": [
+    "logs",
+    "security",
+    "incident-response"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "id": "l2_tally",
+  "title": "Tally the arrivals",
+  "level": "text",
+  "machine": "workstation",
+  "xp": 130,
+  "briefing": [
+    "The guest log has the same names over and over. Who came most often?"
+  ],
+  "tips": [
+    "`sort` then `uniq -c` counts adjacent repeats; a second `sort -rn` ranks them."
+  ],
+  "objective": "From ~/guests.txt, write to ~/tally.txt each name with how many times it appears, most frequent first.",
+  "hints": [
+    "uniq only collapses ADJACENT duplicates, so sort the file first.",
+    "`sort guests.txt | uniq -c` counts each name; pipe into `sort -rn` to rank by count.",
+    "`sort guests.txt | uniq -c | sort -rn > ~/tally.txt`"
+  ],
+  "solution": "sort guests.txt | uniq -c | sort -rn > ~/tally.txt",
+  "setup": {
+    "files": {
+      "~/guests.txt": {
+        "owner": "player",
+        "group": "player",
+        "lines": [
+          "alice",
+          "bob",
+          "alice",
+          "carol",
+          "alice",
+          "bob",
+          "alice"
+        ]
+      }
+    },
+    "remove": [
+      "~/tally.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/tally.txt",
+    "regex": "^\\s*4 alice"
+  },
+  "explanation": "`sort | uniq -c | sort -rn` is the workhorse pipeline for 'what appears most?'. sort groups equal lines, uniq -c counts each group, and sort -rn floats the biggest counts to the top.",
+  "unlocks": [
+    "sort",
+    "uniq"
+  ],
+  "teaches": [
+    "sort",
+    "uniq",
+    "pipes"
+  ]
+}

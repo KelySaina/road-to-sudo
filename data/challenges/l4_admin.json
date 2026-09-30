@@ -1,0 +1,42 @@
+{
+  "id": "l4_admin",
+  "title": "Who holds the keys?",
+  "level": "users",
+  "machine": "workstation",
+  "xp": 140,
+  "briefing": [
+    "Only members of the sudo group can become root. Who are they?",
+    "",
+    "The answer is in /etc/group — one line per group, members in the last field."
+  ],
+  "tips": [
+    "`grep '^sudo:' /etc/group` finds the sudo line; `cut -d: -f4` is its member list."
+  ],
+  "objective": "Find which account is a member of the sudo group and write that username into ~/admin.txt.",
+  "hints": [
+    "Each group is a line in /etc/group ending in a comma-separated member list. Find the sudo line.",
+    "`grep '^sudo:' /etc/group` gives the line; the 4th colon-field is the members: `cut -d: -f4`.",
+    "`grep '^sudo:' /etc/group | cut -d: -f4 > ~/admin.txt`"
+  ],
+  "solution": "grep '^sudo:' /etc/group | cut -d: -f4 > ~/admin.txt",
+  "setup": {
+    "remove": [
+      "~/admin.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/admin.txt",
+    "regex": "^\\s*alice\\s*$"
+  },
+  "explanation": "/etc/group maps group names to their members. Membership in sudo/wheel is the difference between an ordinary user and an administrator. Knowing who has that power — and limiting it — is core to securing a system.",
+  "unlocks": [
+    "who"
+  ],
+  "teaches": [
+    "groups",
+    "sudo",
+    "security"
+  ]
+}

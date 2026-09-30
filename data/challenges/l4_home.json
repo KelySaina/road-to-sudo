@@ -1,0 +1,34 @@
+{
+  "id": "l4_home",
+  "title": "Find alice's home",
+  "level": "users",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": [
+    "Everything about a user lives in one line of /etc/passwd:",
+    "  name:x:uid:gid:info:HOME:shell"
+  ],
+  "tips": [
+    "`grep name /etc/passwd` shows that user's line."
+  ],
+  "objective": "Find alice's home directory by reading /etc/passwd, and print the line that reveals it.",
+  "hints": [
+    "alice has one line in /etc/passwd. Filter to it.",
+    "`grep alice /etc/passwd` — the sixth colon-field is her home directory.",
+    "`grep alice /etc/passwd`  (or `grep alice /etc/passwd | cut -d: -f6`)"
+  ],
+  "solution": "grep alice /etc/passwd",
+  "setup": {
+    "cwd": "~"
+  },
+  "success": {
+    "type": "output_contains",
+    "text": "/home/alice"
+  },
+  "explanation": "/etc/passwd is world-readable and holds every account's uid, home and shell (passwords live in /etc/shadow, which is not readable). grep + cut reads it like any other colon-separated file.",
+  "unlocks": [],
+  "teaches": [
+    "users",
+    "passwd"
+  ]
+}

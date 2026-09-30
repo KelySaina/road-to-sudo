@@ -1,0 +1,46 @@
+{
+  "id": "l2_attacker_ip",
+  "title": "Trace the attacker",
+  "level": "text",
+  "machine": "workstation",
+  "xp": 150,
+  "time_limit": 240,
+  "briefing": [
+    "Security wants the IP address behind the most failed logins in /var/log/auth.log.",
+    "3,000 lines. A pipeline will crack it in seconds."
+  ],
+  "tips": [
+    "`grep -oE 'PATTERN'` prints only the matching part; then sort | uniq -c | sort -rn ranks."
+  ],
+  "objective": "Find the IP address responsible for the most failed logins in /var/log/auth.log, and write just that IP into ~/attacker_ip.txt.",
+  "hints": [
+    "Keep only failed-login lines, then extract just the IP from each and count them.",
+    "grep 'Failed password' /var/log/auth.log, then `grep -oE '[0-9.]+' | sort | uniq -c | sort -rn` — the top line is your IP.",
+    "One answer: grep the failures, extract IPs, rank them; then  echo 203.0.113.66 > ~/attacker_ip.txt"
+  ],
+  "solution": "grep 'Failed password' /var/log/auth.log | grep -oE '[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+' | sort | uniq -c | sort -rn | head -1\necho 203.0.113.66 > ~/attacker_ip.txt",
+  "setup": {
+    "remove": [
+      "~/attacker_ip.txt"
+    ],
+    "restore": [
+      "/var/log/auth.log"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/attacker_ip.txt",
+    "regex": "^\\s*203\\.0\\.113\\.66\\s*$"
+  },
+  "explanation": "`grep -oE` prints only the matched substring, so you can pull IPs, emails or tokens straight out of noisy logs, then rank them with the sort|uniq|sort pipeline. This is real incident triage.",
+  "unlocks": [
+    "head",
+    "tail"
+  ],
+  "teaches": [
+    "grep",
+    "pipes",
+    "logs"
+  ]
+}

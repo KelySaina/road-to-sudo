@@ -1,0 +1,71 @@
+{
+  "id": "l5_kill9",
+  "title": "It won't die",
+  "level": "processes",
+  "machine": "workstation",
+  "xp": 140,
+  "briefing": [
+    "A wedged process ignores your polite requests to stop.",
+    "",
+    "  $ kill 8080",
+    "  $ ps aux | grep stuck",
+    "  player  8080 ... ./stuck-daemon   <- still there",
+    "",
+    "Time to stop asking."
+  ],
+  "tips": [
+    "`kill -9 PID` sends SIGKILL, which a process cannot catch or ignore."
+  ],
+  "objective": "Force-kill the stuck-daemon process that ignores a normal kill.",
+  "hints": [
+    "A plain kill sends a signal the process can ignore — and this one does.",
+    "`kill -9` (SIGKILL) cannot be ignored. You'll need its PID.",
+    "`kill -9 8080`"
+  ],
+  "solution": "kill -9 8080",
+  "setup": {
+    "processes": [
+      {
+        "pid": 8080,
+        "user": "player",
+        "cpu": 40.0,
+        "mem": 0.5,
+        "stat": "S",
+        "cmd": "./stuck-daemon",
+        "ignores_term": true
+      }
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "process_absent",
+    "cmd_contains": "stuck-daemon"
+  },
+  "reactions": [
+    {
+      "when": {
+        "all": [
+          {
+            "type": "event",
+            "name": "process_killed",
+            "data_contains": {
+              "cmd": "stuck-daemon"
+            }
+          },
+          {
+            "type": "process_running",
+            "cmd_contains": "stuck-daemon"
+          }
+        ]
+      },
+      "say": "Still running — it ignored SIGTERM. Send the one signal it can't refuse: kill -9.",
+      "kind": "warning"
+    }
+  ],
+  "explanation": "A normal kill sends SIGTERM, which programs may catch to clean up — or ignore. `kill -9` sends SIGKILL, which the kernel enforces with no chance to refuse. Use it only when the polite signal fails.",
+  "unlocks": [],
+  "teaches": [
+    "signals",
+    "kill"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "id": "l5_findhog",
+  "title": "Something's eating the CPU",
+  "level": "processes",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": [
+    "Level 5 — Processes.",
+    "",
+    "The fans are screaming. One process is burning cycles it never earned."
+  ],
+  "tips": [
+    "`ps aux` lists every process with its CPU%. `top` sorts by CPU for you."
+  ],
+  "objective": "Find the process using the most CPU and write its PID into ~/hog.txt.",
+  "hints": [
+    "List what's running and look at the %CPU column — one will dwarf the rest.",
+    "`ps aux` or `top` shows it. Note the PID (the number in the PID column).",
+    "It's PID 6666. `echo 6666 > ~/hog.txt`"
+  ],
+  "solution": "top\necho 6666 > ~/hog.txt",
+  "setup": {
+    "processes": [
+      {
+        "pid": 6666,
+        "user": "player",
+        "cpu": 98.7,
+        "mem": 3.0,
+        "stat": "S",
+        "cmd": "./cryptominer --pool x"
+      }
+    ],
+    "remove": [
+      "~/hog.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/hog.txt",
+    "regex": "^\\s*6666\\s*$"
+  },
+  "explanation": "Every running program is a process with a PID (process id), an owner and a resource footprint. `ps aux` lists them all; `top` sorts by CPU so the greedy one rises to the top. The PID is the handle you use to control it.",
+  "unlocks": [
+    "ps",
+    "top"
+  ],
+  "teaches": [
+    "processes",
+    "ps",
+    "top"
+  ]
+}

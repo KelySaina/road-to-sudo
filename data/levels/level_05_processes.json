@@ -1,0 +1,15 @@
+{
+  "id": "processes",
+  "order": 5,
+  "title": "Level 5 — Processes",
+  "subtitle": "ps, top, kill, pkill, signals",
+  "description": "See what's running, spot the greedy one, and stop it — politely with kill, by name with pkill, or by force with kill -9.",
+  "machine": "workstation",
+  "challenges": [
+    "l5_findhog",
+    "l5_kill",
+    "l5_pkill",
+    "l5_kill9",
+    "l5_incident"
+  ]
+}

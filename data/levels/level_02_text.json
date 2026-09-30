@@ -1,0 +1,15 @@
+{
+  "id": "text",
+  "order": 2,
+  "title": "Level 2 — Text & Pipes",
+  "subtitle": "grep, cut, sort, uniq, wc, and the mighty |",
+  "description": "Filter, cut, count and rank text. Chain small tools with pipes to answer big questions.",
+  "machine": "workstation",
+  "challenges": [
+    "l2_wc",
+    "l2_bashusers",
+    "l2_tally",
+    "l2_apikey",
+    "l2_attacker_ip"
+  ]
+}

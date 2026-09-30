@@ -1,0 +1,15 @@
+{
+  "id": "permissions",
+  "order": 3,
+  "title": "Level 3 — Permissions",
+  "subtitle": "chmod, umask, and the rwx letters",
+  "description": "Read, write, execute — for owner, group and others. Lock secrets down, open scripts up, and close world-writable holes.",
+  "machine": "workstation",
+  "challenges": [
+    "l3_private",
+    "l3_exec_group",
+    "l3_worldwrite",
+    "l3_umask",
+    "l3_deploy_fix"
+  ]
+}

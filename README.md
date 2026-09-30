@@ -20,9 +20,10 @@ Backing up /home/player/projects...
     +150 XP   +50 no-hint bonus
 ```
 
-This is an early build: the full engine, a two-level campaign (16 challenges,
-from `whoami` to debugging a production incident to wrangling the filesystem),
-and a 2D RPG adventure mode. More levels are on the way.
+This is an early build with a lot in it: a full **8-level campaign (40
+challenges)** that takes you from `whoami` to taking **root on a burning
+production server**, plus a **2D RPG adventure mode**. A few advanced topics
+(networking, services, packages, SSH, git) are the next waves.
 
 ---
 
@@ -94,8 +95,8 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   basics"), Continue, **Adventure**, Practice Lab, Achievements, Settings and
   Exit.
   Starting over and resetting progress each ask for confirmation first.
-- **Campaign — two levels, 16 challenges** (state-checked, so any valid
-  solution passes):
+- **Campaign — 8 levels, 40 challenges** (state-checked, so any valid solution
+  passes), ending by taking root on a production server:
 - **Level 0 · First Contact**, 10 challenges:
   1. *Who are you?* (`whoami` / `id`)
   2. *Where are you?* (`pwd`)
@@ -109,9 +110,19 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   9. *Permission denied*: Alice's backup script (`ls -l`, `chmod`)
   10. *Your first incident*: a report generator fails for two independent
       reasons. You have to read the logs and fix both.
-- **Level 1 · The Filesystem**, 6 challenges: back up with `cp`, rename with
-  `mv`, tidy `*.log` files into a folder, delete a build dir with `rm -r`,
-  hunt a buried file with `find`, and restore a broken homepage (`mv` + `rm`).
+- **Level 1 · The Filesystem**, 6 challenges: `cp`, `mv`, `rm -r`, globs, `find`.
+- **Level 2 · Text & Pipes**, 5: `grep`, `cut`, `sort | uniq -c | sort -rn`,
+  `wc`, and tracing an attacker's IP through 3,000 log lines.
+- **Level 3 · Permissions**, 5: lock secrets to 600, `chmod 750`, close a
+  world-writable hole, set a private `umask`, fix a "Permission denied" script.
+- **Level 4 · Users & Groups**, 4: `id`, reading `/etc/passwd` and `/etc/group`,
+  and finding who holds `sudo`.
+- **Level 5 · Processes**, 5: `ps`/`top`, `kill`, `pkill`, `kill -9`, and
+  clearing a multi-process outbreak.
+- **Level 6 · Logs & Debugging**, 4: read the last error, count errors, spot a
+  break-in in `auth.log`, and follow a log to the fix.
+- **Final · Road to sudo**: a broken production server, no hand-holding —
+  investigate, `sudo -i`, stop the rogue root process, and hold the throne.
 - **Adventure mode — "The Ascent to Root" (a 2D RPG):** a real top-down game.
   You steer an operator (WASD / arrows) through the mainframe's rooms, walk up
   to consoles, NPCs and monsters, and press **E**. Consoles open a **terminal
@@ -127,14 +138,14 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   [docs/ADVENTURE.md](docs/ADVENTURE.md).
 - **Practice Lab:** a separate sandbox machine with no objectives and no
   score.
-- **49 simulated commands:**
+- **60 simulated commands:**
   - basics: `pwd cd ls echo clear help man history learn`  (`learn` is a
     friendly cheat sheet of what every command does, with examples)
   - files: `cat less touch mkdir rmdir rm cp mv find tree stat file`
   - text: `grep head tail wc sort uniq cut tr`
-  - permissions: `chmod chown/chgrp`
-  - users: `whoami id groups su sudo`
-  - processes: `ps kill`
+  - permissions: `chmod chown/chgrp umask`
+  - users: `whoami id groups who su sudo`
+  - processes: `ps top kill pkill pgrep`
   - system: `hostname uname date`
   - shell: `bash/sh env/printenv export unset which exit true false`
 - **Shell features:** pipes, `>`, `>>`, `<`, `2>`, `2>&1`, `>&2`, `&&`,
@@ -278,11 +289,11 @@ These are honest gaps, not bugs:
 
 ## Roadmap (next steps)
 
-1. **Level 1 · The Filesystem** — done (cp / mv / rm / find, 6 challenges).
-2. **Level 3–4 · Permissions, users and groups:** `useradd`, `passwd` and
-   interactive password prompts (a `PromptRequest` in `ExecutionOutcome`).
-3. **Level 5 · Processes:** a live process table (CPU hogs that respawn),
-   plus `top`, `jobs`, `bg` / `fg` and `&`.
+Levels 0–6 and the Final (Road to sudo) are **built** — 40 challenges. Still
+to come, each needing a new simulated subsystem:
+1. **Networking** (a `Network` of hosts): `ss`, `ip`, `ping`, `curl`, `dig`.
+2. **Packages** (a package DB): `apt`, `dpkg`.
+3. **Services** (a `ServiceManager`): `systemctl`, `journalctl`.
 4. **Level 6 & 10 · Networking and SSH:** a `Network` of `Machine`s,
    `ip` / `ss` / `curl` / `ssh` / `scp`, and keys in `~/.ssh`.
 5. **Level 8 · Services:** a `ServiceManager` for `systemctl` / `journalctl`,

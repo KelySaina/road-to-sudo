@@ -1,0 +1,56 @@
+{
+  "id": "l2_bashusers",
+  "title": "Who uses bash?",
+  "level": "text",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": [
+    "/etc/passwd lists every account, one per line, fields split by colons:",
+    "  name:x:uid:gid:info:home:shell",
+    "The last field is the login shell."
+  ],
+  "tips": [
+    "`grep WORD file` keeps matching lines. `cut -d: -f1` keeps the first colon-field."
+  ],
+  "objective": "Write the username of every account whose login shell is /bin/bash (one per line) into ~/bash_users.txt.",
+  "hints": [
+    "First keep only the lines that mention /bin/bash, then keep only the name column.",
+    "`grep /bin/bash /etc/passwd` filters the lines; pipe into `cut -d: -f1` for the names.",
+    "`grep /bin/bash /etc/passwd | cut -d: -f1 > ~/bash_users.txt`"
+  ],
+  "solution": "grep /bin/bash /etc/passwd | cut -d: -f1 > ~/bash_users.txt",
+  "setup": {
+    "remove": [
+      "~/bash_users.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {
+        "type": "file_contains",
+        "path": "~/bash_users.txt",
+        "text": "root"
+      },
+      {
+        "type": "file_contains",
+        "path": "~/bash_users.txt",
+        "text": "player"
+      },
+      {
+        "type": "file_contains",
+        "path": "~/bash_users.txt",
+        "text": "alice"
+      }
+    ]
+  },
+  "explanation": "`grep` filters lines, `cut -d: -f1` extracts a column, and `|` glues them together. This grep-then-cut pattern pulls structured data out of any colon- or comma-separated file.",
+  "unlocks": [
+    "cut"
+  ],
+  "teaches": [
+    "grep",
+    "cut",
+    "pipes"
+  ]
+}
