@@ -51,6 +51,12 @@
       {"cmd": "dig",       "desc": "what IP does a name resolve to?","ex": "dig +short host.internal"},
       {"cmd": "curl",      "desc": "make an HTTP request",           "ex": "curl http://host/health"}
     ]},
+    {"title": "Remote machines (ssh)", "items": [
+      {"cmd": "ssh-keygen", "desc": "make an SSH key pair",           "ex": "ssh-keygen -t ed25519"},
+      {"cmd": "ssh",        "desc": "log in to a remote machine",     "ex": "ssh admin@web-01"},
+      {"cmd": "scp",        "desc": "copy files to/from a remote box", "ex": "scp web-01:/var/log/app.log ."},
+      {"cmd": "exit",       "desc": "disconnect / leave the shell",   "ex": "exit"}
+    ]},
     {"title": "Packages (software)", "items": [
       {"cmd": "apt search", "desc": "find a package",              "ex": "apt search tcpdump"},
       {"cmd": "apt install","desc": "install it (needs sudo)",     "ex": "sudo apt install tcpdump"},

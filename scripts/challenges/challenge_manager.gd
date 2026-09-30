@@ -55,14 +55,27 @@ func begin(challenge: Challenge, session: ShellSession, resume: bool = false) ->
 	_started_msec = Time.get_ticks_msec()
 	_commands_this_attempt = 0
 	_log_start = session.command_log.size()
-	if resume:
-		_snapshot = {}
-	else:
+	if not resume:
+		_reset_to_base_shell(session)
 		_apply_setup(challenge.setup, session)
 		_snapshot = session.machine.to_dict()
 		_snapshot_cwd = session.cwd
+	else:
+		_snapshot = {}
 	profile.current_challenge = challenge.id
 	challenge_started.emit(challenge)
+
+
+## Every challenge starts from a clean login shell on its own machine: undo any
+## su/sudo elevation or ssh connection left over from the previous challenge on
+## the same machine, and forget cached remote hosts.
+func _reset_to_base_shell(session: ShellSession) -> void:
+	while session.is_remote() or not session.user_stack.is_empty():
+		if not session.user_stack.is_empty():
+			session.pop_user()
+		else:
+			session.ssh_disconnect()
+	session.remote_cache.clear()
 
 
 func _apply_setup(setup: Dictionary, session: ShellSession) -> void:
@@ -211,6 +224,8 @@ func reset() -> bool:
 			return false
 		_session.machine = machine_factory.call(current.machine if current.machine != "" else "workstation")
 		_session.user_stack.clear()
+		_session.remote_stack.clear()
+		_session.remote_cache.clear()
 		_session.cwd = _session.home()
 		_apply_setup(current.setup, _session)
 		_snapshot = _session.machine.to_dict()

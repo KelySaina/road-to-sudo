@@ -20,7 +20,7 @@ Backing up /home/player/projects...
     +150 XP   +50 no-hint bonus
 ```
 
-This is an early build with a lot in it: a full **12-level campaign (56
+This is an early build with a lot in it: a full **13-level campaign (60
 challenges)** that takes you from `whoami` to taking **root on a burning
 production server**, plus a **2D RPG adventure mode**. A few advanced topics
 (networking, services, packages, SSH, git) are the next waves.
@@ -95,7 +95,7 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   basics"), Continue, **Adventure**, Practice Lab, Achievements, Settings and
   Exit.
   Starting over and resetting progress each ask for confirmation first.
-- **Campaign — 12 levels, 56 challenges** (state-checked, so any valid solution
+- **Campaign — 13 levels, 60 challenges** (state-checked, so any valid solution
   passes), ending by taking root on a production server:
 - **Level 0 · First Contact**, 10 challenges:
   1. *Who are you?* (`whoami` / `id`)
@@ -137,6 +137,10 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   `status` / `log` on a real index-and-commits model that diffs the working
   tree live — put a project under version control, keep a `.env` secret out
   with `.gitignore`, stage only what's ready, and build a two-commit history.
+- **Level 11 · SSH & Remote Servers**, 4: from a jump host, `ssh-keygen` a key,
+  `ssh` into a broken web server (your prompt and the whole session move to the
+  remote box), `scp` a log back, and end an incident on a machine you never
+  touch — `exit` brings you home.
 - **Final · Road to sudo**: a broken production server, no hand-holding —
   investigate, `sudo -i`, stop the rogue root process, and hold the throne.
 - **Adventure mode — "The Ascent to Root" (a 2D RPG):** a real top-down game.
@@ -154,7 +158,7 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   [docs/ADVENTURE.md](docs/ADVENTURE.md).
 - **Practice Lab:** a separate sandbox machine with no objectives and no
   score.
-- **69 simulated commands:**
+- **73 simulated commands:**
   - basics: `pwd cd ls echo clear help man history learn`  (`learn` is a
     friendly cheat sheet of what every command does, with examples)
   - files: `cat less touch mkdir rmdir rm cp mv find tree stat file`
@@ -164,6 +168,7 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   - processes: `ps top kill pkill pgrep`
   - services: `systemctl journalctl`
   - network: `ip ss ping dig/host curl`
+  - remote: `ssh scp ssh-keygen`
   - packages: `apt/apt-get dpkg`
   - version control: `git` (init/add/commit/status/log/diff)
   - system: `hostname uname date`
@@ -309,19 +314,17 @@ These are honest gaps, not bugs:
 
 ## Roadmap (next steps)
 
-Levels 0–10 and the Final (Road to sudo) are **built** — 56 challenges. Each
+Levels 0–11 and the Final (Road to sudo) are **built** — 60 challenges. Each
 recent level added a small subsystem to `Machine` and a command or two: Level 7
-(Services) a `services` table + `systemctl` / `journalctl`; Level 8 (Networking)
-a `net` model + `ip` / `ss` / `ping` / `dig` / `curl`; Level 9 (Packages) a
-`packages` database + `apt` / `dpkg`; Level 10 (Git) a `git` repo model + the
-`git` command. The pattern for what's left is the same:
-1. **SSH** (remote `Machine`s + keys in `~/.ssh`): `ssh`, `scp`, `ssh-keygen`.
-   The `net` model already gives every host reachable peers to build on.
-2. **Bash control flow:** `if` / `for` / `while` in the script interpreter (the
+(Services) `systemctl` / `journalctl`; Level 8 (Networking) `ip` / `ss` /
+`ping` / `dig` / `curl`; Level 9 (Packages) `apt` / `dpkg`; Level 10 (Git) the
+`git` command; Level 11 (SSH) whole-session `ssh` into remote machines, `scp`
+and `ssh-keygen`. What's left:
+1. **Bash control flow:** `if` / `for` / `while` in the script interpreter (the
    parser already produces a list/pipeline AST to build on), plus `$(…)`.
-3. **More Adventure regions:** the RPG engine is data-driven — new regions,
-   NPCs, enemies and bosses are JSON in `data/adventure/`. Each new subsystem
-   above can also become a new zone.
+2. **More Adventure regions:** the RPG engine is data-driven — new regions,
+   NPCs, enemies and bosses are JSON in `data/adventure/`. Each subsystem above
+   can also become a new zone.
 
 The Final is done: a broken production server that uses everything, ending with
 `sudo -i` → *"YOU MADE IT. Welcome to the other side of the prompt."*

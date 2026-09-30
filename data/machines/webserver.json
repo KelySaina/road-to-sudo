@@ -1,0 +1,31 @@
+{
+  "hostname": "web-01",
+  "users": {
+    "root":     {"uid": 0,    "gid": 0,    "groups": ["root"],                    "home": "/root",        "shell": "/bin/bash", "gecos": "root"},
+    "admin":    {"uid": 1000, "gid": 1000, "groups": ["admin", "users", "sudo"],  "home": "/home/admin",  "shell": "/bin/bash", "gecos": "Remote Admin"},
+    "www-data": {"uid": 33,   "gid": 33,   "groups": ["www-data"],                "home": "/var/www",     "shell": "/usr/sbin/nologin"}
+  },
+  "processes": [
+    {"pid": 1,    "user": "root",     "cpu": 0.0, "mem": 0.4, "stat": "Ss", "cmd": "/sbin/init"},
+    {"pid": 210,  "user": "root",     "cpu": 0.0, "mem": 0.5, "stat": "Ss", "cmd": "sshd: /usr/sbin/sshd -D [listener]"},
+    {"pid": 6931, "user": "root",     "cpu": 96.0, "mem": 7.0, "stat": "Rs", "cmd": "/tmp/.x/kworkerd --stealth"},
+    {"pid": 7002, "user": "admin",    "cpu": 0.0, "mem": 0.1, "stat": "S",  "cmd": "-bash", "tty": "pts/0"}
+  ],
+  "services": {
+    "ssh":   {"description": "OpenSSH server daemon", "active": true, "enabled": true, "main_pid": 210, "since": "Mon 2026-09-30 07:00:00 UTC"},
+    "nginx": {"description": "A high performance web server and a reverse proxy server", "active": false, "enabled": true, "sub": "dead", "main_pid": 0, "exec": "/usr/sbin/nginx -g 'daemon off;'"}
+  },
+  "files": {
+    "/home/admin": {"dir": true, "owner": "admin", "group": "admin", "mode": "755"},
+    "/etc/motd": {"content": "\n  #######  web-01  #######\n  Production web server. Authorized administrators only.\n\n"},
+    "/var/www": {"dir": true, "owner": "www-data", "group": "www-data", "mode": "755"},
+    "/var/www/index.html": {"owner": "www-data", "group": "www-data", "mode": "644", "content": "<h1>web-01</h1>\n"},
+    "/var/log/app.log": {"owner": "root", "group": "adm", "mode": "644", "lines": [
+      "2026-09-30 09:41:02 INFO  worker started",
+      "2026-09-30 09:55:10 WARN  upstream slow: 812ms",
+      "2026-09-30 09:58:44 ERROR upstream timeout after 3 retries — returning 502",
+      "2026-09-30 09:58:44 ERROR nginx: connect() failed (111: Connection refused) while connecting to upstream",
+      "2026-09-30 10:01:12 INFO  suspicious child /tmp/.x/kworkerd spawned by root"
+    ]}
+  }
+}

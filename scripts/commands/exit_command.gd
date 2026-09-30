@@ -20,5 +20,10 @@ func execute(ctx: CommandContext) -> int:
 	if ctx.session.pop_user():
 		ctx.emit("shell_exited", {"user": ctx.session.user})
 		return 0
+	var closed := ctx.session.ssh_disconnect()
+	if closed != "":
+		ctx.out("Connection to %s closed.\n" % closed)
+		ctx.emit("ssh_closed", {"host": closed})
+		return 0
 	ctx.out("(This is your login shell. Type :menu to return to the main menu.)\n", "dim")
 	return 0

@@ -1,0 +1,48 @@
+{
+  "hostname": "ops-01",
+  "users": {
+    "root":   {"uid": 0,    "gid": 0,    "groups": ["root"],            "home": "/root",        "shell": "/bin/bash", "gecos": "root"},
+    "player": {"uid": 1000, "gid": 1000, "groups": ["player", "users"], "home": "/home/player", "shell": "/bin/bash", "gecos": "Ops Engineer"}
+  },
+  "processes": [
+    {"pid": 1,    "user": "root",   "cpu": 0.0, "mem": 0.4, "stat": "Ss", "cmd": "/sbin/init"},
+    {"pid": 640,  "user": "root",   "cpu": 0.0, "mem": 0.5, "stat": "Ss", "cmd": "sshd: /usr/sbin/sshd -D [listener]"},
+    {"pid": 1337, "user": "player", "cpu": 0.0, "mem": 0.1, "stat": "S",  "cmd": "-bash", "tty": "pts/0"}
+  ],
+  "net": {
+    "interfaces": [
+      {"name": "eth0", "ip": "10.0.0.5", "cidr": 24, "mac": "52:54:00:0a:0b:0c", "state": "UP"}
+    ],
+    "routes": [
+      {"dst": "default", "via": "10.0.0.1", "dev": "eth0"},
+      {"dst": "10.0.0.0/24", "dev": "eth0", "src": "10.0.0.5"}
+    ],
+    "dns": {
+      "web-01": "10.0.0.10",
+      "gateway.lan": "10.0.0.1"
+    },
+    "listen": [
+      {"proto": "tcp", "addr": "0.0.0.0", "port": 22, "process": "sshd", "pid": 640}
+    ],
+    "hosts": {
+      "10.0.0.10": {"name": "web-01", "up": true, "machine": "webserver", "ports": {
+        "22": {"proto": "ssh"},
+        "80": {"proto": "http", "status": 502, "headers": {"Server": "nginx"}, "body": "502 Bad Gateway\n"}
+      }}
+    }
+  },
+  "files": {
+    "/home/player": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+    "/home/player/RUNBOOK.txt": {"owner": "player", "group": "player", "mode": "644", "lines": [
+      "ops-01 — the jump host. From here you reach the fleet over ssh.",
+      "",
+      "The web server web-01 (10.0.0.10) is paged: the site returns 502.",
+      "You have an admin account on it. To work on it, log in:",
+      "  ssh admin@web-01",
+      "Your prompt becomes admin@web-01 — every command then runs THERE.",
+      "Type exit to come back to ops-01.",
+      "",
+      "First, set up a key so you're not typing passwords: ssh-keygen -t ed25519."
+    ]}
+  }
+}

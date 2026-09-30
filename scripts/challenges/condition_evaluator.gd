@@ -81,6 +81,8 @@ static func evaluate(cond: Dictionary, state: Dictionary) -> bool:
 			return session.cwd == _path(cond.path, session)
 		"user_is":
 			return session.user == cond.user
+		"host_is":
+			return session.machine.hostname == cond.host
 		"env_is":
 			return str(session.env.get(cond.name, "")) == str(cond.get("value", ""))
 		"event":

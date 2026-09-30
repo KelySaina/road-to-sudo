@@ -17,7 +17,7 @@ func _play(mgr: ChallengeManager, shell: Shell, lines: Array) -> bool:
 
 func test_library_is_valid() -> void:
 	var lib := ChallengeLibrary.load_default()
-	check_eq(lib.order.size(), 56, "full campaign in order")
+	check_eq(lib.order.size(), 60, "full campaign in order")
 	for cid in lib.order:
 		var c := lib.get_challenge(cid)
 		check(c.validate().is_empty(), "%s validates: %s" % [cid, str(c.validate())])
@@ -62,6 +62,10 @@ func test_alternative_solutions() -> void:
 		"l9_remove": ["sudo apt purge netcat-traditional"],
 		"l10_init": ["cd site", "git init", "git add index.html style.css", "git commit -m snapshot"],
 		"l10_log": ["cd ~/tool", "git init", "git add .", "git commit -m one", "echo x >> tool.sh", "git add .", "git commit -m two"],
+		"l11_keygen": ["ssh-keygen"],
+		"l11_login": ["ssh admin@web-01", "sudo systemctl start nginx"],
+		"l11_scp": ["cd ~", "scp admin@web-01:/var/log/app.log ."],
+		"l11_remote": ["ssh admin@web-01", "sudo kill 6931"],
 	}
 	for cid in cases:
 		var c := lib.get_challenge(cid)
@@ -126,6 +130,16 @@ func test_wrong_answers_do_not_pass() -> void:
 	shell = new_shell("devbox")
 	mgr.begin(lib.get_challenge("l10_stage"), shell.session)
 	check(not _play(mgr, shell, ["cd ~/feature", "git init", "git add .", "git commit -m all"]), "committing the WIP scratch file is not the goal")
+	# SSH: a bad login gets you nowhere; connecting without fixing isn't a fix.
+	mgr = _manager()
+	shell = new_shell("opsbox")
+	mgr.begin(lib.get_challenge("l11_login"), shell.session)
+	check(not _play(mgr, shell, ["ssh bob@web-01"]), "ssh as an unknown user is refused")
+	check(not shell.session.is_remote(), "a refused ssh does not open a remote shell")
+	mgr = _manager()
+	shell = new_shell("opsbox")
+	mgr.begin(lib.get_challenge("l11_remote"), shell.session)
+	check(not _play(mgr, shell, ["ssh admin@web-01", "ps aux"]), "looking at the rogue process is not killing it")
 
 
 func test_hints_and_scoring() -> void:

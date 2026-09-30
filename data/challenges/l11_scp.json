@@ -1,0 +1,36 @@
+{
+  "id": "l11_scp",
+  "title": "Pull the evidence",
+  "level": "ssh",
+  "machine": "opsbox",
+  "xp": 150,
+  "time_limit": 240,
+  "briefing": [
+    "Before/after the outage, you want web-01's application log on ops-01 so you",
+    "can analyze it here (and keep a copy).",
+    "",
+    "Copy /var/log/app.log off web-01 to your home directory with scp."
+  ],
+  "tips": [
+    "scp copies over ssh. A remote path is written host:path — e.g. admin@web-01:/var/log/app.log.",
+    "`scp admin@web-01:/var/log/app.log ~/` downloads it into your home dir."
+  ],
+  "objective": "Copy /var/log/app.log from web-01 to your home directory on ops-01 (so ~/app.log exists locally).",
+  "expert_objective": "Fetch web-01:/var/log/app.log to ops-01.",
+  "hints": [
+    "scp takes a remote source and a local destination: `scp admin@web-01:/var/log/app.log <dest>`.",
+    "Send it to your home directory: `scp admin@web-01:/var/log/app.log ~/`.",
+    "`scp admin@web-01:/var/log/app.log ~/`, then `cat ~/app.log` to read it locally."
+  ],
+  "solution": "scp admin@web-01:/var/log/app.log ~/\ncat ~/app.log",
+  "setup": {
+    "remove": ["~/app.log"],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_exists",
+    "path": "~/app.log"
+  },
+  "explanation": "scp is ssh's file-copy cousin: host:path means 'on that machine', a plain path means local. Pulling logs down to analyze them (or pushing a fixed config up) is daily work — same auth, same hosts as ssh.",
+  "teaches": ["ssh", "scp", "files"]
+}

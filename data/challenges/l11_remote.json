@@ -1,0 +1,38 @@
+{
+  "id": "l11_remote",
+  "title": "Hunt it on the box",
+  "level": "ssh",
+  "machine": "opsbox",
+  "xp": 200,
+  "time_limit": 320,
+  "briefing": [
+    "The log you pulled mentioned a suspicious child process on web-01, and the",
+    "box is pinned at 100% CPU. Something root-owned is hiding in /tmp.",
+    "",
+    "Log into web-01, find the rogue process, and kill it. It runs as root, so",
+    "you'll need sudo to stop it."
+  ],
+  "tips": [
+    "On web-01: `ps aux` and look for the CPU hog running from /tmp.",
+    "It's root-owned — `sudo kill <PID>` to stop it. Confirm it's gone with ps again."
+  ],
+  "objective": "SSH into web-01 and kill the rogue root-owned process (the CPU hog running from /tmp) so it's no longer running.",
+  "expert_objective": "Something root-owned is melting web-01. Log in and end it.",
+  "hints": [
+    "Get on the box and find it: `ssh admin@web-01`, then `ps aux`. The hog is /tmp/.x/kworkerd at ~96% CPU (PID 6931).",
+    "It's root's process, so stop it with privilege: `sudo kill 6931`.",
+    "`ssh admin@web-01`, `ps aux`, then `sudo kill 6931`. `ps aux` again shows it gone."
+  ],
+  "solution": "ssh admin@web-01\nps aux\nsudo kill 6931",
+  "setup": {
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {"type": "host_is", "host": "web-01"},
+      {"type": "process_absent", "cmd_contains": "kworkerd"}
+    ]
+  },
+  "explanation": "Incident response over ssh: get on the affected host, find the offender with ps, and stop it — with sudo, because it's not your process. You just handled a compromise on a server across the network, using only the shell.",
+  "teaches": ["ssh", "processes", "security", "incident-response"]
+}

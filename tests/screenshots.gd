@@ -94,6 +94,13 @@ func _run() -> void:
 		screen.terminal._on_submitted(line)
 		await _frames(1)
 	await _shot("11_git")
+	# Level 11 — SSH: log into a remote box and fix it.
+	Game.start_challenge("l11_login")
+	await _frames()
+	for line in ["curl -I http://web-01/", "ssh admin@web-01", "systemctl status nginx", "sudo systemctl start nginx", "systemctl is-active nginx"]:
+		screen.terminal._on_submitted(line)
+		await _frames(1)
+	await _shot("12_ssh")
 	Game.submit(":menu")
 	await _frames()
 	menu = main.host.get_child(main.host.get_child_count() - 1)

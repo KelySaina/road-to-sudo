@@ -235,6 +235,7 @@ func submit(line: String) -> void:
 		return
 
 	var user_before := session.user
+	var machine_before := session.machine
 	var outcome := shell.run_line(line)
 	EventBus.command_output.emit(outcome)
 	progression.record_outcome(outcome)
@@ -243,7 +244,7 @@ func submit(line: String) -> void:
 		challenges.observe(outcome)
 	elif mode == "adventure":
 		adventure.observe(outcome)
-	if user_before != session.user or outcome.has_event("cwd_changed") or outcome.has_event("root_shell") or outcome.has_event("adv_move"):
+	if user_before != session.user or machine_before != session.machine or outcome.has_event("cwd_changed") or outcome.has_event("root_shell") or outcome.has_event("adv_move"):
 		EventBus.session_changed.emit()
 	_lines_since_save += 1
 	if _lines_since_save >= AUTOSAVE_EVERY_LINES:
@@ -284,10 +285,12 @@ func save_now() -> void:
 			slot = CAMPAIGN_SLOT
 		elif mode == "adventure":
 			slot = ADVENTURE_SLOT
+		# While ssh'd into a remote host, record the local (login) machine, not
+		# the remote — a reload should drop you back home, not onto the server.
 		var world_data := {
 			"machine_id": _machine_id,
-			"machine": session.machine.to_dict(),
-			"cwd": session.cwd,
+			"machine": session.base_machine().to_dict(),
+			"cwd": session.base_cwd(),
 			"history": session.history.slice(-100),
 			"challenge": challenges.current.id if challenges.current != null else "",
 		}

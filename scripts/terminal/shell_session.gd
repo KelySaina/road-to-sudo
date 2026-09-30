@@ -25,6 +25,12 @@ var command_log: Array = []
 var exit_requested: int = -1
 ## Stack of {"user", "cwd"} pushed by su / sudo -i, popped by exit.
 var user_stack: Array = []
+## Stack of saved local contexts pushed by `ssh`, popped on remote `exit`.
+## Each frame: {"machine", "user", "cwd", "env", "user_stack", "host"}.
+var remote_stack: Array = []
+## Remote machines built this session, keyed by host, so reconnecting sees the
+## changes you made. Not serialized: a save/reload drops you back home.
+var remote_cache: Dictionary = {}
 
 
 func _init(p_machine: Machine, p_user: String) -> void:
@@ -118,6 +124,47 @@ func pop_user() -> bool:
 
 func prompt_symbol() -> String:
 	return "#" if user == "root" else "$"
+
+
+# --- ssh: switch the whole session to a remote machine, and back -------------
+
+func is_remote() -> bool:
+	return not remote_stack.is_empty()
+
+
+## Opens a shell on `remote` as `target_user`, saving the current context.
+func ssh_connect(remote: Machine, target_user: String) -> void:
+	remote_stack.append({"machine": machine, "user": user, "cwd": cwd, "env": env.duplicate(), "user_stack": user_stack.duplicate(), "host": machine.hostname})
+	machine = remote
+	user = target_user
+	user_stack = []
+	cwd = machine.home_of(target_user)
+	_reset_env()
+
+
+## Closes the current remote shell, restoring the previous context. Returns the
+## hostname just closed, or "" if there was no remote shell.
+func ssh_disconnect() -> String:
+	if remote_stack.is_empty():
+		return ""
+	var closed := machine.hostname
+	var frame: Dictionary = remote_stack.pop_back()
+	machine = frame.machine
+	user = frame.user
+	cwd = frame.cwd
+	env = frame.env
+	user_stack = frame.user_stack
+	return closed
+
+
+## The bottom-of-stack (login) machine and cwd — what a save should record even
+## while the player is off on a remote host.
+func base_machine() -> Machine:
+	return remote_stack[0].machine if not remote_stack.is_empty() else machine
+
+
+func base_cwd() -> String:
+	return remote_stack[0].cwd if not remote_stack.is_empty() else cwd
 
 
 func pretty_cwd() -> String:

@@ -1,0 +1,14 @@
+{
+  "id": "ssh",
+  "order": 11,
+  "title": "Level 11 — SSH & Remote Servers",
+  "subtitle": "ssh, scp and running the fleet from a jump host",
+  "description": "Real servers are administered remotely. From the ops-01 jump host, make a key, log into a broken web server over ssh, copy files with scp, and handle an incident on a machine you never physically touch — using the same Linux you already know, just somewhere else.",
+  "machine": "opsbox",
+  "challenges": [
+    "l11_keygen",
+    "l11_login",
+    "l11_scp",
+    "l11_remote"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "l11_keygen",
+  "title": "Your key to the fleet",
+  "level": "ssh",
+  "machine": "opsbox",
+  "fresh_machine": true,
+  "xp": 120,
+  "time_limit": 180,
+  "briefing": [
+    "Welcome to ops-01, the jump host you'll use to reach other servers over ssh.",
+    "",
+    "Before logging into anything, set up an SSH key pair: a private key you keep",
+    "secret and a public key you hand to servers. Then you log in with no password."
+  ],
+  "tips": [
+    "`ssh-keygen -t ed25519` makes a modern key in ~/.ssh.",
+    "It writes two files: id_ed25519 (private, mode 600) and id_ed25519.pub (public)."
+  ],
+  "objective": "Generate an ed25519 SSH key pair in ~/.ssh (a private key and its .pub).",
+  "expert_objective": "Create an ed25519 key pair under ~/.ssh.",
+  "hints": [
+    "Run `ssh-keygen -t ed25519` and accept the default location.",
+    "It creates ~/.ssh/id_ed25519 and ~/.ssh/id_ed25519.pub.",
+    "`ssh-keygen -t ed25519` — then `ls -l ~/.ssh` shows both files (private key is 600)."
+  ],
+  "solution": "ssh-keygen -t ed25519\nls -l ~/.ssh",
+  "setup": {
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {"type": "file_exists", "path": "~/.ssh/id_ed25519"},
+      {"type": "file_exists", "path": "~/.ssh/id_ed25519.pub"}
+    ]
+  },
+  "explanation": "Key-based auth is how real ssh works: the private key never leaves your machine (that's why it's mode 600), and the matching .pub goes on the servers you log into. No passwords flying over the network — just proof you hold the private key.",
+  "teaches": ["ssh", "keys", "authentication"]
+}

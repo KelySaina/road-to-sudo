@@ -162,6 +162,7 @@ Composites: `{"all": [...]}`, `{"any": [...]}`, `{"not": {...}}`.
 | `owner_is` | `path`, `owner?`, `group?` | owner and/or group match |
 | `cwd_is` | `path` | the shell is in that directory |
 | `user_is` | `user` | the shell runs as that user (for example `root` after `sudo -i`) |
+| `host_is` | `host` | the session's current machine has that hostname (true while ssh'd into it) |
 | `env_is` | `name`, `value` | a variable has that value |
 | `command_ran` | `name` (string or list), `args_contain?`, `exit_code?`, `cwd?`, `user?`, `scope?` | a matching command ran during this challenge (scripts and pipeline stages included) |
 | `output_contains` / `output_matches` | `text` or `regex`, `scope?` | some command's stdout showed it |
@@ -248,6 +249,13 @@ installed, depends?}`; `apt` reads and mutates it, `dpkg` reads it.
 A loopback interface is always added for you. Name resolution reads
 `/etc/hosts` before `dns`, so a challenge can be *solved* by editing
 `/etc/hosts` (which is what `dig`, `ping` and `curl` then see).
+
+A host in `net.hosts` becomes `ssh`-able by giving it a `"machine"` (another
+`data/machines/*.json` id) and a port 22 in its `ports`. `ssh user@that-host`
+then loads that machine and moves the whole session onto it; `exit` comes back.
+Remote machines are cached per session and reset at the start of each challenge,
+so a challenge's success is best checked *while connected* (`host_is` + the
+remote state), which is exactly what the SSH level does.
 
 A `services` entry is a name → unit spec map, read by `systemctl` /
 `journalctl`:

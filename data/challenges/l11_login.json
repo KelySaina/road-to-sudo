@@ -1,0 +1,38 @@
+{
+  "id": "l11_login",
+  "title": "Log in and fix it",
+  "level": "ssh",
+  "machine": "opsbox",
+  "xp": 170,
+  "time_limit": 300,
+  "briefing": [
+    "web-01 is paged: the site returns 502 Bad Gateway. From ops-01 you can see",
+    "it (curl -I http://web-01/), but to fix it you have to get ONTO it.",
+    "",
+    "Log in over ssh as admin and bring the web server back up. Once you ssh in,",
+    "every command runs on web-01 — the same tools you already know."
+  ],
+  "tips": [
+    "`ssh admin@web-01` logs you in; your prompt changes to admin@web-01.",
+    "There, treat it like any box: check the service and start it. `exit` returns to ops-01."
+  ],
+  "objective": "SSH into web-01 as admin and start its nginx service so the site is back up (nginx active on web-01).",
+  "expert_objective": "web-01 returns 502. Log in and restore nginx.",
+  "hints": [
+    "Get on the box: `ssh admin@web-01`. Then look: `systemctl status nginx` shows it's inactive (dead).",
+    "Start it (admin has sudo there): `sudo systemctl start nginx`.",
+    "`ssh admin@web-01`, then `sudo systemctl start nginx`. `systemctl is-active nginx` prints 'active'."
+  ],
+  "solution": "ssh admin@web-01\nsystemctl status nginx\nsudo systemctl start nginx",
+  "setup": {
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {"type": "host_is", "host": "web-01"},
+      {"type": "service_active", "service": "nginx", "expect": true}
+    ]
+  },
+  "explanation": "This is remote administration in a nutshell: ssh puts you on the far machine, and from there it's the same Linux you know. You diagnosed a down service and started it — on a server you never physically touch. `exit` closes the connection and brings you home.",
+  "teaches": ["ssh", "remote-admin", "services"]
+}
