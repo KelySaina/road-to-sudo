@@ -3,22 +3,23 @@ extends RefCounted
 ## The whole look, built in code: palette, fonts, styleboxes and the
 ## type variations scenes refer to (theme_type_variation = "DimLabel"...).
 
-const BG := Color("0b0d12")
-const PANEL := Color("10141b")
-const PANEL_ALT := Color("151a23")
-const PANEL_HOVER := Color("1a2130")
-const TERMINAL_BG := Color("0c0f15")
-const BORDER := Color("222a37")
-const TEXT := Color("d7dce5")
-const DIM := Color("7d8799")
-const FAINT := Color("4a5263")
-const ACCENT := Color("5ee6c8") # mint
-const ACCENT_DIM := Color("2c7d6c")
-const VIOLET := Color("b58cff")
-const WARN := Color("ffb454")
-const ERROR := Color("ff6b7a")
-const SUCCESS := Color("7ee787")
-const INFO := Color("7cb7ff")
+# Neon: vivid cyan/magenta/green on a deep violet-black. Bright accents, dark ground.
+const BG := Color("070510")
+const PANEL := Color("0e0b1e")
+const PANEL_ALT := Color("141031")
+const PANEL_HOVER := Color("1f1842")
+const TERMINAL_BG := Color("08060f")
+const BORDER := Color("2d2358")
+const TEXT := Color("e9ecff")
+const DIM := Color("8a8fce")
+const FAINT := Color("555a93")
+const ACCENT := Color("00e5ff") # neon cyan
+const ACCENT_DIM := Color("128f9e")
+const VIOLET := Color("c15bff") # neon magenta-violet
+const WARN := Color("ffc53d") # neon amber
+const ERROR := Color("ff2e63") # neon rose
+const SUCCESS := Color("2bffb0") # neon green
+const INFO := Color("4db8ff") # neon blue
 
 ## Output style name -> color (terminal chunks, narration kinds).
 const STYLE_COLORS := {
