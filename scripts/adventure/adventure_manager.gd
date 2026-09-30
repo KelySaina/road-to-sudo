@@ -27,6 +27,7 @@ var _snapshot_cwd: String = ""
 var _in_battle: bool = false
 var _hints_shown: int = 0
 var _setup_done: Dictionary = {}
+var _fired_reactions: Dictionary = {}
 var _won: bool = false
 
 
@@ -70,6 +71,7 @@ func engage(node_id: String) -> void:
 		if node.has("cwd"):
 			_session.set_cwd(ConditionEvaluator._path(node.cwd, _session))
 	_fired_traps.clear()
+	_fired_reactions.clear()
 	_events.clear()
 	_hints_shown = 0
 	_log_start = _session.command_log.size()
@@ -272,10 +274,26 @@ func observe(outcome: ExecutionOutcome) -> void:
 		var node := world.node(state.current)
 		if ConditionEvaluator.evaluate(node.get("battle", {}).get("success", {}), _state_dict()):
 			_win_battle(node)
+		else:
+			_check_reactions(node)
 
 
 func _state_dict() -> Dictionary:
 	return {"session": _session, "log_start": _log_start, "events": _events, "last_records": []}
+
+
+## Fire-once nudges that teach when the player is clearly stuck (looking around
+## with the wrong tool). Defined per battle in world.json as `reactions`.
+func _check_reactions(node: Dictionary) -> void:
+	var reactions: Array = node.get("battle", {}).get("reactions", [])
+	for i in reactions.size():
+		if _fired_reactions.has(i):
+			continue
+		var r: Dictionary = reactions[i]
+		if ConditionEvaluator.evaluate(r.get("when", {}), _state_dict()):
+			_fired_reactions[i] = true
+			narrate.emit("", "story")
+			narrate.emit("» " + str(r.get("say", "")), r.get("kind", "tip"))
 
 
 func _check_traps() -> void:

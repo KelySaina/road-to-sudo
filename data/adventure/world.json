@@ -121,6 +121,30 @@
         "learned": [
           "`chmod` changes a file's permissions. `chmod +x file` adds the execute bit,",
           "so a program is allowed to run. `./file` runs a program in the current directory."
+        ],
+        "reactions": [
+          {
+            "when": {
+              "all": [
+                {
+                  "type": "command_ran",
+                  "name": [
+                    "cat",
+                    "less",
+                    "more"
+                  ]
+                },
+                {
+                  "not": {
+                    "type": "command_ran",
+                    "name": "chmod"
+                  }
+                }
+              ]
+            },
+            "say": "Reading the script won't run it. Look at its permissions first — `ls -l keycard.sh` — the missing letter is `x`. Add it with `chmod +x keycard.sh`.",
+            "kind": "tip"
+          }
         ]
       },
       "exits": {
@@ -197,6 +221,30 @@
         "learned": [
           "`grep PATTERN file` keeps only the lines that match. A pipe `|` feeds one",
           "command into the next, so  grep ... | sort | uniq -c | sort -rn  counts and ranks."
+        ],
+        "reactions": [
+          {
+            "when": {
+              "all": [
+                {
+                  "type": "command_ran",
+                  "name": [
+                    "cat",
+                    "less",
+                    "more"
+                  ]
+                },
+                {
+                  "not": {
+                    "type": "command_ran",
+                    "name": "grep"
+                  }
+                }
+              ]
+            },
+            "say": "That's thousands of lines. Don't read them — filter them. `grep` keeps only lines that match: try  grep 'Failed password' /var/log/auth.log",
+            "kind": "tip"
+          }
         ]
       },
       "exits": {
@@ -276,6 +324,30 @@
         "learned": [
           "`ps aux` lists every process with its PID and CPU use. `kill <PID>` stops one.",
           "Read before you strike — a name in the list is not always what it seems."
+        ],
+        "reactions": [
+          {
+            "when": {
+              "all": [
+                {
+                  "type": "command_ran",
+                  "name": [
+                    "ls",
+                    "dir",
+                    "cat"
+                  ]
+                },
+                {
+                  "not": {
+                    "type": "command_ran",
+                    "name": "ps"
+                  }
+                }
+              ]
+            },
+            "say": "You won't find a process with `ls` — processes aren't files. List what's running with  ps aux  and look for the greedy one.",
+            "kind": "tip"
+          }
         ]
       },
       "exits": {
@@ -533,6 +605,31 @@
         "victory": [
           "The Packrat shrieks as you pull the config from its hoard.",
           "Backed up and restored. The archive settles."
+        ],
+        "reactions": [
+          {
+            "when": {
+              "all": [
+                {
+                  "type": "command_ran",
+                  "name": [
+                    "ls",
+                    "dir",
+                    "cat",
+                    "less"
+                  ]
+                },
+                {
+                  "not": {
+                    "type": "command_ran",
+                    "name": "find"
+                  }
+                }
+              ]
+            },
+            "say": "Buried means buried — and it's in a hidden folder, so a plain `ls` will never show it. Search the whole tree by name instead:  find /etc -name backup.cfg",
+            "kind": "tip"
+          }
         ]
       },
       "exits": {
@@ -597,6 +694,32 @@
         "victory": [
           "The Shredder unravels. The ledger falls quiet.",
           "'nemo' — caught red-handed in the columns."
+        ],
+        "reactions": [
+          {
+            "when": {
+              "all": [
+                {
+                  "type": "command_ran",
+                  "name": [
+                    "cat",
+                    "less",
+                    "more",
+                    "head",
+                    "tail"
+                  ]
+                },
+                {
+                  "not": {
+                    "type": "command_ran",
+                    "name": "cut"
+                  }
+                }
+              ]
+            },
+            "say": "600 rows is too many to eyeball. Slice out just the first column with `cut`, then count and rank:  cut -d, -f1 access.csv | sort | uniq -c | sort -rn",
+            "kind": "tip"
+          }
         ]
       },
       "exits": {

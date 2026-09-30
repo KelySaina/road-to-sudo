@@ -25,12 +25,12 @@ func _run():
 	var world=main.host.get_child(main.host.get_child_count()-1)
 	while world._dialogue.visible: world._advance_dialogue()
 	await _frames(2)
-	world._terminal.set_speed("instant")
-	var gate=_find(world,"gate"); world._player.global_position=gate.global_position+Vector2(0,48)
+	# jump straight into the archive fight and hunt with ls to trigger the nudge
+	Game.adventure.state.add_flag("keycard"); Game.adventure.state.add_flag("intel"); Game.adventure.state.add_flag("cpu_freed")
+	Game.adventure.state.cleared["gate"]=true; Game.adventure.state.cleared["swamp"]=true; Game.adventure.state.cleared["foundry"]=true
+	var arc=_find(world,"archive"); world._player.global_position=arc.global_position+Vector2(0,50)
 	await _phys(6); await _frames(3)
-	world._interact(gate); await _frames(3)
-	# reproduce the reported sequence: cd around, prompt must follow
-	for c in ["ls","cd /etc","pwd","cd /var/log","pwd","ls"]:
-		Game.submit(c)
-	await _frames(3)
-	await _shot("fix_prompt_follows_cd")
+	world._terminal.set_speed("instant")
+	world._interact(arc); await _frames(3)
+	Game.submit("ls /etc"); await _frames(3)
+	await _shot("nudge_find")

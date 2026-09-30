@@ -17,6 +17,7 @@ func _initialize() -> void:
 	test_wrong_answers()
 	test_traps_and_reboot()
 	test_elevation_unwind()
+	test_nudges()
 	print("\nadventure: %d passed, %d failed" % [passes, failures.size()])
 	for f in failures:
 		print("  FAIL ", f)
@@ -194,6 +195,27 @@ func test_elevation_unwind() -> void:
 	_run(ctx, "cd")
 	check(ctx.session.cwd == "/home/player", "cd with no arg goes to player home, not /root")
 	check(_run(ctx, "ls").stdout_text().contains("keycard.sh"), "ls shows the room, not a leaked /etc")
+
+
+func test_nudges() -> void:
+	# Hunting the buried file with ls should nudge the player toward find.
+	var ctx := _new()
+	ctx.mgr.engage("archive")
+	narration = []
+	_run(ctx, "ls /etc")
+	check(narration.any(func(t): return t.contains("find /etc -name backup.cfg")), "archive nudges toward find after ls")
+	# once find is used, the nudge condition no longer holds (and it is fire-once)
+	var ctx2 := _new()
+	ctx2.mgr.engage("archive")
+	narration = []
+	_run(ctx2, "find /etc -name backup.cfg")
+	check(not narration.any(func(t): return t.contains("Buried means buried")), "no nudge once find is used")
+	# swamp nudges toward grep
+	var ctx3 := _new()
+	ctx3.mgr.engage("swamp")
+	narration = []
+	_run(ctx3, "cat /var/log/auth.log")
+	check(narration.any(func(t): return t.contains("grep")), "swamp nudges toward grep after cat")
 
 
 func _imposter(ctx: Dictionary) -> int:
