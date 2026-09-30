@@ -20,7 +20,7 @@ Backing up /home/player/projects...
     +150 XP   +50 no-hint bonus
 ```
 
-This is an early build with a lot in it: a full **11-level campaign (52
+This is an early build with a lot in it: a full **12-level campaign (56
 challenges)** that takes you from `whoami` to taking **root on a burning
 production server**, plus a **2D RPG adventure mode**. A few advanced topics
 (networking, services, packages, SSH, git) are the next waves.
@@ -95,7 +95,7 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   basics"), Continue, **Adventure**, Practice Lab, Achievements, Settings and
   Exit.
   Starting over and resetting progress each ask for confirmation first.
-- **Campaign — 11 levels, 52 challenges** (state-checked, so any valid solution
+- **Campaign — 12 levels, 56 challenges** (state-checked, so any valid solution
   passes), ending by taking root on a production server:
 - **Level 0 · First Contact**, 10 challenges:
   1. *Who are you?* (`whoami` / `id`)
@@ -133,6 +133,10 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
 - **Level 9 · Package Management**, 4: install a missing tool with `apt`
   (dependencies pulled in for you), audit an installed version with `dpkg`,
   spot a risky package that shouldn't be on a server, and `apt remove` it.
+- **Level 10 · Version Control with Git**, 4: `git init` / `add` / `commit` /
+  `status` / `log` on a real index-and-commits model that diffs the working
+  tree live — put a project under version control, keep a `.env` secret out
+  with `.gitignore`, stage only what's ready, and build a two-commit history.
 - **Final · Road to sudo**: a broken production server, no hand-holding —
   investigate, `sudo -i`, stop the rogue root process, and hold the throne.
 - **Adventure mode — "The Ascent to Root" (a 2D RPG):** a real top-down game.
@@ -161,6 +165,7 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   - services: `systemctl journalctl`
   - network: `ip ss ping dig/host curl`
   - packages: `apt/apt-get dpkg`
+  - version control: `git` (init/add/commit/status/log/diff)
   - system: `hostname uname date`
   - shell: `bash/sh env/printenv export unset which exit true false`
 - **Shell features:** pipes, `>`, `>>`, `<`, `2>`, `2>&1`, `>&2`, `&&`,
@@ -304,17 +309,17 @@ These are honest gaps, not bugs:
 
 ## Roadmap (next steps)
 
-Levels 0–9 and the Final (Road to sudo) are **built** — 52 challenges. Each
+Levels 0–10 and the Final (Road to sudo) are **built** — 56 challenges. Each
 recent level added a small subsystem to `Machine` and a command or two: Level 7
 (Services) a `services` table + `systemctl` / `journalctl`; Level 8 (Networking)
 a `net` model + `ip` / `ss` / `ping` / `dig` / `curl`; Level 9 (Packages) a
-`packages` database + `apt` / `dpkg`. The pattern for what's left is the same:
+`packages` database + `apt` / `dpkg`; Level 10 (Git) a `git` repo model + the
+`git` command. The pattern for what's left is the same:
 1. **SSH** (remote `Machine`s + keys in `~/.ssh`): `ssh`, `scp`, `ssh-keygen`.
    The `net` model already gives every host reachable peers to build on.
-2. **Git** (a mini in-VFS repo model): `git init/add/commit/log/status`.
-3. **Bash control flow:** `if` / `for` / `while` in the script interpreter (the
+2. **Bash control flow:** `if` / `for` / `while` in the script interpreter (the
    parser already produces a list/pipeline AST to build on), plus `$(…)`.
-4. **More Adventure regions:** the RPG engine is data-driven — new regions,
+3. **More Adventure regions:** the RPG engine is data-driven — new regions,
    NPCs, enemies and bosses are JSON in `data/adventure/`. Each new subsystem
    above can also become a new zone.
 

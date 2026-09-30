@@ -169,6 +169,7 @@ Composites: `{"all": [...]}`, `{"any": [...]}`, `{"not": {...}}`.
 | `process_running` / `process_absent` | `pid` or `cmd_contains` | process table state |
 | `service_active` / `service_enabled` | `service`, `expect?` (default `true`) | a systemd unit is running / set to start at boot |
 | `package_installed` | `package`, `expect?` (default `true`) | a package is (or isn't) installed |
+| `git_state` | `repo`, plus any of `has_commits`, `min_commits`, `clean`, `tracked` [paths], `not_tracked` [paths] | the repo at `repo` is in that state (working tree diffed live) |
 
 `scope` is `"any"` (the default: anything since the challenge started) or
 `"last"` (only the line just entered).

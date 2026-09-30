@@ -1,0 +1,29 @@
+{
+  "hostname": "dev-01",
+  "users": {
+    "root":   {"uid": 0,    "gid": 0,    "groups": ["root"],               "home": "/root",        "shell": "/bin/bash", "gecos": "root"},
+    "player": {"uid": 1000, "gid": 1000, "groups": ["player", "users"],    "home": "/home/player", "shell": "/bin/bash", "gecos": "Developer"}
+  },
+  "processes": [
+    {"pid": 1,    "user": "root",   "cpu": 0.0, "mem": 0.4, "stat": "Ss", "cmd": "/sbin/init"},
+    {"pid": 1337, "user": "player", "cpu": 0.0, "mem": 0.1, "stat": "S",  "cmd": "-bash", "tty": "pts/0"}
+  ],
+  "packages": {
+    "git": {"version": "2.43.0-1", "section": "vcs", "installed": true, "description": "fast, scalable, distributed revision control system"}
+  },
+  "files": {
+    "/home/player": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+    "/home/player/README.txt": {"owner": "player", "group": "player", "mode": "644", "lines": [
+      "dev-01 — your developer workstation.",
+      "",
+      "git tracks the history of a project. The rhythm is always the same:",
+      "  git init            start tracking a folder",
+      "  git status          see what changed",
+      "  git add <file>      stage a change (git add . stages everything)",
+      "  git commit -m '...'  save the staged changes as a commit",
+      "  git log             the history",
+      "",
+      "A .gitignore file lists things git should never track (secrets, junk)."
+    ]}
+  }
+}

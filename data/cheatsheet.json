@@ -57,6 +57,13 @@
       {"cmd": "apt remove", "desc": "uninstall it (needs sudo)",   "ex": "sudo apt remove telnet"},
       {"cmd": "dpkg -l",    "desc": "what's installed, which version","ex": "dpkg -l openssl"}
     ]},
+    {"title": "Version control (git)", "items": [
+      {"cmd": "git init",   "desc": "start tracking this folder",    "ex": "git init"},
+      {"cmd": "git status", "desc": "what's changed / staged",       "ex": "git status"},
+      {"cmd": "git add",    "desc": "stage a change (. = all)",      "ex": "git add file.py"},
+      {"cmd": "git commit", "desc": "save staged changes",          "ex": "git commit -m 'msg'"},
+      {"cmd": "git log",    "desc": "the commit history",           "ex": "git log --oneline"}
+    ]},
     {"title": "Becoming root", "items": [
       {"cmd": "sudo",  "desc": "run one command as root",         "ex": "sudo cat /etc/shadow"},
       {"cmd": "su",    "desc": "switch user",                     "ex": "su - alice"}

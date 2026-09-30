@@ -17,7 +17,7 @@ func _play(mgr: ChallengeManager, shell: Shell, lines: Array) -> bool:
 
 func test_library_is_valid() -> void:
 	var lib := ChallengeLibrary.load_default()
-	check_eq(lib.order.size(), 52, "full campaign in order")
+	check_eq(lib.order.size(), 56, "full campaign in order")
 	for cid in lib.order:
 		var c := lib.get_challenge(cid)
 		check(c.validate().is_empty(), "%s validates: %s" % [cid, str(c.validate())])
@@ -60,6 +60,8 @@ func test_alternative_solutions() -> void:
 		"l9_install": ["sudo apt-get install tcpdump"],
 		"l9_audit": ["dpkg -s openssl", "echo 3.0.11-1~deb12u2 > openssl.txt"],
 		"l9_remove": ["sudo apt purge netcat-traditional"],
+		"l10_init": ["cd site", "git init", "git add index.html style.css", "git commit -m snapshot"],
+		"l10_log": ["cd ~/tool", "git init", "git add .", "git commit -m one", "echo x >> tool.sh", "git add .", "git commit -m two"],
 	}
 	for cid in cases:
 		var c := lib.get_challenge(cid)
@@ -115,6 +117,15 @@ func test_wrong_answers_do_not_pass() -> void:
 	shell = new_shell("server")
 	mgr.begin(lib.get_challenge("l9_remove"), shell.session)
 	check(not _play(mgr, shell, ["apt remove netcat-traditional"]), "apt remove needs privilege")
+	# Git: committing everything must NOT track the secret / the WIP file.
+	mgr = _manager()
+	shell = new_shell("devbox")
+	mgr.begin(lib.get_challenge("l10_gitignore"), shell.session)
+	check(not _play(mgr, shell, ["cd ~/api", "git init", "git add .", "git commit -m all"]), "committing .env without ignoring it fails the challenge")
+	mgr = _manager()
+	shell = new_shell("devbox")
+	mgr.begin(lib.get_challenge("l10_stage"), shell.session)
+	check(not _play(mgr, shell, ["cd ~/feature", "git init", "git add .", "git commit -m all"]), "committing the WIP scratch file is not the goal")
 
 
 func test_hints_and_scoring() -> void:

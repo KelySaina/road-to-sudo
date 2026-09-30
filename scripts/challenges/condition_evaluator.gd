@@ -95,6 +95,8 @@ static func evaluate(cond: Dictionary, state: Dictionary) -> bool:
 			return session.machine.service_enabled(cond.service) == bool(cond.get("expect", true))
 		"package_installed":
 			return session.machine.package_installed(cond.package) == bool(cond.get("expect", true))
+		"git_state":
+			return _git_state(cond, session)
 		"has_flag":
 			return session.adventure != null and session.adventure.state.has_flag(cond.flag)
 	push_warning("Unknown condition type: %s" % cond.get("type", "?"))
@@ -164,6 +166,30 @@ static func _event_seen(cond: Dictionary, state: Dictionary) -> bool:
 		if ok:
 			return true
 	return false
+
+
+## git_state: repo (root path), and any of has_commits, min_commits, clean,
+## tracked [paths must be staged/committed], not_tracked [paths must not be].
+static func _git_state(cond: Dictionary, session: ShellSession) -> bool:
+	var m := session.machine
+	var root := _path(cond.get("repo", "~"), session)
+	if not m.git.has(root):
+		return false
+	var repo := GitModel.get_repo(m, root)
+	var st := GitModel.status(m, m.vfs, root)
+	if cond.has("has_commits") and st.has_commits != bool(cond.has_commits):
+		return false
+	if cond.has("min_commits") and (repo.commits as Array).size() < int(cond.min_commits):
+		return false
+	if cond.has("clean") and GitModel.is_clean(st) != bool(cond.clean):
+		return false
+	for p in cond.get("tracked", []):
+		if not (repo.index as Dictionary).has(p):
+			return false
+	for p in cond.get("not_tracked", []):
+		if (repo.index as Dictionary).has(p):
+			return false
+	return true
 
 
 static func _process_exists(m: Machine, cond: Dictionary) -> bool:

@@ -1,0 +1,44 @@
+{
+  "id": "l10_init",
+  "title": "Start tracking",
+  "level": "vcs",
+  "machine": "devbox",
+  "fresh_machine": true,
+  "xp": 130,
+  "time_limit": 220,
+  "briefing": [
+    "You've built a little website in ~/site, but it isn't under version control.",
+    "One bad edit and there's no way back.",
+    "",
+    "Put it in git: turn the folder into a repository and make a first commit",
+    "with everything in it."
+  ],
+  "tips": [
+    "The rhythm is: git init → git add . → git commit -m \"message\".",
+    "`git status` after each step shows you what git thinks is going on."
+  ],
+  "objective": "Turn ~/site into a git repository and commit all of its files in a first commit.",
+  "expert_objective": "Put ~/site under git with an initial commit of everything.",
+  "hints": [
+    "Go there and start a repo: `cd ~/site`, then `git init`.",
+    "Stage everything, then commit: `git add .`, then `git commit -m \"initial commit\"`.",
+    "`cd ~/site && git init && git add . && git commit -m \"initial commit\"`. `git status` should then say 'working tree clean'."
+  ],
+  "solution": "cd ~/site\ngit init\ngit add .\ngit commit -m \"initial commit\"",
+  "setup": {
+    "files": {
+      "~/site": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "~/site/index.html": {"owner": "player", "group": "player", "mode": "644", "content": "<h1>Hello</h1>\n"},
+      "~/site/style.css": {"owner": "player", "group": "player", "mode": "644", "content": "body { font-family: monospace; }\n"}
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "git_state",
+    "repo": "~/site",
+    "min_commits": 1,
+    "clean": true
+  },
+  "explanation": "Every git project starts the same way: `git init` creates the repository, `git add` stages what you want to save, and `git commit` records a snapshot with a message. 'working tree clean' means everything is safely committed — your undo history has begun.",
+  "teaches": ["git", "version-control"]
+}

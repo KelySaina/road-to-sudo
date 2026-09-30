@@ -1,0 +1,42 @@
+{
+  "id": "l10_log",
+  "title": "A history worth reading",
+  "level": "vcs",
+  "machine": "devbox",
+  "xp": 170,
+  "time_limit": 300,
+  "briefing": [
+    "One commit isn't a history. In ~/tool there's a script, tool.sh. Get it",
+    "under git, then make a real change and commit that too — so the log shows",
+    "the story of how the file evolved.",
+    "",
+    "End with two commits and a clean working tree."
+  ],
+  "tips": [
+    "The everyday loop: edit a file → git add it → git commit. Repeat.",
+    "`git log` (or `git log --oneline`) shows the commits you've made, newest first."
+  ],
+  "objective": "In a new ~/tool repo, commit tool.sh, then make a change to it and commit again — two commits, working tree clean.",
+  "expert_objective": "Give ~/tool a two-commit history with a clean tree.",
+  "hints": [
+    "First commit: `cd ~/tool && git init && git add tool.sh && git commit -m \"first version\"`.",
+    "Change the file, then commit again: append a line with `echo ... >> tool.sh`, then `git add tool.sh` and `git commit -m \"...\"`.",
+    "`echo 'echo done' >> tool.sh`, then `git commit -am \"print done when finished\"` (‑a stages the tracked change). `git log --oneline` shows two commits."
+  ],
+  "solution": "cd ~/tool\ngit init\ngit add tool.sh\ngit commit -m \"first version\"\necho 'echo done' >> tool.sh\ngit commit -am \"print done when finished\"\ngit log --oneline",
+  "setup": {
+    "files": {
+      "~/tool": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "~/tool/tool.sh": {"owner": "player", "group": "player", "mode": "755", "content": "#!/bin/bash\necho running\n"}
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "git_state",
+    "repo": "~/tool",
+    "min_commits": 2,
+    "clean": true
+  },
+  "explanation": "This is the loop you'll run thousands of times: change something, `git add`, `git commit`. Each commit is a labelled snapshot you can return to, and `git log` reads back the story. `git commit -a` is a shortcut that stages changes to already-tracked files for you.",
+  "teaches": ["git", "commit", "log"]
+}

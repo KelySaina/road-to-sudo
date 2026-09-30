@@ -87,6 +87,13 @@ func _run() -> void:
 		screen.terminal._on_submitted(line)
 		await _frames(1)
 	await _shot("10_packages")
+	# Level 10 — Git: the init → add → commit loop.
+	Game.start_challenge("l10_init")
+	await _frames()
+	for line in ["cd ~/site", "git status", "git init", "git add .", "git commit -m \"initial commit\"", "git log --oneline"]:
+		screen.terminal._on_submitted(line)
+		await _frames(1)
+	await _shot("11_git")
 	Game.submit(":menu")
 	await _frames()
 	menu = main.host.get_child(main.host.get_child_count() - 1)

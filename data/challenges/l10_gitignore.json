@@ -1,0 +1,45 @@
+{
+  "id": "l10_gitignore",
+  "title": "Keep the secret out",
+  "level": "vcs",
+  "machine": "devbox",
+  "xp": 160,
+  "time_limit": 260,
+  "briefing": [
+    "The ~/api project has source files — and a .env file holding a database",
+    "password. That secret must NEVER go into git; committed secrets are one of",
+    "the most common ways credentials leak.",
+    "",
+    "Put ~/api under version control, but make git ignore .env so it's never",
+    "tracked or committed."
+  ],
+  "tips": [
+    "A .gitignore file, one pattern per line, tells git what to skip. Create it BEFORE you `git add .`.",
+    "Check with `git status`: once .env is ignored, it stops appearing as untracked."
+  ],
+  "objective": "Make ~/api a git repo and commit its files, but keep .env out of git by ignoring it — .env must not be tracked.",
+  "expert_objective": "Version ~/api without ever tracking its .env secret.",
+  "hints": [
+    "Start the repo and tell git to ignore the secret: `cd ~/api && git init`, then `echo .env > .gitignore`.",
+    "Now stage and commit everything else: `git add .` (the ignored .env is skipped), then `git commit -m \"initial commit\"`.",
+    "`cd ~/api && git init && echo .env > .gitignore && git add . && git commit -m \"init\"`. `git status` shows .env is no longer listed."
+  ],
+  "solution": "cd ~/api\ngit init\necho .env > .gitignore\ngit add .\ngit commit -m \"initial commit\"",
+  "setup": {
+    "files": {
+      "~/api": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "~/api/server.js": {"owner": "player", "group": "player", "mode": "644", "content": "require('./db').connect()\n"},
+      "~/api/config.json": {"owner": "player", "group": "player", "mode": "644", "content": "{ \"port\": 8080 }\n"},
+      "~/api/.env": {"owner": "player", "group": "player", "mode": "600", "content": "DB_PASSWORD=hunter2\n"}
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {"type": "git_state", "repo": "~/api", "min_commits": 1, "not_tracked": [".env"], "clean": true},
+      {"type": "file_contains", "path": "~/api/.gitignore", "text": ".env"}
+    ]
+  },
+  "explanation": "`.gitignore` lists paths git should pretend it can't see — secrets, build output, logs. Add the pattern before you stage, and `git add .` quietly skips it. That's how you keep a .env of passwords out of a repo that might one day be pushed somewhere public.",
+  "teaches": ["git", "gitignore", "security", "secrets"]
+}

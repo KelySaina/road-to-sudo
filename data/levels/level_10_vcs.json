@@ -1,0 +1,14 @@
+{
+  "id": "vcs",
+  "order": 10,
+  "title": "Level 10 — Version Control with Git",
+  "subtitle": "init, add, commit, log — and a .gitignore for secrets",
+  "description": "git is how the world tracks changes to code. Learn the everyday loop — init a repo, stage with add, save with commit, read the story with log — plus the two habits that matter most: choosing exactly what to commit, and keeping secrets out with .gitignore.",
+  "machine": "devbox",
+  "challenges": [
+    "l10_init",
+    "l10_gitignore",
+    "l10_stage",
+    "l10_log"
+  ]
+}

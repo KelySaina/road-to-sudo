@@ -1,0 +1,44 @@
+{
+  "id": "l10_stage",
+  "title": "Commit only what's ready",
+  "level": "vcs",
+  "machine": "devbox",
+  "xp": 160,
+  "time_limit": 260,
+  "briefing": [
+    "In ~/feature there are two files: parser.py, which is finished and reviewed,",
+    "and scratch.txt, your messy personal notes that shouldn't go in the repo",
+    "yet.",
+    "",
+    "Commit parser.py — and only parser.py. Leave scratch.txt untracked."
+  ],
+  "tips": [
+    "`git add .` stages EVERYTHING. To stage one file, name it: `git add parser.py`.",
+    "`git status` will show parser.py staged and scratch.txt still untracked."
+  ],
+  "objective": "In a new ~/feature repo, commit parser.py while leaving scratch.txt untracked (not committed).",
+  "expert_objective": "Commit only parser.py from ~/feature; scratch.txt stays untracked.",
+  "hints": [
+    "Start the repo: `cd ~/feature && git init`.",
+    "Stage just the one file (not `git add .`): `git add parser.py`.",
+    "`git add parser.py && git commit -m \"add parser\"`. `git status` still lists scratch.txt as untracked."
+  ],
+  "solution": "cd ~/feature\ngit init\ngit add parser.py\ngit commit -m \"add parser\"",
+  "setup": {
+    "files": {
+      "~/feature": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "~/feature/parser.py": {"owner": "player", "group": "player", "mode": "644", "content": "def parse(s):\n    return s.split()\n"},
+      "~/feature/scratch.txt": {"owner": "player", "group": "player", "mode": "644", "content": "TODO: my messy notes, do not commit\n"}
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "type": "git_state",
+    "repo": "~/feature",
+    "min_commits": 1,
+    "tracked": ["parser.py"],
+    "not_tracked": ["scratch.txt"]
+  },
+  "explanation": "The staging area (index) is git's superpower: you choose exactly which changes go into a commit. `git add <file>` stages one thing; `git add .` stages all. Committing only what's ready keeps history clean and keeps half-finished work out of it.",
+  "teaches": ["git", "staging", "version-control"]
+}

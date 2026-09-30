@@ -286,14 +286,25 @@ func _history_step(direction: int) -> void:
 
 
 ## Typing anywhere in the game screen goes to the prompt. If focus had briefly
-## drifted, grab it AND type the character, so the first keystroke is never
-## eaten just re-focusing (the "I have to click before I can type" bug).
+## drifted, grab it AND act on the key in the same event, so no keystroke is
+## ever eaten just re-focusing (the "I have to click / press Enter twice before
+## I can type" bug). Enter, Backspace and printable characters are all handled.
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not (is_visible_in_tree() and event is InputEventKey and event.pressed and not input.has_focus()):
 		return
 	input.grab_focus()
 	var key := event as InputEventKey
-	if key.unicode >= 32 and not key.ctrl_pressed and not key.meta_pressed:
+	if key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER:
+		_on_submitted(input.text)
+		accept_event()
+	elif key.keycode == KEY_BACKSPACE:
+		if input.caret_column > 0:
+			var col := input.caret_column
+			input.text = input.text.substr(0, col - 1) + input.text.substr(col)
+			input.caret_column = col - 1
+			_on_text_changed(input.text)
+		accept_event()
+	elif key.unicode >= 32 and not key.ctrl_pressed and not key.meta_pressed:
 		input.insert_text_at_caret(String.chr(key.unicode))
 		_on_text_changed(input.text)
 		accept_event()

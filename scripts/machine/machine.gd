@@ -19,6 +19,10 @@ var net: Dictionary = {}
 ## "description", "section", "installed": bool, "depends": [names]}.
 ## Read by apt / dpkg.
 var packages: Dictionary = {}
+## Git repositories, keyed by absolute working-tree root. Each:
+## {"branch", "index": {path: hash}, "commits": [{hash, message, author, tree, parent}]}.
+## Managed by GitModel via the `git` command.
+var git: Dictionary = {}
 var sudoers: Array = []
 var next_pid: int = 1000
 
@@ -175,6 +179,7 @@ func to_dict() -> Dictionary:
 		"services": services,
 		"net": net,
 		"packages": packages,
+		"git": git,
 		"sudoers": sudoers,
 		"next_pid": next_pid,
 		"fs": vfs.to_dict(),
@@ -189,6 +194,7 @@ static func from_dict(d: Dictionary) -> Machine:
 	m.services = d.get("services", {})
 	m.net = d.get("net", {})
 	m.packages = d.get("packages", {})
+	m.git = d.get("git", {})
 	m.sudoers = d.get("sudoers", [])
 	m.next_pid = int(d.get("next_pid", 1000))
 	m.vfs = VirtualFileSystem.from_dict(d.get("fs", {}))
