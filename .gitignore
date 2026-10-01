@@ -1,7 +1,9 @@
 # Godot 4
 .godot/
 *.import
-export_presets.cfg
 *.translation
+# Export output (binaries ship via GitHub Releases, not the repo)
+/build/
+*.tpz
 # OS
 .DS_Store
