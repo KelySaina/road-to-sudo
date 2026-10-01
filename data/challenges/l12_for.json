@@ -1,0 +1,48 @@
+{
+  "id": "l12_for",
+  "title": "Do it to all of them",
+  "level": "bash",
+  "machine": "workstation",
+  "fresh_machine": true,
+  "xp": 150,
+  "time_limit": 240,
+  "briefing": [
+    "~/reports holds three monthly reports: jan.txt, feb.txt, mar.txt. They've",
+    "been signed off, so archive each one by renaming it to add a .done suffix",
+    "(jan.txt → jan.txt.done).",
+    "",
+    "Doing it by hand is three commands. A loop does it in one — and in one",
+    "hundred the same way. That's what `for` is for."
+  ],
+  "tips": [
+    "`for f in *.txt; do ... ; done` runs the body once per matching file, with $f set to each.",
+    "Inside, rename with `mv \"$f\" \"$f.done\"`."
+  ],
+  "objective": "In ~/reports, rename every .txt file to add a .done suffix (so jan.txt becomes jan.txt.done, and no .txt file is left).",
+  "expert_objective": "Archive every .txt in ~/reports to .txt.done with one loop.",
+  "hints": [
+    "A for loop walks a list: `for f in *.txt; do ...; done`. Each time, $f is one filename.",
+    "Rename inside the loop: `mv \"$f\" \"$f.done\"`.",
+    "`cd ~/reports`, then `for f in *.txt; do mv \"$f\" \"$f.done\"; done`."
+  ],
+  "solution": "cd ~/reports\nfor f in *.txt; do mv \"$f\" \"$f.done\"; done",
+  "setup": {
+    "files": {
+      "~/reports": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "~/reports/jan.txt": {"owner": "player", "group": "player", "content": "January report\n"},
+      "~/reports/feb.txt": {"owner": "player", "group": "player", "content": "February report\n"},
+      "~/reports/mar.txt": {"owner": "player", "group": "player", "content": "March report\n"}
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {"type": "file_exists", "path": "~/reports/jan.txt.done"},
+      {"type": "file_exists", "path": "~/reports/feb.txt.done"},
+      {"type": "file_exists", "path": "~/reports/mar.txt.done"},
+      {"type": "path_missing", "path": "~/reports/jan.txt"}
+    ]
+  },
+  "explanation": "A `for` loop repeats a command for every item in a list — here every file matching *.txt. The loop variable ($f) takes each value in turn. Learn this and batch work stops being tedious: the same loop handles three files or three thousand.",
+  "teaches": ["bash", "for", "loops", "scripting"]
+}

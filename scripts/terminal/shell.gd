@@ -33,8 +33,30 @@ func run_line(line: String) -> ExecutionOutcome:
 ## `parent` is set when running inside a script: nested output then follows
 ## the parent's streams (so `./x.sh > out.txt` captures everything).
 func run_into(line: String, outcome: ExecutionOutcome, depth: int, parent: CommandContext = null) -> void:
-	if line == "" or line.begins_with("#"):
+	if line.strip_edges() == "":
 		return
+	# A line is a sequence of top-level statements (split on ; and newline, but
+	# not inside a for/while/if block). Each is either a compound command or an
+	# ordinary pipeline. This is also what makes compounds work after a ; and
+	# multi-line blocks work (their embedded newlines separate statements).
+	for stmt in ShellControl.split_statements(line):
+		_run_statement(stmt, outcome, depth, parent)
+		if session.exit_requested >= 0 and depth > 0:
+			return
+
+
+func _run_statement(stmt: String, outcome: ExecutionOutcome, depth: int, parent: CommandContext) -> void:
+	if stmt == "" or stmt.begins_with("#"):
+		return
+	# Control flow (for / while / until / if) is detected on the raw statement —
+	# the scanner treats $(...) and quotes as opaque — and runs its conditions
+	# and bodies back through run_into.
+	if ShellControl.is_compound_start(ShellControl.first_word(stmt)):
+		ShellControl.run(self, stmt, outcome, depth, parent)
+		return
+	var line := stmt
+	if line.contains("$(") or line.contains("`"):
+		line = _expand_command_subst(line, outcome, depth, parent)
 	var parsed := CommandParser.parse(line)
 	if parsed.error != "":
 		outcome.write("err", "bash: %s\n" % parsed.error)
@@ -143,6 +165,80 @@ func _run_pipeline(pipeline: Array, outcome: ExecutionOutcome, depth: int, paren
 		piped = true
 
 
+## Replaces every $(...) and `...` with the stdout of running it. Single-quoted
+## spans are left literal. Trailing newlines are trimmed and inner newlines
+## become spaces (the common unquoted use, e.g. `for f in $(ls)`).
+func _expand_command_subst(line: String, outcome: ExecutionOutcome, depth: int, parent: CommandContext) -> String:
+	var out := ""
+	var i := 0
+	var n := line.length()
+	while i < n:
+		var c := line[i]
+		if c == "'":
+			var e := line.find("'", i + 1)
+			if e == -1:
+				out += line.substr(i)
+				break
+			out += line.substr(i, e - i + 1)
+			i = e + 1
+			continue
+		if c == "\\" and i + 1 < n:
+			out += line.substr(i, 2)
+			i += 2
+			continue
+		if c == "$" and i + 1 < n and line[i + 1] == "(":
+			var close := _find_subst_close(line, i + 2)
+			out += _run_capture(line.substr(i + 2, close - i - 2), outcome, depth, parent)
+			i = close + 1
+			continue
+		if c == "`":
+			var b := line.find("`", i + 1)
+			if b == -1:
+				out += line.substr(i)
+				break
+			out += _run_capture(line.substr(i + 1, b - i - 1), outcome, depth, parent)
+			i = b + 1
+			continue
+		out += c
+		i += 1
+	return out
+
+
+func _find_subst_close(line: String, i: int) -> int:
+	var depth := 1
+	var n := line.length()
+	while i < n:
+		var c := line[i]
+		if c == "'":
+			var e := line.find("'", i + 1)
+			i = (e + 1) if e != -1 else n
+			continue
+		if c == "(":
+			depth += 1
+		elif c == ")":
+			depth -= 1
+			if depth == 0:
+				return i
+		i += 1
+	return n
+
+
+func _run_capture(inner: String, outcome: ExecutionOutcome, depth: int, parent: CommandContext) -> String:
+	var cap := CommandContext.new()
+	cap.session = session
+	cap.shell = self
+	cap.outcome = outcome
+	cap.to_screen = false
+	cap.stderr_to_screen = parent == null or parent.stderr_to_screen
+	var saved_code := session.last_exit_code
+	run_into(inner, outcome, depth + 1, cap)
+	session.last_exit_code = saved_code
+	var text := cap.stdout_buffer
+	while text.ends_with("\n"):
+		text = text.substr(0, text.length() - 1)
+	return text.replace("\n", " ")
+
+
 func _open_redirect(redirect: Dictionary, outcome: ExecutionOutcome) -> bool:
 	if redirect.path == "/dev/null":
 		return true
@@ -248,17 +344,25 @@ func _run_program_file(path_text: String, ctx: CommandContext) -> int:
 	return run_script(res.node.content, ctx.args(), ctx)
 
 
-## Interprets a script: one command line per line. Control flow (if/for)
-## is planned for the Bash level; see docs/ARCHITECTURE.md.
+## Interprets a script. Statements are read one at a time; a for/while/if block
+## is accumulated across lines until it closes (done/fi) and run as a unit.
 func run_script(source: String, script_args: Array, ctx: CommandContext) -> int:
 	var saved_positional := session.positional
 	session.positional = script_args
 	var saved_code := session.last_exit_code
 	session.last_exit_code = 0
-	for raw in source.split("\n"):
-		var line := raw.strip_edges()
+	var lines := source.split("\n")
+	var i := 0
+	while i < lines.size():
+		var line := str(lines[i]).strip_edges()
+		i += 1
 		if line == "" or line.begins_with("#"):
 			continue
+		# A compound command (for/while/if) may span several lines: keep reading
+		# until its block is balanced (done/fi), then run the whole thing.
+		while ShellControl.block_depth(line) > 0 and i < lines.size():
+			line += "\n" + str(lines[i])
+			i += 1
 		run_into(line, ctx.outcome, ctx.depth + 1, ctx)
 		if session.exit_requested >= 0:
 			session.last_exit_code = session.exit_requested

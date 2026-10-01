@@ -63,6 +63,13 @@
       {"cmd": "apt remove", "desc": "uninstall it (needs sudo)",   "ex": "sudo apt remove telnet"},
       {"cmd": "dpkg -l",    "desc": "what's installed, which version","ex": "dpkg -l openssl"}
     ]},
+    {"title": "Scripting (loops & logic)", "items": [
+      {"cmd": "for",  "desc": "repeat a command over a list",    "ex": "for f in *.txt; do mv $f $f.bak; done"},
+      {"cmd": "if",   "desc": "run only when a test succeeds",   "ex": "if [ -f x ]; then echo yes; fi"},
+      {"cmd": "while","desc": "repeat while a test holds",       "ex": "while [ -f lock ]; do rm lock; done"},
+      {"cmd": "test", "desc": "a condition; [ ... ] is the same","ex": "[ \"$USER\" = root ]"},
+      {"cmd": "$( )", "desc": "use a command's output",         "ex": "echo count: $(ls | wc -l)"}
+    ]},
     {"title": "Version control (git)", "items": [
       {"cmd": "git init",   "desc": "start tracking this folder",    "ex": "git init"},
       {"cmd": "git status", "desc": "what's changed / staged",       "ex": "git status"},

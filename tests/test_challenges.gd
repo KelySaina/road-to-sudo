@@ -17,7 +17,7 @@ func _play(mgr: ChallengeManager, shell: Shell, lines: Array) -> bool:
 
 func test_library_is_valid() -> void:
 	var lib := ChallengeLibrary.load_default()
-	check_eq(lib.order.size(), 60, "full campaign in order")
+	check_eq(lib.order.size(), 64, "full campaign in order")
 	for cid in lib.order:
 		var c := lib.get_challenge(cid)
 		check(c.validate().is_empty(), "%s validates: %s" % [cid, str(c.validate())])
@@ -66,6 +66,9 @@ func test_alternative_solutions() -> void:
 		"l11_login": ["ssh admin@web-01", "sudo systemctl start nginx"],
 		"l11_scp": ["cd ~", "scp admin@web-01:/var/log/app.log ."],
 		"l11_remote": ["ssh admin@web-01", "sudo kill 6931"],
+		"l12_for": ["cd ~/reports", "for f in jan feb mar; do mv $f.txt $f.txt.done; done"],
+		"l12_while": ["mkdir ~/processed", "while [ -n \"$(ls ~/queue)\" ]; do f=$(ls ~/queue | head -1); mv ~/queue/$f ~/processed/; done"],
+		"l12_subst": ["ls ~/logs/*.log | wc -l > ~/count.txt"],
 	}
 	for cid in cases:
 		var c := lib.get_challenge(cid)
@@ -140,6 +143,15 @@ func test_wrong_answers_do_not_pass() -> void:
 	shell = new_shell("opsbox")
 	mgr.begin(lib.get_challenge("l11_remote"), shell.session)
 	check(not _play(mgr, shell, ["ssh admin@web-01", "ps aux"]), "looking at the rogue process is not killing it")
+	# Bash: copying instead of renaming, and listing all hosts, both miss the goal.
+	mgr = _manager()
+	shell = new_shell()
+	mgr.begin(lib.get_challenge("l12_for"), shell.session)
+	check(not _play(mgr, shell, ["cd ~/reports", "for f in *.txt; do cp $f $f.done; done"]), "copying leaves the .txt files, so it is not a rename")
+	mgr = _manager()
+	shell = new_shell()
+	mgr.begin(lib.get_challenge("l12_if"), shell.session)
+	check(not _play(mgr, shell, ["cd ~/hosts", "for h in *; do echo $h >> ~/up.txt; done"]), "listing every host (not just the up ones) is wrong")
 
 
 func test_hints_and_scoring() -> void:

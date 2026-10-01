@@ -20,9 +20,9 @@ Backing up /home/player/projects...
     +150 XP   +50 no-hint bonus
 ```
 
-This is an early build with a lot in it: a full **13-level campaign (60
+This is an early build with a lot in it: a full **14-level campaign (64
 challenges)** that takes you from `whoami` to taking **root on a burning
-production server**, plus a **2D RPG adventure mode**. A few advanced topics
+production server**, plus a **2D adventure mode**. A few advanced topics
 (networking, services, packages, SSH, git) are the next waves.
 
 ---
@@ -95,7 +95,7 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   basics"), Continue, **Adventure**, Practice Lab, Achievements, Settings and
   Exit.
   Starting over and resetting progress each ask for confirmation first.
-- **Campaign — 13 levels, 60 challenges** (state-checked, so any valid solution
+- **Campaign — 14 levels, 64 challenges** (state-checked, so any valid solution
   passes), ending by taking root on a production server:
 - **Level 0 · First Contact**, 10 challenges:
   1. *Who are you?* (`whoami` / `id`)
@@ -141,6 +141,9 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   `ssh` into a broken web server (your prompt and the whole session move to the
   remote box), `scp` a log back, and end an incident on a machine you never
   touch — `exit` brings you home.
+- **Level 12 · Bash: Loops & Logic**, 4: batch-rename files with a `for` loop,
+  filter with `if` + `test` (`[ ... ]`), drain a queue with `while`, and glue
+  commands together with command substitution `$( )`.
 - **Final · Road to sudo**: a broken production server, no hand-holding —
   investigate, `sudo -i`, stop the rogue root process, and hold the throne.
 - **Adventure mode — "The Ascent to Root" (Skill Worlds):** a top-down 2D game
@@ -158,7 +161,7 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   by Kenney (CC0). Full write-up: [docs/ADVENTURE.md](docs/ADVENTURE.md).
 - **Practice Lab:** a separate sandbox machine with no objectives and no
   score.
-- **73 simulated commands:**
+- **74 simulated commands:**
   - basics: `pwd cd ls echo clear help man history learn`  (`learn` is a
     friendly cheat sheet of what every command does, with examples)
   - files: `cat less touch mkdir rmdir rm cp mv find tree stat file`
@@ -172,12 +175,14 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   - packages: `apt/apt-get dpkg`
   - version control: `git` (init/add/commit/status/log/diff)
   - system: `hostname uname date`
-  - shell: `bash/sh env/printenv export unset which exit true false`
+  - shell: `bash/sh env/printenv export unset which exit true false test/[`
 - **Shell features:** pipes, `>`, `>>`, `<`, `2>`, `2>&1`, `>&2`, `&&`,
   `||`, `;`, quoting, `$VAR` / `${VAR}` / `$?`, `~` expansion, `*` / `?`
-  globs, `NAME=value`, and scripts with `$1..$9` and `exit N`. Running a
-  script checks real permissions: `./x.sh` needs `x`, `bash x.sh` only
-  needs `r`.
+  globs, `NAME=value`, command substitution `$( )` / `` ` ` ``, and **control
+  flow** — `for`, `while` / `until`, `if` / `elif` / `else`, with `test` / `[ ]`
+  — both on one line (`for f in *; do …; done`) and as multi-line blocks in a
+  script. Scripts take `$1..$9` and `exit N`, and running one checks real
+  permissions: `./x.sh` needs `x`, `bash x.sh` only needs `r`.
 - **Learning system:** three progressive hints per challenge, then the
   solution. Challenges react to what the player does (for example the
   `bash backup.sh` loophole or reading a log). Beginner mode gets
@@ -295,15 +300,14 @@ both **CC0 1.0** (public domain). Only the tiles used are bundled, under
 
 These are honest gaps, not bugs:
 
-- Scripts run line by line. There is no `if` / `for` / `while` or functions
-  yet (planned for Level 11), and no `$(…)` command substitution.
+- Control flow covers `for` / `while` / `until` / `if` (single-line and
+  multi-line blocks in scripts), `test` / `[ ]`, and `$( )` / backticks — but
+  not shell **functions**, `case`, or `$(( ))` arithmetic.
 - There are no interactive programs: `less` prints the whole file,
   `tail -f` doesn't follow, `su` can't prompt for a password, and there is
   no text editor.
 - Globs support `*` and `?` but not `[abc]` classes. `find` has no `-o`
   (OR).
-- There is one machine per session. The `Machine` model is ready for
-  several (SSH, Level 10) but networking isn't simulated yet.
 - The font is the system monospace font (JetBrains Mono, Fira Code, … and
   falling back to DejaVu Sans Mono). To bundle one, drop
   `assets/fonts/mono-regular.ttf` and `mono-bold.ttf` in place; `UiTheme`
@@ -314,17 +318,18 @@ These are honest gaps, not bugs:
 
 ## Roadmap (next steps)
 
-Levels 0–11 and the Final (Road to sudo) are **built** — 60 challenges. Each
-recent level added a small subsystem to `Machine` and a command or two: Level 7
-(Services) `systemctl` / `journalctl`; Level 8 (Networking) `ip` / `ss` /
-`ping` / `dig` / `curl`; Level 9 (Packages) `apt` / `dpkg`; Level 10 (Git) the
+**Every spec topic is now built** — Levels 0–12 and the Final, 64 challenges.
+Each recent level added a small subsystem to `Machine` and a command or two:
+Level 7 (Services) `systemctl` / `journalctl`; Level 8 (Networking) `ip` / `ss`
+/ `ping` / `dig` / `curl`; Level 9 (Packages) `apt` / `dpkg`; Level 10 (Git) the
 `git` command; Level 11 (SSH) whole-session `ssh` into remote machines, `scp`
-and `ssh-keygen`. What's left:
-1. **Bash control flow:** `if` / `for` / `while` in the script interpreter (the
-   parser already produces a list/pipeline AST to build on), plus `$(…)`.
-2. **More Adventure regions:** the RPG engine is data-driven — new regions,
-   NPCs, enemies and bosses are JSON in `data/adventure/`. Each subsystem above
-   can also become a new zone.
+and `ssh-keygen`; Level 12 (Bash) `for` / `while` / `if` / `test` and `$( )` in
+the shell interpreter.
+
+What's left is content, not engine:
+- **More Adventure worlds:** the mode is data-driven — a world is `orbs` + a
+  `trial` in `data/adventure/worlds.json`, and its room is generated from the
+  orb count. New worlds are pure JSON.
 
 The Final is done: a broken production server that uses everything, ending with
 `sudo -i` → *"YOU MADE IT. Welcome to the other side of the prompt."*
