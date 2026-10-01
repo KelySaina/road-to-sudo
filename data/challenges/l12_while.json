@@ -1,0 +1,48 @@
+{
+  "id": "l12_while",
+  "title": "Drain the queue",
+  "level": "bash",
+  "machine": "workstation",
+  "xp": 180,
+  "time_limit": 300,
+  "briefing": [
+    "~/queue holds pending jobs (job1.txt, job2.txt, job3.txt). Process them:",
+    "move every job into ~/processed until the queue is empty.",
+    "",
+    "You don't know how many there'll be next time — so loop until the queue",
+    "runs dry. That's what `while` does: repeat as long as a condition holds."
+  ],
+  "tips": [
+    "Make the destination first: `mkdir ~/processed`.",
+    "`while [ -n \"$(ls ~/queue)\" ]; do ...; done` repeats while `ls ~/queue` still prints something."
+  ],
+  "objective": "Move every file out of ~/queue into ~/processed, leaving ~/queue empty.",
+  "expert_objective": "Empty ~/queue by moving each job into ~/processed.",
+  "hints": [
+    "Create the target: `mkdir ~/processed`.",
+    "Loop while the queue isn't empty: `while [ -n \"$(ls ~/queue)\" ]; do ...; done`. `$(...)` runs a command and drops its output in place; `[ -n ... ]` is true when that text isn't empty.",
+    "Inside, move one job: `f=$(ls ~/queue | head -1); mv ~/queue/$f ~/processed/`. (A `for f in ~/queue/*; do mv \"$f\" ~/processed/; done` works too.)"
+  ],
+  "solution": "mkdir ~/processed\nfor f in ~/queue/*; do mv \"$f\" ~/processed/; done",
+  "setup": {
+    "files": {
+      "~/queue": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "~/queue/job1.txt": {"owner": "player", "group": "player", "content": "job 1\n"},
+      "~/queue/job2.txt": {"owner": "player", "group": "player", "content": "job 2\n"},
+      "~/queue/job3.txt": {"owner": "player", "group": "player", "content": "job 3\n"},
+      "~/processed": {"dir": true, "owner": "player", "group": "player", "mode": "755"}
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {"type": "path_missing", "path": "~/queue/job1.txt"},
+      {"type": "path_missing", "path": "~/queue/job2.txt"},
+      {"type": "path_missing", "path": "~/queue/job3.txt"},
+      {"type": "file_exists", "path": "~/processed/job1.txt"},
+      {"type": "file_exists", "path": "~/processed/job3.txt"}
+    ]
+  },
+  "explanation": "A `while` loop repeats as long as its condition keeps succeeding — perfect when you don't know the count in advance (drain a queue, retry until something's ready). Here the condition uses `$(...)`, which runs a command and substitutes its output, and `[ -n ... ]` to ask 'is there still anything there?'.",
+  "teaches": ["bash", "while", "command-substitution", "loops"]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "l12_subst",
+  "title": "Put a number in a box",
+  "level": "bash",
+  "machine": "workstation",
+  "xp": 150,
+  "time_limit": 240,
+  "briefing": [
+    "The daily report wants one figure: how many log files are in ~/logs right",
+    "now. Count them and write just that number into ~/count.txt.",
+    "",
+    "The trick is feeding one command's output into another. `$(...)` runs a",
+    "command and drops its output right where you wrote it."
+  ],
+  "tips": [
+    "Count lines with `wc -l`. List the logs with `ls ~/logs/*.log`.",
+    "`echo $(ls ~/logs/*.log | wc -l) > ~/count.txt` runs the count and writes the result."
+  ],
+  "objective": "Count the .log files in ~/logs and write just that number into ~/count.txt.",
+  "expert_objective": "Record the count of ~/logs/*.log in ~/count.txt.",
+  "hints": [
+    "`ls ~/logs/*.log | wc -l` prints the count.",
+    "Capture a command's output with $(...): `echo $(ls ~/logs/*.log | wc -l) > ~/count.txt`.",
+    "Or pipe straight to the file: `ls ~/logs/*.log | wc -l > ~/count.txt`. There are three logs."
+  ],
+  "solution": "echo $(ls ~/logs/*.log | wc -l) > ~/count.txt\ncat ~/count.txt",
+  "setup": {
+    "files": {
+      "~/logs": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "~/logs/access.log": {"owner": "player", "group": "player", "content": "a\n"},
+      "~/logs/error.log": {"owner": "player", "group": "player", "content": "b\n"},
+      "~/logs/debug.log": {"owner": "player", "group": "player", "content": "c\n"}
+    },
+    "remove": ["~/count.txt"],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_matches",
+    "path": "~/count.txt",
+    "regex": "^\\s*3\\s*$"
+  },
+  "explanation": "`$(command)` is command substitution: it runs the command and replaces itself with the output, so you can pass one command's result to another (`echo`, a variable, a condition). It's the glue that turns single commands into real scripts.",
+  "teaches": ["bash", "command-substitution", "pipes"]
+}

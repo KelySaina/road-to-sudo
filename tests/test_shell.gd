@@ -16,6 +16,35 @@ func test_basics() -> void:
 	check_eq(out(sh, "echo \\$USER"), "$USER\n", "backslash escape")
 
 
+func test_control_flow() -> void:
+	var sh := new_shell()
+	check_eq(out(sh, "for i in 1 2 3; do echo n=$i; done"), "n=1\nn=2\nn=3\n", "for over a list")
+	check_eq(out(sh, "for i in a b; do echo $i; done; echo end"), "a\nb\nend\n", "compound then a command")
+	check_eq(out(sh, "if [ 2 -gt 1 ]; then echo yes; else echo no; fi"), "yes\n", "if/then true branch")
+	check_eq(out(sh, "if [ 1 -gt 2 ]; then echo yes; else echo no; fi"), "no\n", "if/then else branch")
+	check_eq(out(sh, "if false; then echo a; elif true; then echo b; else echo c; fi"), "b\n", "elif branch")
+	check_eq(out(sh, "echo today: $(whoami)"), "today: player\n", "command substitution")
+	check_eq(out(sh, "echo $(echo one; echo two)"), "one two\n", "substitution joins lines with spaces")
+	# nested loop + conditional
+	check_eq(out(sh, "for n in 1 2 3; do if [ $n -eq 2 ]; then echo hit; fi; done"), "hit\n", "nested if inside for")
+	# test / [ as a command
+	check_eq(run(sh, "test -f welcome.txt").exit_code, 0, "test -f on a real file is true")
+	check_eq(run(sh, "[ -f nope ]").exit_code, 1, "[ -f ] on a missing file is false")
+	check_eq(run(sh, "[ abc = abc ]").exit_code, 0, "string equality")
+	# a while that drains a condition
+	run(sh, "touch /tmp/lock")
+	check_eq(out(sh, "while [ -f /tmp/lock ]; do echo working; rm /tmp/lock; done"), "working\n", "while runs until its condition fails")
+	# globs feed the loop
+	check(out(sh, "for f in *.txt; do echo got $f; done").contains("got welcome.txt"), "for over a glob")
+
+
+func test_multiline_script() -> void:
+	var sh := new_shell()
+	var src := "#!/bin/bash\nfor n in 1 2 3\ndo\n  if [ $n -gt 1 ]\n  then\n    echo big $n\n  fi\ndone\n"
+	sh.session.machine.vfs.put_file("/home/player/s.sh", src, "player", "player", Permissions.from_octal("755"))
+	check_eq(out(sh, "./s.sh"), "big 2\nbig 3\n", "multi-line for+if block runs from a script")
+
+
 func test_cd() -> void:
 	var sh := new_shell()
 	run(sh, "cd /var/log")

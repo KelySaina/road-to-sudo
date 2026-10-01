@@ -1,0 +1,48 @@
+{
+  "id": "l12_if",
+  "title": "Only the ones that matter",
+  "level": "bash",
+  "machine": "workstation",
+  "xp": 170,
+  "time_limit": 300,
+  "briefing": [
+    "~/hosts has one file per server. A non-empty file means the host reported",
+    "in (it's up); an empty file means silence (it's down).",
+    "",
+    "Build the roster of who's up: for each host, test whether its file has",
+    "content, and if so, record its name."
+  ],
+  "tips": [
+    "Combine a loop with a test: `for h in *; do if [ -s \"$h\" ]; then ...; fi; done`.",
+    "`[ -s FILE ]` is true when FILE exists and is non-empty. Append a name with `echo \"$h\" >> ~/up.txt`."
+  ],
+  "objective": "For every file in ~/hosts, if it is non-empty, append its name to ~/up.txt — so ~/up.txt lists exactly the hosts that are up.",
+  "expert_objective": "Write the non-empty hosts in ~/hosts into ~/up.txt.",
+  "hints": [
+    "Loop over the files and test each: `for h in *; do if [ -s \"$h\" ]; then ...; fi; done`.",
+    "`[ -s \"$h\" ]` is true only when the file has content. Inside the `then`, record it: `echo \"$h\" >> ~/up.txt`.",
+    "`cd ~/hosts`, then `for h in *; do if [ -s \"$h\" ]; then echo \"$h\" >> ~/up.txt; fi; done`."
+  ],
+  "solution": "cd ~/hosts\nfor h in *; do if [ -s \"$h\" ]; then echo \"$h\" >> ~/up.txt; fi; done",
+  "setup": {
+    "files": {
+      "~/hosts": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "~/hosts/web1": {"owner": "player", "group": "player", "content": "ok\n"},
+      "~/hosts/web2": {"owner": "player", "group": "player", "content": ""},
+      "~/hosts/db1": {"owner": "player", "group": "player", "content": "ok\n"},
+      "~/hosts/cache": {"owner": "player", "group": "player", "content": ""}
+    },
+    "remove": ["~/up.txt"],
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {"type": "file_contains", "path": "~/up.txt", "text": "web1"},
+      {"type": "file_contains", "path": "~/up.txt", "text": "db1"},
+      {"not": {"type": "file_contains", "path": "~/up.txt", "text": "web2"}},
+      {"not": {"type": "file_contains", "path": "~/up.txt", "text": "cache"}}
+    ]
+  },
+  "explanation": "`if COND; then ...; fi` runs the body only when COND succeeds (exits 0). The condition here is `test` (spelled `[ ... ]`): `-s` asks 'does this file have content?'. A loop that makes a decision per item is the heart of almost every real script.",
+  "teaches": ["bash", "if", "test", "loops"]
+}

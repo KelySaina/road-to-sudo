@@ -1,13 +1,24 @@
 extends Node
 ## Dev helper: screenshots of Adventure mode (skill worlds). Needs a display.
 ##   godot --path . res://tests/world_shots.tscn -- <output_dir>
+##
+## Renders through a SubViewport at the project's own resolution, so the shots
+## come out the same size on any monitor instead of however large the window
+## manager let the window be.
+const SHOT_SIZE := Vector2i(1440, 860)
 var out_dir := "user://world_shots"
+var _vp: SubViewport
 func _ready():
 	var a := OS.get_cmdline_user_args()
 	if not a.is_empty(): out_dir = a[0]
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	SaveManager.save_path = "user://world_shot_save.json"; SaveManager.delete_save(); Game.reset_progress()
 	Game.profile.settings["text_speed"] = "instant"
+	_vp = SubViewport.new()
+	_vp.size = SHOT_SIZE
+	_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	_vp.handle_input_locally = false
+	add_child(_vp)
 	await _run(); SaveManager.delete_save(); get_tree().quit()
 func _frames(n := 4):
 	for i in n: await get_tree().process_frame
@@ -15,9 +26,9 @@ func _phys(n := 8):
 	for i in n: await get_tree().physics_frame
 func _shot(nm):
 	await _frames(8); await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(out_dir.path_join(nm + ".png"))
+	_vp.get_texture().get_image().save_png(out_dir.path_join(nm + ".png"))
 func _run():
-	var main: Control = load("res://scenes/main/main.tscn").instantiate(); add_child(main); await _frames()
+	var main: Control = load("res://scenes/main/main.tscn").instantiate(); _vp.add_child(main); await _frames()
 	var menu = main.host.get_child(main.host.get_child_count() - 1)
 	menu.adventure_requested.emit(); await _frames(6)
 	var world = main.host.get_child(main.host.get_child_count() - 1)

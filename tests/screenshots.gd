@@ -101,6 +101,13 @@ func _run() -> void:
 		screen.terminal._on_submitted(line)
 		await _frames(1)
 	await _shot("12_ssh")
+	# Level 12 — Bash: loops and logic.
+	Game.start_challenge("l12_if")
+	await _frames()
+	for line in ["cd ~/hosts", "ls", "for h in *; do if [ -s \"$h\" ]; then echo \"$h\" >> ~/up.txt; fi; done", "cat ~/up.txt"]:
+		screen.terminal._on_submitted(line)
+		await _frames(1)
+	await _shot("13_bash")
 	Game.submit(":menu")
 	await _frames()
 	menu = main.host.get_child(main.host.get_child_count() - 1)
