@@ -9,9 +9,9 @@ const TILE := 48
 @warning_ignore("unused_signal")
 signal moved()
 
-var _sprite: Sprite2D
+var _char: CharacterSprite
 var _facing := "down"
-var _bob := 0.0
+var _phase := 0.0
 var input_locked := false
 
 
@@ -20,17 +20,14 @@ func _ready() -> void:
 	collision_mask = 1
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
-	rect.size = Vector2(28, 20)
+	rect.size = Vector2(26, 18)
 	shape.shape = rect
-	shape.position = Vector2(0, 10)
+	shape.position = Vector2(0, 12)
 	add_child(shape)
 
-	_sprite = Sprite2D.new()
-	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_sprite.texture = SpriteFactory.texture("player")
-	_sprite.scale = Vector2(3, 3)
-	_sprite.position = Vector2(0, -14)
-	add_child(_sprite)
+	_char = CharacterSprite.new()
+	_char.position = Vector2(0, -4)
+	add_child(_char)
 	z_index = 10
 
 
@@ -45,17 +42,19 @@ func _physics_process(delta: float) -> void:
 
 
 func _animate(dir: Vector2, delta: float) -> void:
-	if dir == Vector2.ZERO:
-		_bob = 0.0
-		_sprite.position.y = -14
-		return
-	if absf(dir.x) > absf(dir.y):
-		_facing = "right" if dir.x > 0 else "left"
-		_sprite.flip_h = dir.x < 0
+	var moving := dir != Vector2.ZERO
+	if moving:
+		if absf(dir.x) > absf(dir.y):
+			_facing = "right" if dir.x > 0 else "left"
+		else:
+			_facing = "down" if dir.y > 0 else "up"
+		_phase += delta * 9.5
 	else:
-		_facing = "down" if dir.y > 0 else "up"
-	_bob += delta * 11.0
-	_sprite.position.y = -14 + (2.0 if sin(_bob) > 0 else 0.0)
+		_phase = 0.0
+	_char.facing = _facing
+	_char.moving = moving
+	_char.phase = _phase
+	_char.queue_redraw()
 
 
 func facing_dir() -> Vector2:
