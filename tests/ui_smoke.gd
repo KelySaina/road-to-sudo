@@ -73,6 +73,10 @@ func _run() -> void:
 
 	var achievements_seen: Array = []
 	EventBus.achievement_unlocked.connect(func(a): achievements_seen.append(a.id))
+	# This test asserts on the English UI, so pin the locale regardless of any
+	# language the developer has saved locally.
+	Game.profile.settings["language"] = "en"
+	Loc.set_locale("en")
 	menu.journey_requested.emit("beginner", false)
 	await _frames(3)
 	var screen = main.host.get_child(main.host.get_child_count() - 1)
