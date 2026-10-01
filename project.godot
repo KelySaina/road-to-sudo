@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 
 EventBus="*res://scripts/core/event_bus.gd"
 SaveManager="*res://scripts/core/save_manager.gd"
+Loc="*res://scripts/core/loc.gd"
 Game="*res://scripts/core/game.gd"
 
 [display]

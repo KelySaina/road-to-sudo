@@ -86,7 +86,7 @@ func _on_command_output(outcome: ExecutionOutcome) -> void:
 func _on_narrate(text: String, kind: String) -> void:
 	terminal.type_text("")
 	for line in text.split("\n"):
-		terminal.type_text("  " + line if line != "" else "", kind)
+		terminal.type_text("  " + Loc.t(line) if line != "" else "", kind)
 	terminal.type_text("")
 
 
@@ -96,22 +96,22 @@ func _on_challenge_started(c: Challenge) -> void:
 	if int(pos.get("index", 0)) == 0:
 		var lvl: Dictionary = pos.get("level", {})
 		terminal.print_text("")
-		terminal.print_rule(str(lvl.get("title", "")).to_upper())
+		terminal.print_rule(Loc.t(str(lvl.get("title", ""))).to_upper())
 		if lvl.has("description"):
-			terminal.type_text("  " + str(lvl.description), "dim")
+			terminal.type_text("  " + Loc.t(str(lvl.description)), "dim")
 	terminal.print_text("")
-	terminal.print_rule("%d/%d · %s" % [int(pos.get("index", 0)) + 1, int(pos.get("count", 1)), c.title])
+	terminal.print_rule("%d/%d · %s" % [int(pos.get("index", 0)) + 1, int(pos.get("count", 1)), Loc.t(c.title)])
 	terminal.type_text("")
 	for line in c.briefing_for(diff.id):
-		terminal.type_text("  " + str(line), "story")
+		terminal.type_text("  " + Loc.t(str(line)), "story")
 	terminal.type_text("")
 	if diff.show_tips:
 		for tip in c.tips:
-			terminal.type_text("  › " + str(tip), "tip")
+			terminal.type_text("  › " + Loc.t(str(tip)), "tip")
 		if not c.tips.is_empty():
 			terminal.type_text("")
-	terminal.type_text("  OBJECTIVE  " + c.objective_for(diff.id), "objective")
-	terminal.type_text("  (stuck? :hint or F1)\n" if diff.max_hints > 0 else "", "dim")
+	terminal.type_text("  %s  %s" % [Loc.t("OBJECTIVE"), Loc.t(c.objective_for(diff.id))], "objective")
+	terminal.type_text(("  " + Loc.t("(stuck? :hint or F1)") + "\n") if diff.max_hints > 0 else "", "dim")
 	objective_panel.show_challenge(c)
 	_refresh_session()
 
@@ -119,26 +119,26 @@ func _on_challenge_started(c: Challenge) -> void:
 func _on_challenge_completed(c: Challenge, result: Dictionary) -> void:
 	var diff: DifficultySettings = Game.difficulty
 	terminal.type_text("")
-	terminal.type_text("  ✔ OBJECTIVE COMPLETE — %s" % c.title, "success")
+	terminal.type_text("  ✔ %s — %s" % [Loc.t("OBJECTIVE COMPLETE"), Loc.t(c.title)], "success")
 	var parts: Array = ["+%d XP" % int(result.base)]
 	if int(result.bonus) > 0:
-		parts.append("+%d %s" % [int(result.bonus), "no-hint bonus" if int(result.hints) == 0 else "bonus"])
+		parts.append("+%d %s" % [int(result.bonus), Loc.t("no-hint bonus") if int(result.hints) == 0 else Loc.t("bonus")])
 	if int(result.get("time_bonus", 0)) > 0:
-		parts.append("+%d speed" % int(result.time_bonus))
+		parts.append("+%d %s" % [int(result.time_bonus), Loc.t("speed")])
 	if float(result.multiplier) != 1.0:
 		parts.append("×%s %s" % [str(result.multiplier), diff.label])
 	if not result.get("first_time", true):
-		parts = ["replay — no XP"]
+		parts = [Loc.t("replay — no XP")]
 	terminal.type_text("    " + "   ".join(PackedStringArray(parts)), "success")
 	if diff.show_explanations and c.explanation != "":
 		terminal.type_text("")
-		terminal.type_text("  WHAT JUST HAPPENED", "header")
+		terminal.type_text("  " + Loc.t("WHAT JUST HAPPENED"), "header")
 		for line in c.explanation.split("\n"):
-			terminal.type_text("  " + line, "story")
+			terminal.type_text("  " + Loc.t(line), "story")
 	var fresh: Array = result.get("new_commands", [])
 	if not fresh.is_empty():
 		terminal.type_text("")
-		terminal.type_text("  New in your toolbox: " + "  ".join(PackedStringArray(fresh)), "reaction")
+		terminal.type_text("  " + Loc.t("New in your toolbox:") + " " + "  ".join(PackedStringArray(fresh)), "reaction")
 	objective_panel.show_completed(c, result)
 	# Deferred so a rank-up triggered by this XP prints before the prompt.
 	_print_continue.call_deferred(str(result.get("next", "")) != "")
@@ -147,17 +147,17 @@ func _on_challenge_completed(c: Challenge, result: Dictionary) -> void:
 func _print_continue(has_next: bool) -> void:
 	terminal.type_text("")
 	if has_next:
-		terminal.type_text("  ▸ Press Enter to continue.", "tip")
+		terminal.type_text("  ▸ " + Loc.t("Press Enter to continue."), "tip")
 
 
 func _on_hint_revealed(index: int, text: String) -> void:
-	terminal.type_text("  HINT %d/%d  %s" % [index, Game.challenges.hints_available(), text], "warn")
+	terminal.type_text("  %s %d/%d  %s" % [Loc.t("HINT"), index, Game.challenges.hints_available(), Loc.t(text)], "warn")
 
 
 func _on_rank_up(rank: Dictionary) -> void:
 	terminal.type_text("")
-	terminal.type_text("  ★ RANK UP — you are now: %s" % rank.name, "reaction")
-	terminal.type_text("    %s" % rank.get("blurb", ""), "dim")
+	terminal.type_text("  ★ %s %s" % [Loc.t("RANK UP — you are now:"), rank.name], "reaction")
+	terminal.type_text("    %s" % Loc.t(str(rank.get("blurb", ""))), "dim")
 
 
 func _on_adventure_won() -> void:

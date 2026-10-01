@@ -44,6 +44,8 @@ var _blink := 0.0
 @onready var reset_button: Button = %ResetButton
 @onready var reset_confirm: HBoxContainer = %ResetConfirm
 
+var _language_option: OptionButton
+
 
 func _ready() -> void:
 	start_button.pressed.connect(_open_new_journey)
@@ -66,7 +68,32 @@ func _ready() -> void:
 	skip_basics.toggled.connect(func(_on): _update_warning())
 	_build_difficulties()
 	_build_settings()
+	_apply_locale_text()
 	_show_home()
+
+
+## Sets every menu label from the current locale (English falls through
+## unchanged). Called on load and whenever the language changes.
+func _apply_locale_text() -> void:
+	start_button.text = Loc.t("Start Journey")
+	continue_button.text = Loc.t("Continue")
+	practice_button.text = Loc.t("Practice Lab")
+	%AdventureButton.text = Loc.t("Adventure — The Ascent to Root")
+	%AchievementsButton.text = Loc.t("Achievements")
+	%SettingsButton.text = Loc.t("Settings")
+	%ExitButton.text = Loc.t("Exit")
+	%BeginButton.text = Loc.t("Begin  ⏎")
+	skip_basics.text = Loc.t("I know the basics — skip to the first real problem")
+	ach_heading.text = Loc.t("Achievements")
+	reset_button.text = Loc.t("Reset all progress…")
+	for b in [%BackButton, %AchBack, %SetBack]:
+		b.text = Loc.t("← Back")
+	var grid := speed.get_parent()
+	grid.get_child(0).text = Loc.t("Narration speed")
+	grid.get_child(2).text = Loc.t("Text size")
+	grid.get_child(4).text = Loc.t("Difficulty (current journey)")
+	if _language_option != null:
+		(_language_option.get_parent().get_child(6) as Label).text = Loc.t("Language")
 
 
 func _process(delta: float) -> void:
@@ -224,6 +251,21 @@ func _build_settings() -> void:
 		settings_changed.emit())
 	difficulty_option.item_selected.connect(func(i):
 		Game.set_difficulty(DifficultySettings.all()[i].id))
+	# Language row, appended to the settings grid (label + dropdown).
+	var grid := speed.get_parent()
+	var lang_label := Label.new()
+	lang_label.text = Loc.t("Language")
+	grid.add_child(lang_label)
+	_language_option = OptionButton.new()
+	_language_option.add_item("English")
+	_language_option.add_item("Français")
+	grid.add_child(_language_option)
+	_language_option.item_selected.connect(func(i):
+		Game.profile.settings["language"] = "fr" if i == 1 else "en"
+		Loc.set_locale(str(Game.profile.settings["language"]))
+		Game.save_now()
+		_apply_locale_text()
+		settings_changed.emit())
 
 
 func _open_settings() -> void:
@@ -231,6 +273,8 @@ func _open_settings() -> void:
 	var s: Dictionary = Game.profile.settings
 	speed.select(maxi(0, SPEEDS.find(s.get("text_speed", "fast"))))
 	font_size.select(maxi(0, FONT_SIZES.find(int(s.get("font_size", 17)))))
+	if _language_option != null:
+		_language_option.select(1 if Loc.locale == "fr" else 0)
 	var ids: Array = []
 	for d in DifficultySettings.all():
 		ids.append(d.id)

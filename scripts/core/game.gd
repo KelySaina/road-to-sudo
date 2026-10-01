@@ -39,6 +39,7 @@ func _ready() -> void:
 
 func _load_profile(p: PlayerProfile) -> void:
 	profile = p
+	Loc.set_locale(str(profile.settings.get("language", "en")))
 	difficulty = DifficultySettings.load_id(profile.difficulty)
 	progression = Progression.new(profile)
 	progression.xp_changed.connect(func(xp, rank, pr): EventBus.xp_changed.emit(xp, rank, pr))
