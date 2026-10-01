@@ -2,11 +2,11 @@ class_name SpriteFactory
 extends RefCounted
 ## The game's pixel art, authored in place as 16x16 colour maps.
 ##
-## Adventure mode is set inside a failing mainframe, so the art is machine, not
-## masonry: deck plating with a lit edge, circuit substrate underneath, a CRT
-## workstation and a portal. Keeping the pixels here rather than in PNGs means
-## they are written in the same palette as the rest of the UI (see UiTheme) and
-## can be edited in a text diff.
+## Terrain and hazards are PNGs sliced from a CC0 sheet (tools/extract_tiles.py)
+## and the operator is vector-drawn (CharacterSprite); what is authored here is
+## the props with no equivalent in either — the CRT workstation and the portal.
+## Keeping those pixels here rather than in PNGs means they are written in the
+## same palette as the rest of the UI (see UiTheme) and edit in a text diff.
 ##
 ## A PNG in res://assets/tiles/<name>.png still wins for any name that has no
 ## built-in map, so custom art can be dropped in without touching code.
@@ -23,6 +23,7 @@ const ART := {
 	# that sheet: the console, the portal and the operator.
 	# The trial console: a CRT workstation with a live prompt on it.
 	"console": {
+		"outline": "05030f",
 		"palette": {
 			"F": "241d55", "G": "15103a", "s": "07131f", "t": "0c3a4a",
 			"T": "00e5ff", "B": "0c0826",
@@ -48,6 +49,7 @@ const ART := {
 	},
 	# Same machine, trial passed: the screen goes green.
 	"console_done": {
+		"outline": "05030f",
 		"palette": {
 			"F": "241d55", "G": "15103a", "s": "07131f", "t": "0f4436",
 			"T": "2bffb0", "B": "0c0826",
@@ -73,6 +75,7 @@ const ART := {
 	},
 	# The portal to the next world.
 	"door": {
+		"outline": "05030f",
 		"palette": {
 			"R": "3a2a6e", "l": "5b3fa8", "n": "8a5bd6", "w": "c15bff", "r": "2a1e52",
 		},
@@ -93,189 +96,6 @@ const ART := {
 			"...RRRRRRRRRR...",
 			"...RR......RR...",
 			"..RRR......RRR..",
-		],
-	},
-	# The operator: visor, ops suit, pack and mag boots, feet on the bottom row
-	# so Player2D's feet-origin lands flush on a tile top. The outline is traced
-	# from the silhouette at build time, which is what keeps it legible against
-	# five different world palettes.
-	"player": {
-		"outline": "05030f",
-		"palette": {
-			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
-			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
-		},
-		"rows": [
-			"................",
-			"......hhhh......",
-			".....hhhhhh.....",
-			".....hvvvvh.....",
-			".....hvvvvh.....",
-			".....hhhhhh.....",
-			"...ppHHHHHHa....",
-			"...ppHbbbbHa....",
-			"...ppHbCbbHa....",
-			"....pHbbbbH.....",
-			".....bbbbbb.....",
-			"....bb..bb......",
-			"....bb..bb......",
-			"....bb..bb......",
-			"...LLL..LLL.....",
-			"...kkk..kkk.....",
-		],
-	},
-	# Run cycle: contact, left leg lifted, contact, right leg lifted — the legs
-	# have to alternate or it reads as bouncing rather than running.
-	"player_run_0": {
-		"outline": "05030f",
-		"palette": {
-			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
-			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
-		},
-		"rows": [
-			"................",
-			"......hhhh......",
-			".....hhhhhh.....",
-			".....hvvvvh.....",
-			".....hvvvvh.....",
-			".....hhhhhh.....",
-			"...ppHHHHHHa....",
-			"...ppHbbbbHa....",
-			"...ppHbCbbHa....",
-			"....pHbbbbH.....",
-			".....bbbbbb.....",
-			"....bb..bb......",
-			"...bb.....bb....",
-			"..bb.......bb...",
-			".LLL.......LLL..",
-			".kkk.......kkk..",
-		],
-	},
-	"player_run_1": {
-		"outline": "05030f",
-		"palette": {
-			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
-			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
-		},
-		"rows": [
-			"................",
-			"......hhhh......",
-			".....hhhhhh.....",
-			".....hvvvvh.....",
-			".....hvvvvh.....",
-			".....hhhhhh.....",
-			"...ppHHHHHHa....",
-			"...ppHbbbbHa....",
-			"...ppHbCbbHa....",
-			"....pHbbbbH.....",
-			".....bbbbbb.....",
-			"....bb..bb......",
-			"....bb..bb......",
-			"....bb...LL.....",
-			"...LLL...kk.....",
-			"...kkk..........",
-		],
-	},
-	"player_run_2": {
-		"outline": "05030f",
-		"palette": {
-			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
-			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
-		},
-		"rows": [
-			"................",
-			"......hhhh......",
-			".....hhhhhh.....",
-			".....hvvvvh.....",
-			".....hvvvvh.....",
-			".....hhhhhh.....",
-			"...ppHHHHHHa....",
-			"...ppHbbbbHa....",
-			"...ppHbCbbHa....",
-			"....pHbbbbH.....",
-			".....bbbbbb.....",
-			"....bb..bb......",
-			"...bb....bb.....",
-			"..bb......bb....",
-			".LLL......LLL...",
-			".kkk......kkk...",
-		],
-	},
-	"player_run_3": {
-		"outline": "05030f",
-		"palette": {
-			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
-			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
-		},
-		"rows": [
-			"................",
-			"......hhhh......",
-			".....hhhhhh.....",
-			".....hvvvvh.....",
-			".....hvvvvh.....",
-			".....hhhhhh.....",
-			"...ppHHHHHHa....",
-			"...ppHbbbbHa....",
-			"...ppHbCbbHa....",
-			"....pHbbbbH.....",
-			".....bbbbbb.....",
-			"....bb..bb......",
-			"....bb..bb......",
-			".....LL..bb.....",
-			".....kk..LLL....",
-			".........kkk....",
-		],
-	},
-	# Rising: legs tucked.
-	"player_jump": {
-		"outline": "05030f",
-		"palette": {
-			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
-			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
-		},
-		"rows": [
-			"................",
-			"......hhhh......",
-			".....hhhhhh.....",
-			".....hvvvvh.....",
-			".....hvvvvh.....",
-			".....hhhhhh.....",
-			"...ppHHHHHHa....",
-			"...ppHbbbbHa....",
-			"...ppHbCbbHa....",
-			"....pHbbbbH.....",
-			".....bbbbbb.....",
-			"....bb..bb......",
-			"...bb....bb.....",
-			"..LLL....LLL....",
-			"..kkk....kkk....",
-			"................",
-		],
-	},
-	# Falling: legs reaching for the ground.
-	"player_fall": {
-		"outline": "05030f",
-		"palette": {
-			"h": "2a2456", "v": "00e5ff", "H": "3a3270", "b": "232050",
-			"C": "2bffb0", "L": "1a1540", "k": "0d0a24", "p": "4a3f8c", "a": "3a3270",
-		},
-		"rows": [
-			"................",
-			"......hhhh......",
-			".....hhhhhh.....",
-			".....hvvvvh.....",
-			".....hvvvvh.....",
-			".....hhhhhh.....",
-			"...ppHHHHHHa....",
-			"...ppHbbbbHa....",
-			"...ppHbCbbHa....",
-			"....pHbbbbH.....",
-			".....bbbbbb.....",
-			"....bb..bb......",
-			"...bb.....bb....",
-			"..bb.......bb...",
-			".bb.........bb..",
-			".LLL.......LLL..",
 		],
 	},
 }

@@ -59,9 +59,10 @@ func _run():
 		await _frames(2)
 		if world._overlay.visible: world._close_terminal()
 		await _frames(1)
+	await _frames(30)
 	# The end plateau: the trial console and the portal.
 	world._player.global_position = world._console.global_position + Vector2(-70, 0)
-	await _frames(6)
+	await _frames(10)
 	await _shot("e4_console_and_portal")
 	world._interact(world._console); await _frames(3)
 	Game.submit("talk chmod"); await _frames(3)

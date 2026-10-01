@@ -348,15 +348,13 @@ func _run() -> void:
 	# Every sprite the world asks for must exist. A missing one doesn't crash —
 	# it silently degrades to a placeholder that nobody notices until a
 	# screenshot, which is exactly the kind of rot a test should catch.
-	var sprite_names: Array = ["spikes", "crate", "console", "console_done", "door",
-		"player", "player_jump", "player_fall"]
+	var sprite_names: Array = ["spikes", "crate", "console", "console_done", "door"]
 	for colour in ["blue", "red", "green", "orange", "violet"]:
 		for role in ["_floor", "_floor_alt", "_wall", "_wall_alt"]:
 			sprite_names.append(colour + role)
 	for i in 4:
 		sprite_names.append("rover_%d" % i)
 		sprite_names.append("burst_%d" % i)
-	sprite_names.append_array(Player2D.RUN_FRAMES)
 	var missing: Array = []
 	for n in sprite_names:
 		if not SpriteFactory.has(str(n)):

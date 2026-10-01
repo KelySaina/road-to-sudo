@@ -94,9 +94,9 @@ from its orb count, so adding a world is pure JSON.
   gravity, coyote time, jump buffering and variable jump height. Its tuning and
   the level generator agree on one contract: a full jump clears ~3 tiles of
   height and ~3.7 across, so ledges sit 2 tiles up and pits are at most 3 wide.
-- Feel: the camera leads you in the direction you're running; the operator has
-  a four-frame run cycle stepped off ground covered rather than off time, so the
-  feet don't skate, plus jump and fall poses; and every course is backed by two
+- Feel: the camera leads you in the direction you're running; the operator's run
+  cycle advances off ground covered rather than off time, so the feet don't
+  skate, and it has poses for rising and falling; and every course is backed by two
   parallax layers of machine receding into the dark, generated per world from
   its palette so no two skylines match.
 - Hurdles: `scripts/world2d/hazard.gd` (spikes, rovers, bursts — all of which
@@ -104,9 +104,11 @@ from its orb count, so adding a world is pure JSON.
   lift, an AnimatableBody2D so it carries the player for free).
 - Art: terrain and hazards are sliced from Buch's CC0 sci-fi sheet by
   `tools/extract_tiles.py` (see `assets/tiles/CREDITS.md`); the console, portal
-  and operator are 16x16 colour maps authored in `sprite_factory.gd`, which
-  traces their outlines from the silhouette at build time rather than asking
-  every frame to draw its own.
+  are 16x16 colour maps authored in `sprite_factory.gd`, which traces their
+  outlines from the silhouette at build time. The operator is not pixel art at
+  all: `scripts/world2d/character_sprite.gd` draws it as vector shapes, so it
+  stays crisp at any zoom — a jacket with a neon seam, a glowing visor, a run
+  cycle and a ground shadow that drops away when you leave the ground.
 - Tested headlessly in `tests/adventure_smoke.gd`, and through the real 2D
   scene in `tests/ui_smoke.gd` — which also holds the generator to its contract:
   every orb sits on a ledge (or over a lift), every ledge is within one measured

@@ -164,8 +164,9 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   Any valid solution passes, you get a "what you learned", and the **portal** to
   the next world opens. No HP, no lives and nothing kills you — touch a hazard or
   fall in a pit and you're set back on the last ground you stood on, and told so.
-  The camera leads where you run, the operator has a real run cycle, and each
-  course is backed by parallax layers of machine receding into the dark. It ends at the Throne of root: the
+  The camera leads where you run, the vector-drawn operator has a real run cycle
+  with poses for rising and falling, and each course is backed by parallax layers
+  of machine receding into the dark. It ends at the Throne of root: the
   **sudo orb** earns you the right, and you become root to end the impostor
   (*"YOU MADE IT."*). Trial XP feeds the same ranks; the run is saved.
   Full write-up: [docs/ADVENTURE.md](docs/ADVENTURE.md).
@@ -308,10 +309,13 @@ Michele 'Buch' Bucelli** (https://opengameart.org/content/sci-fi-platformer-tile
 fetches it and slices out only the tiles the game uses — five colour sets of
 block/edge tiles, plus spikes, a rover and a pulse emitter.
 
-The console, the portal and the operator are original, authored as 16x16 colour
-maps in [scripts/world2d/sprite_factory.gd](scripts/world2d/sprite_factory.gd)
-so they sit in the same palette as the rest of the UI and live in a text diff
-rather than a binary. A PNG in `assets/tiles/<name>.png` overrides any of them.
+The console and the portal are original, authored as 16x16 colour maps in
+[scripts/world2d/sprite_factory.gd](scripts/world2d/sprite_factory.gd) so they
+sit in the same palette as the rest of the UI and live in a text diff rather
+than a binary. A PNG in `assets/tiles/<name>.png` overrides either of them. The
+operator is not pixel art: it is vector-drawn in
+[scripts/world2d/character_sprite.gd](scripts/world2d/character_sprite.gd) and
+stays crisp at any zoom.
 
 Everything else — engine, game, terminal font fallback — is original. See
 `assets/tiles/CREDITS.md`.

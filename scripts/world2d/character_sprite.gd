@@ -1,13 +1,22 @@
 class_name CharacterSprite
 extends Node2D
 ## A smooth, vector-drawn operator avatar — no pixel art, so it stays crisp at
-## any zoom. Draws a stylized top-down "netrunner": dark jacket with neon trim,
-## glowing visor, animated walk cycle, facing four directions. Set `facing`,
-## `moving` and advance `phase` each frame; call queue_redraw().
+## any zoom. A stylized "netrunner": dark jacket with neon trim, glowing visor,
+## animated run cycle.
+##
+## Drawn side-on for the platforming worlds, so there are two facings rather
+## than four, plus poses for rising and falling. The origin sits at the
+## character's FEET, matching Player2D's collider, which is what lets the world
+## place it on a tile top with a plain `y = row * TILE`.
+##
+## Set `facing`, `moving`, `airborne` / `rising` and advance `phase` each frame,
+## then call queue_redraw().
 
-var facing := "down"
+var facing := 1           # 1 right, -1 left
 var moving := false
-var phase := 0.0          # walk cycle, radians
+var airborne := false
+var rising := false       # only meaningful while airborne
+var phase := 0.0          # run cycle, radians
 
 # Neon-operator palette (kept in sync with the UI accent).
 const SUIT := Color("1b2150")
@@ -18,8 +27,13 @@ const SKIN_LO := Color("c98f67")
 const HAIR := Color("191c38")
 const BOOT := Color("0d1030")
 const SHADOW := Color(0, 0, 0, 0.26)
+const INK := Color("05030f")
 var ACCENT := Color("00e5ff")
 var ACCENT_SOFT := Color("00e5ff")
+
+## Everything below is authored around a figure standing at the origin, so the
+## whole drawing is shifted up by this much to put the feet on y = 0.
+const FOOT_OFFSET := -21.0
 
 
 func _ready() -> void:
@@ -28,51 +42,50 @@ func _ready() -> void:
 
 
 func _draw() -> void:
-	var stride: float = sin(phase) if moving else 0.0
-	var swing: float = stride * 3.2
-	var bob: float = (-1.5 if (moving and sin(phase) > 0.0) else 0.0)
-	# Ground shadow (stays put; the body bobs above it).
-	_ellipse(Vector2(0, 21), 12.5, 4.2, SHADOW)
-	draw_set_transform(Vector2(0, bob), 0.0, Vector2.ONE)
-	match facing:
-		"up": _draw_up(swing)
-		"left": _draw_side(-1, swing)
-		"right": _draw_side(1, swing)
-		_: _draw_down(swing)
+	var stride: float = sin(phase) if (moving and not airborne) else 0.0
+	var swing: float = stride * 3.6
+	var bob: float = (-1.5 if (moving and not airborne and sin(phase) > 0.0) else 0.0)
+	# Ground shadow: it stays put while the body bobs above it, and shrinks away
+	# as you leave the ground, which is most of what sells a jump.
+	if not airborne:
+		_ellipse(Vector2(0, 21.0 + FOOT_OFFSET), 12.5, 4.2, SHADOW)
+	draw_set_transform(Vector2(0, bob + FOOT_OFFSET), 0.0, Vector2.ONE)
+	if airborne:
+		_draw_air(facing, rising)
+	else:
+		_draw_side(facing, swing)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
-# --- facing down (toward the viewer) ----------------------------------------
+# --- poses ------------------------------------------------------------------
 
-func _draw_down(swing: float) -> void:
-	_leg(Vector2(-4.2, 11), swing, true)
-	_leg(Vector2(4.2, 11), -swing, true)
-	_torso()
-	_arm(Vector2(-10.5, 0), -swing)
-	_arm(Vector2(10.5, 0), swing)
-	_head(0.0, true)
-
-
-func _draw_up(swing: float) -> void:
-	_leg(Vector2(-4.2, 11), swing, true)
-	_leg(Vector2(4.2, 11), -swing, true)
-	_torso()
-	_arm(Vector2(-10.5, 0), -swing)
-	_arm(Vector2(10.5, 0), swing)
-	# Back of the head: hood/hair, no face, a thin neon nape line.
-	_capsule(Vector2(0, -16), Vector2(0, -10), 9.0, HAIR)
-	draw_circle(Vector2(0, -13.5), 8.6, HAIR)
-	draw_line(Vector2(-5, -9), Vector2(5, -9), Color(ACCENT, 0.5), 1.4, true)
-
-
-func _draw_side(sign: int, swing: float) -> void:
-	# A 3/4 profile: body slightly turned, one arm leads.
+## Running or standing: a 3/4 profile with one arm leading, one trailing.
+func _draw_side(side: int, swing: float) -> void:
 	_leg(Vector2(-1.5, 11), swing, true)
-	_leg(Vector2(3.0 * sign, 11), -swing, true)
+	_leg(Vector2(3.0 * side, 11), -swing, true)
 	_torso()
-	_arm(Vector2(-2.0 * sign, 1), swing)          # trailing arm (behind torso)
-	_head(float(sign), false)
-	_arm(Vector2(9.0 * sign, 1), -swing)          # leading arm (in front)
+	_arm(Vector2(-2.0 * side, 1), swing)          # trailing arm (behind torso)
+	_head(float(side))
+	_arm(Vector2(9.0 * side, 1), -swing)          # leading arm (in front)
+
+
+## In the air: legs tucked on the way up, reaching on the way down, with the
+## arms counter-posed so the two read apart at a glance.
+func _draw_air(side: int, up: bool) -> void:
+	if up:
+		_leg(Vector2(-1.5, 9), -3.5, true)
+		_leg(Vector2(3.0 * side, 9), -5.5, true)
+		_torso()
+		_arm(Vector2(-2.0 * side, 0), -5.0)
+		_head(float(side))
+		_arm(Vector2(9.0 * side, -1), -6.0)       # leading arm thrown up
+	else:
+		_leg(Vector2(-2.5, 12), 4.5, true)
+		_leg(Vector2(3.5 * side, 12), 2.0, true)
+		_torso()
+		_arm(Vector2(-2.0 * side, 1), 4.0)
+		_head(float(side))
+		_arm(Vector2(9.0 * side, 2), 5.5)         # arms out, catching balance
 
 
 # --- parts ------------------------------------------------------------------
@@ -94,7 +107,7 @@ func _torso() -> void:
 	draw_line(Vector2(8, -3), Vector2(6.6, 10.5), ACCENT_SOFT, 2.2, true)
 
 
-func _head(side: float, front: bool) -> void:
+func _head(side: float) -> void:
 	var cx := 2.6 * side
 	var c := Vector2(cx, -13.0)
 	# neck
@@ -103,15 +116,10 @@ func _head(side: float, front: bool) -> void:
 	draw_circle(c, 8.4, SKIN)
 	# hair cap
 	_arc_cap(c, 8.4, HAIR)
-	if front:
-		# glowing visor across the eyes + faint outer glow
-		draw_line(c + Vector2(-6.4, 1.2), c + Vector2(6.4, 1.2), ACCENT_SOFT, 5.0, true)
-		draw_line(c + Vector2(-6.0, 1.2), c + Vector2(6.0, 1.2), ACCENT, 2.6, true)
-	else:
-		# profile visor on the facing side
-		var dirx := 1.0 if side >= 0.0 else -1.0
-		draw_line(c + Vector2(1.5 * dirx, 1.0), c + Vector2(6.6 * dirx, 1.0), ACCENT_SOFT, 5.0, true)
-		draw_line(c + Vector2(1.8 * dirx, 1.0), c + Vector2(6.2 * dirx, 1.0), ACCENT, 2.6, true)
+	# profile visor on the facing side
+	var dirx := 1.0 if side >= 0.0 else -1.0
+	draw_line(c + Vector2(1.5 * dirx, 1.0), c + Vector2(6.6 * dirx, 1.0), ACCENT_SOFT, 5.0, true)
+	draw_line(c + Vector2(1.8 * dirx, 1.0), c + Vector2(6.2 * dirx, 1.0), ACCENT, 2.6, true)
 
 
 func _arm(at: Vector2, swing: float) -> void:

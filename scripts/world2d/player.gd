@@ -1,7 +1,9 @@
 class_name Player2D
 extends CharacterBody2D
 ## Side-on operator for the platforming worlds: run, jump, fall. Builds its own
-## sprite and collider so the world can spawn it in code.
+## avatar and collider so the world can spawn it in code. The avatar is
+## CharacterSprite — vector-drawn rather than a tile, so it stays crisp at any
+## zoom; this script only tells it which way it is facing and what it is doing.
 ##
 ## The origin sits at the character's FEET, which is what lets the world place
 ## it on a tile top with a plain `y = row * TILE`.
@@ -22,8 +24,7 @@ const JUMP_VELOCITY := -790.0
 const JUMP_CUT := 0.42          # release early -> shorter hop
 const COYOTE_TIME := 0.10       # grace after walking off a ledge
 const JUMP_BUFFER := 0.12       # grace when you hit jump just before landing
-const RUN_FRAMES := ["player_run_0", "player_run_1", "player_run_2", "player_run_3"]
-const RUN_STRIDE := 26.0        # pixels of ground covered per run frame
+const RUN_PHASE_PER_PX := 0.045  # run-cycle radians per pixel of ground covered
 
 @warning_ignore("unused_signal")
 signal moved()
@@ -31,11 +32,11 @@ signal landed()
 
 var input_locked := false
 
-var _sprite: Sprite2D
+var _char: CharacterSprite
 var _facing := 1
 var _coyote := 0.0
 var _buffer := 0.0
-var _stride := 0.0
+var _phase := 0.0
 var _was_airborne := false
 
 
@@ -50,12 +51,12 @@ func _ready() -> void:
 	shape.position = Vector2(0, -21)
 	add_child(shape)
 
-	_sprite = Sprite2D.new()
-	_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_sprite.texture = SpriteFactory.texture("player")
-	_sprite.scale = Vector2(3, 3)
-	_sprite.position = Vector2(0, -24)
-	add_child(_sprite)
+	# CharacterSprite draws itself feet-on-origin, so scaling it keeps the feet
+	# planted. Slightly larger than the collider, which is normal — the art
+	# wants presence against 48px tiles, the hitbox wants to be forgiving.
+	_char = CharacterSprite.new()
+	_char.scale = Vector2(1.25, 1.25)
+	add_child(_char)
 	z_index = 10
 
 
@@ -101,24 +102,19 @@ func _physics_process(delta: float) -> void:
 func _animate(dir: float, delta: float) -> void:
 	if not is_zero_approx(dir):
 		_facing = 1 if dir > 0.0 else -1
-		_sprite.flip_h = _facing < 0
-	_sprite.position.y = -24
-	if not is_on_floor():
-		# Lean into the arc: stretch rising, squash falling.
-		var t := clampf(velocity.y / 700.0, -1.0, 1.0)
-		_sprite.scale = Vector2(3.0 - t * 0.2, 3.0 + t * 0.2)
-		_sprite.texture = SpriteFactory.texture("player_fall" if velocity.y > 0.0 else "player_jump")
-		_stride = 0.0
-		return
-	_sprite.scale = Vector2(3, 3)
-	if absf(velocity.x) < 12.0:
-		_stride = 0.0
-		_sprite.texture = SpriteFactory.texture("player")
-		return
-	# Step the run cycle off ground covered rather than off time, so the feet
-	# never skate when you are accelerating or shoving into a wall.
-	_stride += absf(velocity.x) * delta / RUN_STRIDE
-	_sprite.texture = SpriteFactory.texture(RUN_FRAMES[int(_stride) % RUN_FRAMES.size()])
+	var running := is_on_floor() and absf(velocity.x) >= 12.0
+	if running:
+		# Advance the run cycle off ground covered rather than off time, so the
+		# feet never skate when you are accelerating or shoving into a wall.
+		_phase += absf(velocity.x) * delta * RUN_PHASE_PER_PX
+	else:
+		_phase = 0.0
+	_char.facing = _facing
+	_char.moving = running
+	_char.airborne = not is_on_floor()
+	_char.rising = velocity.y < 0.0
+	_char.phase = _phase
+	_char.queue_redraw()
 
 
 func facing_dir() -> Vector2:
