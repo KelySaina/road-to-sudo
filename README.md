@@ -301,16 +301,20 @@ Full details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
   in a level file. No code is needed.
   See [docs/ADDING_CHALLENGES.md](docs/ADDING_CHALLENGES.md).
 - **Translation:** the UI language is switchable in Settings (English /
-  Français). Translation is keyed by the English source string — the code and
-  data keep their English, and `data/i18n/<locale>.json` maps it to the target
-  language. A string with no entry falls back to English, so a partial
-  translation still plays. **Terminal output stays English on purpose** — `ls`
-  columns, `Permission denied`, prompts and every command in a solution are the
-  Linux being taught, so only the teaching layer (UI, objectives, hints,
-  narration, help) is localised. `python3 tools/extract_strings.py` reports the
-  full translatable surface; `--missing <locale>` lists what a locale still
-  lacks. `tests/test_i18n.gd` guards that every translated string keeps the
-  `%`-placeholders of its English source.
+  Français), and **French is complete** — the whole UI, all 64 campaign
+  challenges, every Adventure world, and all command manuals. Translation is
+  keyed by the English source string: the code and data keep their English, and
+  `data/i18n/<locale>.json` maps it to the target language. A string with no
+  entry falls back to English, so a partial translation still plays. **What is
+  the Linux being taught stays English on purpose** — the terminal's own output
+  (`ls` columns, `Permission denied`, prompts, file contents), every command in
+  a solution or example, and each command's usage *synopsis* (`ls [-a] [-l]
+  …`). Only the teaching layer around it is localised: UI, objectives, hints,
+  narration, and the prose of `man`/`learn`/`help`. `python3
+  tools/extract_strings.py` reports the full translatable surface;
+  `--missing <locale>` lists what a locale still lacks. `tests/test_i18n.gd`
+  guards the fallback, that content under `setup/` is never translated, and that
+  every translated string keeps the `%`-placeholders of its English source.
 
 ## Credits
 
