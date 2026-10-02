@@ -41,6 +41,9 @@ func _ready() -> void:
 	prompt_path.add_theme_color_override("font_color", UiTheme.INFO)
 	dots.add_theme_color_override("font_color", UiTheme.FAINT)
 	suggestion.text = ""
+	var keys := get_node_or_null(^"VBox/TitleBar/Row/Keys")
+	if keys != null and keys is Label:
+		keys.text = I18n.t("Tab complete · ↑↓ history · Ctrl+L clear")
 	focus_input.call_deferred()
 
 

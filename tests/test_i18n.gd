@@ -9,7 +9,7 @@ func test_fallback_passes_unknown_through() -> void:
 	I18n.set_locale("en")
 	check_eq(I18n.t("anything at all"), "anything at all", "en is identity")
 	I18n.set_locale("fr")
-	check_eq(I18n.t("Permission denied"), "Permission denied",
+	check_eq(I18n.t("zzz not a real game string zzz"), "zzz not a real game string zzz",
 		"an untranslated string falls back to English, not a blank")
 	I18n.set_locale("en")
 

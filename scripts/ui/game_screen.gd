@@ -20,6 +20,7 @@ func _ready() -> void:
 	terminal.set_speed(str(Game.profile.settings.get("text_speed", "fast")))
 	terminal.submitted.connect(func(line: String): Game.submit(line))
 	menu_button.pressed.connect(func(): Game.submit(":menu"))
+	menu_button.text = I18n.t("⎋  Save & return to menu   (:menu)")
 
 	EventBus.command_output.connect(_on_command_output)
 	EventBus.narrate.connect(_on_narrate)

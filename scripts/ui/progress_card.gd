@@ -13,6 +13,9 @@ var _fresh: Array = []
 func _ready() -> void:
 	EventBus.xp_changed.connect(func(_xp, _rank, _p): refresh())
 	EventBus.commands_unlocked.connect(_on_commands_unlocked)
+	var ct := get_node_or_null(^"VBox/CommandsTitle")
+	if ct != null and ct is Label:
+		ct.text = I18n.t("COMMANDS LEARNED")
 	refresh()
 
 

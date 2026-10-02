@@ -22,6 +22,9 @@ func _ready() -> void:
 	reset_button.pressed.connect(func(): Game.submit(":reset"))
 	continue_button.pressed.connect(func(): Game.submit(":next"))
 	EventBus.hint_revealed.connect(func(_i, _t): _refresh_hints())
+	hint_button.text = I18n.t("Hint  F1")
+	solution_button.text = I18n.t("Solution")
+	reset_button.tooltip_text = I18n.t("Rewind the machine to the start of this challenge (:reset)")
 
 
 func show_practice() -> void:
