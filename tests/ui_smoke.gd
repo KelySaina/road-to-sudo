@@ -74,9 +74,10 @@ func _run() -> void:
 	var achievements_seen: Array = []
 	EventBus.achievement_unlocked.connect(func(a): achievements_seen.append(a.id))
 	# This test asserts on the English UI, so pin the locale regardless of any
-	# language the developer has saved locally.
-	Game.profile.settings["locale"] = "en"
-	I18n.set_locale("en")
+	# language the developer has saved locally. Go through Game.set_locale so the
+	# challenge library is RELOADED in English — just setting the I18n map leaves
+	# content that was cached at boot (in the dev's saved language) untranslated.
+	Game.set_locale("en")
 	menu.journey_requested.emit("beginner", false)
 	await _frames(3)
 	var screen = main.host.get_child(main.host.get_child_count() - 1)
@@ -327,6 +328,15 @@ func _run() -> void:
 	world._interact(world._console)
 	await _frames(2)
 	check(world._overlay.visible, "terminal overlay opens at the trial console")
+	# The trial must open with its briefing — objective, kit, hint prompt — not a
+	# blank console. It once opened blank: engage_trial narrated the objective
+	# before the overlay was visible, so _on_narrate dropped the whole intro.
+	# The briefing is ~200 chars; a dropped one leaves the console empty.
+	# (get_parsed_text() is unreliable headless, so count characters instead.)
+	world._terminal.flush()
+	check(world._terminal.output.get_total_character_count() > 80,
+		"the trial opens with its briefing, not a blank console (%d chars)"
+		% world._terminal.output.get_total_character_count())
 	Game.submit("cd /var"); await _frames(1)
 	check(world._terminal.prompt_path.text.contains("/var"), "overlay prompt follows cd: '%s'" % world._terminal.prompt_path.text)
 	Game.submit("cd"); await _frames(1)

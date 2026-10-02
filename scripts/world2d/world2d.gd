@@ -690,8 +690,14 @@ func _open_terminal() -> void:
 	var idx := state.world_index
 	var trial: Dictionary = world.world_at(idx).get("trial", {})
 	_overlay_mode = "trial"
-	adv.engage_trial(idx)
+	# Show and clear the terminal BEFORE engaging the trial: engage_trial emits
+	# the objective briefing as narration, and _on_narrate only prints while the
+	# overlay is visible. Then re-set the prompt, because engage_trial moves the
+	# shell into the trial's cwd.
 	_open_overlay(I18n.t("TRIAL — %s") % str(trial.get("name", world.world_at(idx).get("name", "Console"))))
+	adv.engage_trial(idx)
+	var s: ShellSession = Game.session
+	_terminal.set_prompt(s.user, s.machine.hostname, s.pretty_cwd(), s.prompt_symbol())
 
 
 ## Taking an orb doesn't just explain a command — it hands you a prompt to run
