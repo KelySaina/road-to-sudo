@@ -87,6 +87,7 @@ func _physics_process(delta: float) -> void:
 		velocity.y = JUMP_VELOCITY
 		_buffer = 0.0
 		_coyote = 0.0
+		Audio.play("jump")
 	# Variable height: let go on the way up and the hop is cut short.
 	if jump_released and velocity.y < 0.0:
 		velocity.y *= JUMP_CUT

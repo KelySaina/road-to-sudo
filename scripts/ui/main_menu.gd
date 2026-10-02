@@ -69,6 +69,8 @@ func _ready() -> void:
 	_build_difficulties()
 	_build_settings()
 	_build_language()
+	_build_audio_toggles()
+	_wire_button_sounds(self)
 	_show_home()
 
 
@@ -133,6 +135,35 @@ func _build_language() -> void:
 	grid.add_child(picker)
 	grid.move_child(lang_label, 0)
 	grid.move_child(picker, 1)
+
+
+## Give every button a navigate-on-focus and select-on-press sound. Done by
+## walking the tree so new buttons are covered without extra wiring.
+func _wire_button_sounds(node: Node) -> void:
+	for child in node.get_children():
+		if child is Button:
+			child.focus_entered.connect(func(): Audio.play("navigate"))
+			child.pressed.connect(func(): Audio.play("select"))
+		_wire_button_sounds(child)
+
+
+## Music and sound-effects toggles, added to the settings grid like the
+## language picker. Each persists to the profile and re-applies immediately.
+func _build_audio_toggles() -> void:
+	var grid := speed.get_parent()
+	for spec in [{"key": "music", "label": "Music"}, {"key": "sfx", "label": "Sound effects"}]:
+		var lbl := Label.new()
+		lbl.text = I18n.t(spec.label)
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var box := CheckButton.new()
+		box.button_pressed = bool(Game.profile.settings.get(spec.key, true))
+		var key: String = spec.key
+		box.toggled.connect(func(on):
+			Game.profile.settings[key] = on
+			Audio.apply_settings()
+			Game.save_now())
+		grid.add_child(lbl)
+		grid.add_child(box)
 
 
 func _process(delta: float) -> void:

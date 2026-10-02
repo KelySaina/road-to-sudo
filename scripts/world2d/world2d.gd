@@ -798,6 +798,7 @@ func _clear_of_hazards(p: Vector2) -> bool:
 ## The only consequence in the whole mode: you are put back down on the last
 ## ground you stood on. No health, no lives, no run to lose.
 func _setback() -> void:
+	Audio.play("setback")
 	_player.global_position = _safe_pos
 	_player.velocity = Vector2.ZERO
 	_hazard_grace = 1.0
@@ -842,6 +843,7 @@ func _interact(it: Interactable) -> void:
 	elif it == _portal:
 		if adv.is_passed(idx):
 			if adv.advance():
+				Audio.play("portal")
 				if adv.is_active():
 					_load_world(state.world_index)
 		else:

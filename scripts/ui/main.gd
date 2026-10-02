@@ -23,6 +23,7 @@ func apply_theme() -> void:
 
 func show_menu() -> void:
 	$Background.visible = true
+	Audio.play_music("menu")
 	var menu := MENU_SCENE.instantiate()
 	_swap(menu)
 	menu.journey_requested.connect(func(difficulty: String, skip: bool):
@@ -44,6 +45,7 @@ func show_menu() -> void:
 
 func _show_game(mode: String, fresh: bool) -> void:
 	$Background.visible = true
+	Audio.play_music("adventure" if mode == "practice" else "campaign")
 	var screen := GAME_SCENE.instantiate()
 	_swap(screen)
 	screen.begin(mode, fresh)
@@ -51,6 +53,7 @@ func _show_game(mode: String, fresh: bool) -> void:
 
 func _show_world(resumed: bool) -> void:
 	$Background.visible = false
+	Audio.play_music("adventure")
 	var world := WORLD2D_SCENE.instantiate()
 	world.setup(resumed)
 	for c in host.get_children():

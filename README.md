@@ -22,8 +22,10 @@ Backing up /home/player/projects...
 
 This is an early build with a lot in it: a full **14-level campaign (64
 challenges)** that takes you from `whoami` to taking **root on a burning
-production server**, plus a **2D platformer adventure mode**. A few advanced topics
-(networking, services, packages, SSH, git) are the next waves.
+production server**, plus a **2D platformer adventure mode**. It teaches the
+real toolkit — files and permissions, text and pipes, processes and logs,
+services, networking, packages, git, SSH and Bash scripting — in two languages,
+with music and sound.
 
 ---
 
@@ -48,10 +50,12 @@ GODOT=/path/to/godot tools/run_tests.sh
 
 This runs:
 
-- `tests/run_tests.gd`: 547 assertions over the VFS, permissions, parser,
-  every command, progression and achievements. It plays **every challenge's
-  solution plus alternative solutions**, and checks that wrong answers and
-  half-fixes do not pass.
+- `tests/run_tests.gd`: 1898 assertions over the VFS, permissions, parser,
+  every command, progression and achievements, plus the localisation layer
+  (French placeholder-parity, English fallback) and the audio layer (every
+  music track and sound effect exists). It plays **every challenge's solution
+  plus alternative solutions**, and checks that wrong answers and half-fixes do
+  not pass.
 - `tests/adventure_smoke.gd`: plays the whole RPG region end to end — every
   fight, the damage traps, the respawning boss and the death/reboot — 62
   assertions.
@@ -213,12 +217,24 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   stores the profile (XP, completions, hints, difficulty, stats,
   achievements, settings) and the machine state, so *Continue* resumes
   exactly where you left off, files included.
+- **Languages:** the interface switches between **English and Français** in
+  Settings. The Linux the game teaches stays English on purpose — terminal
+  output, prompts and the commands in every solution — while the teaching
+  layer around it (UI, objectives, hints, narration, `man`/`learn`) is
+  localised. Translation is keyed by the English source string, so a missing
+  entry simply shows English. See **Translation** under *Extending*.
+- **Sound:** background music that crossfades between the menu, the campaign,
+  Adventure and the victory screen, plus sound effects wired to the events
+  that matter — a command error, an objective cleared, a rank-up, an orb
+  taken, a jump, a hazard setback. Music and SFX each have an on/off toggle in
+  Settings. All audio is CC0 (Mirrorshade + Kenney; see
+  `assets/sounds/CREDITS.md`).
 
 ## Project structure
 
 ```text
 road-to-sudo/
-├── project.godot            autoloads: EventBus, SaveManager, Game
+├── project.godot            autoloads: EventBus, SaveManager, Game, Audio
 ├── scenes/
 │   ├── main/                main.tscn (root), game_screen.tscn
 │   ├── world2d/             world2d.tscn (the 2D adventure)
@@ -227,7 +243,8 @@ road-to-sudo/
 │                            status_bar, toast, background.gdshader
 ├── scripts/
 │   ├── core/                game.gd (composition root), event_bus.gd,
-│   │                        save_manager.gd, meta_commands.gd, json_loader.gd
+│   │                        save_manager.gd, meta_commands.gd, json_loader.gd,
+│   │                        i18n.gd (localisation), audio.gd (music + SFX)
 │   ├── filesystem/          VirtualFileSystem, VFSNode, Permissions,
 │   │                        PathUtils, AccessContext, VfsResult
 │   ├── machine/             Machine, MachineBuilder, ContentGenerators
@@ -332,6 +349,10 @@ operator is not pixel art: it is vector-drawn in
 [scripts/world2d/character_sprite.gd](scripts/world2d/character_sprite.gd) and
 stays crisp at any zoom.
 
+**Audio** is CC0 too: background music is *Mirrorshade* by James Gargette, and
+the sound effects are from **Kenney — Interface Sounds** (kenney.nl). Only the
+tracks used are kept, renamed to their role; see `assets/sounds/CREDITS.md`.
+
 Everything else — engine, game, terminal font fallback — is original. See
 `assets/tiles/CREDITS.md`.
 
@@ -350,7 +371,7 @@ These are honest gaps, not bugs:
 - The font is the system monospace font (JetBrains Mono, Fira Code, … and
   falling back to DejaVu Sans Mono). To bundle one, drop
   `assets/fonts/mono-regular.ttf` and `mono-bold.ttf` in place; `UiTheme`
-  picks them up. There is no audio yet.
+  picks them up.
 - "Unlocked commands" mark progress in the UI. Every simulated command can
   be run from the start, because blocking real commands would teach the
   wrong lesson. `sudo` is gated the Linux way, by `/etc/sudoers`.
