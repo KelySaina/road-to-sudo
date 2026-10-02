@@ -21,21 +21,21 @@ func execute(ctx: CommandContext) -> int:
 		if not by_cat.has(cat):
 			by_cat[cat] = []
 		by_cat[cat].append(cmd)
-	ctx.out("New here? Type  learn  for a cheat sheet of what each command does,\n")
-	ctx.out("or  man <command>  for the full manual.\n\n", "tip")
-	ctx.out("Commands on this machine:\n\n")
+	ctx.out(I18n.t("New here? Type  learn  for a cheat sheet of what each command does,") + "\n")
+	ctx.out(I18n.t("or  man <command>  for the full manual.") + "\n\n", "tip")
+	ctx.out(I18n.t("Commands on this machine:") + "\n\n")
 	for cat in CATEGORY_ORDER:
 		if not by_cat.has(cat):
 			continue
 		ctx.out(cat.to_upper() + "\n", "header")
 		for cmd in by_cat[cat]:
-			ctx.out("  %s %s\n" % [cmd.get_command_name().rpad(10), cmd.get_summary()])
+			ctx.out("  %s %s\n" % [cmd.get_command_name().rpad(10), I18n.t(cmd.get_summary())])
 		ctx.out("\n")
-	ctx.out("GAME\n", "header")
-	ctx.out("  :hint      reveal the next hint for the current objective\n")
-	ctx.out("  :objective show the current objective again\n")
-	ctx.out("  :solution  reveal the solution (no bonus XP)\n")
-	ctx.out("  :reset     rewind the machine to the start of this challenge\n")
-	ctx.out("  :skip      skip ahead (Normal/Expert only)\n")
-	ctx.out("  :menu      back to the main menu\n")
+	ctx.out(I18n.t("GAME") + "\n", "header")
+	ctx.out("  :hint      " + I18n.t("reveal the next hint for the current objective") + "\n")
+	ctx.out("  :objective " + I18n.t("show the current objective again") + "\n")
+	ctx.out("  :solution  " + I18n.t("reveal the solution (no bonus XP)") + "\n")
+	ctx.out("  :reset     " + I18n.t("rewind the machine to the start of this challenge") + "\n")
+	ctx.out("  :skip      " + I18n.t("skip ahead (Normal/Expert only)") + "\n")
+	ctx.out("  :menu      " + I18n.t("back to the main menu") + "\n")
 	return 0

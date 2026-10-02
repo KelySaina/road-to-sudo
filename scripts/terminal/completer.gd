@@ -74,7 +74,7 @@ static func describe(line: String, registry: CommandRegistry) -> String:
 	var first: String = words[0]
 	if registry.has(first):
 		var cmd := registry.get_command(first)
-		return "%s — %s" % [cmd.get_usage(), cmd.get_summary()]
+		return "%s — %s" % [I18n.t(cmd.get_usage()), I18n.t(cmd.get_summary())]
 	if words.size() == 1 and first.length() >= 1:
 		var matches: Array = []
 		for n in registry.primary_names():

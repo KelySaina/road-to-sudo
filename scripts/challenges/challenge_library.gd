@@ -19,7 +19,7 @@ static func load_default() -> ChallengeLibrary:
 
 func load_from(levels_dir: String, challenges_dir: String) -> void:
 	for path in JsonLoader.list_json_files(challenges_dir):
-		var data := JsonLoader.load_dict(path)
+		var data := JsonLoader.load_content_dict(path)
 		if data.is_empty():
 			continue
 		var c := Challenge.from_dict(data)
@@ -27,7 +27,7 @@ func load_from(levels_dir: String, challenges_dir: String) -> void:
 			push_warning("%s: %s" % [path, problem])
 		challenges[c.id] = c
 	for path in JsonLoader.list_json_files(levels_dir):
-		var lvl := JsonLoader.load_dict(path)
+		var lvl := JsonLoader.load_content_dict(path)
 		if not lvl.is_empty():
 			levels.append(lvl)
 	levels.sort_custom(func(a, b): return int(a.get("order", 0)) < int(b.get("order", 0)))

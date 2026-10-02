@@ -5,3 +5,7 @@ export_presets.cfg
 *.translation
 # OS
 .DS_Store
+
+# Python bytecode from tools/
+__pycache__/
+*.pyc

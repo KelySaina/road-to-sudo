@@ -13,6 +13,21 @@ static func load_array(path: String) -> Array:
 	return value if value is Array else []
 
 
+## Load a player-facing content file and localise its prose.
+##
+## Machine definitions, the save file and anything else the simulated box reads
+## deliberately do NOT come through here: what a terminal prints has to stay in
+## English, because that is the Linux being taught.
+static func load_content_dict(path: String) -> Dictionary:
+	var out: Variant = I18n.translate_content(load_dict(path))
+	return out if out is Dictionary else {}
+
+
+static func load_content_array(path: String) -> Array:
+	var out: Variant = I18n.translate_content(load_array(path))
+	return out if out is Array else []
+
+
 static func load_any(path: String) -> Variant:
 	if not FileAccess.file_exists(path):
 		return null

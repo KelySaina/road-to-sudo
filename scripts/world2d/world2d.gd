@@ -122,7 +122,7 @@ func _ready() -> void:
 
 	_load_world(state.world_index)
 	if not _resumed:
-		_show_dialogue("The Ascent to Root", world.intro)
+		_show_dialogue(I18n.t("The Ascent to Root"), world.intro)
 
 
 # --- building a world's course ----------------------------------------------
@@ -293,7 +293,7 @@ func _load_world(index: int) -> void:
 	_console.done_sprite = "console_done"
 	if adv.is_passed(index):
 		_console.set_cleared(true)
-	var portal_label := "PORTAL" if not world.is_final(index) else "THE THRONE"
+	var portal_label := I18n.t("PORTAL") if not world.is_final(index) else I18n.t("THE THRONE")
 	_portal = _make_interactable(Interactable.Kind.SIGN, "door", portal_label, plan.portal_x)
 
 	_camera.limit_right = _level_w * TILE
@@ -307,7 +307,7 @@ func _load_world(index: int) -> void:
 	if not _resumed and not _intro_shown.has(index):
 		_intro_shown[index] = true
 		var wd := world.world_at(index)
-		_show_dialogue(str(wd.get("name", "")), wd.get("intro", ["A new world."]))
+		_show_dialogue(str(wd.get("name", "")), wd.get("intro", [I18n.t("A new world.")]))
 
 
 func _build_level_geometry(plan: Dictionary) -> void:
@@ -485,7 +485,7 @@ func _build_hud() -> void:
 	_sub_label.theme_type_variation = &"DimLabel"
 	vb.add_child(_sub_label)
 	var skills_title := Label.new()
-	skills_title.text = "SKILLS"
+	skills_title.text = I18n.t("SKILLS")
 	skills_title.theme_type_variation = &"CapsLabel"
 	vb.add_child(skills_title)
 	_skills_box = HFlowContainer.new()
@@ -511,7 +511,7 @@ func _build_hud() -> void:
 	root.add_child(prompt_panel)
 	_prompt_label = Label.new()
 	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_prompt_label.text = "A D / ← → run   ·   Space or W jump   ·   E at a console   ·   Esc menu"
+	_prompt_label.text = I18n.t("A D / ← → run   ·   Space or W jump   ·   E at a console   ·   Esc menu")
 	_prompt_label.theme_type_variation = &"DimLabel"
 	prompt_panel.add_child(_prompt_label)
 
@@ -540,7 +540,7 @@ func _refresh_hud() -> void:
 	for c in _skills_box.get_children():
 		c.queue_free()
 	if state.skills.is_empty():
-		var l := Label.new(); l.text = "none yet"; l.theme_type_variation = &"FaintLabel"
+		var l := Label.new(); l.text = I18n.t("none yet"); l.theme_type_variation = &"FaintLabel"
 		_skills_box.add_child(l)
 	else:
 		for skill in state.skills:
@@ -550,11 +550,11 @@ func _refresh_hud() -> void:
 			chip.add_child(l)
 			_skills_box.add_child(chip)
 	if adv.is_passed(idx):
-		_orb_label.text = "TRIAL PASSED ✔"
+		_orb_label.text = I18n.t("TRIAL PASSED ✔")
 	elif adv.all_orbs_collected(idx):
-		_orb_label.text = "TRIAL READY — use the console"
+		_orb_label.text = I18n.t("TRIAL READY — use the console")
 	else:
-		_orb_label.text = "ORBS  %d / %d" % [adv.orbs_collected_count(idx), adv.orbs_total(idx)]
+		_orb_label.text = I18n.t("ORBS  %d / %d") % [adv.orbs_collected_count(idx), adv.orbs_total(idx)]
 
 
 # --- dialogue (world intros + lesson cards) ---------------------------------
@@ -585,7 +585,7 @@ func _build_dialogue() -> void:
 	_dialogue_body.custom_minimum_size = Vector2(720, 70)
 	vb.add_child(_dialogue_body)
 	var hint := Label.new()
-	hint.text = "[E] continue"
+	hint.text = I18n.t("[E] continue")
 	hint.theme_type_variation = &"FaintLabel"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	vb.add_child(hint)
@@ -661,7 +661,7 @@ func _build_overlay() -> void:
 	_overlay_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_overlay_title)
 	var esc := Label.new()
-	esc.text = "Esc  step back to the world"
+	esc.text = I18n.t("Esc  step back to the world")
 	esc.theme_type_variation = &"FaintLabel"
 	header.add_child(esc)
 	_terminal = TERMINAL_SCENE.instantiate()
@@ -691,7 +691,7 @@ func _open_terminal() -> void:
 	var trial: Dictionary = world.world_at(idx).get("trial", {})
 	_overlay_mode = "trial"
 	adv.engage_trial(idx)
-	_open_overlay("TRIAL — " + str(trial.get("name", world.world_at(idx).get("name", "Console"))))
+	_open_overlay(I18n.t("TRIAL — %s") % str(trial.get("name", world.world_at(idx).get("name", "Console"))))
 
 
 ## Taking an orb doesn't just explain a command — it hands you a prompt to run
@@ -703,17 +703,17 @@ func _open_practice(lesson: Dictionary) -> void:
 	_practice_skill = str(lesson.get("skill", ""))
 	_practice_done = false
 	adv.prepare_practice(state.world_index)
-	_open_overlay("PRACTICE — " + _practice_skill)
-	_terminal.print_rule("NEW SKILL  ·  " + _practice_skill)
+	_open_overlay(I18n.t("PRACTICE — %s") % _practice_skill)
+	_terminal.print_rule(I18n.t("NEW SKILL  ·  %s") % _practice_skill)
 	_terminal.type_text("")
 	_terminal.type_text("  " + str(lesson.get("teaches", "")), "story")
 	var example := str(lesson.get("example", ""))
 	if example != "":
 		_terminal.type_text("")
-		_terminal.type_text("  try it:   " + example, "tip")
+		_terminal.type_text("  " + I18n.t("try it:") + "   " + example, "tip")
 	_terminal.type_text("")
-	_terminal.type_text("  Nothing is graded here — run it, break it, look around.", "dim")
-	_terminal.type_text("  [Esc] when you're done.", "dim")
+	_terminal.type_text("  " + I18n.t("Nothing is graded here — run it, break it, look around."), "dim")
+	_terminal.type_text("  " + I18n.t("[Esc] when you're done."), "dim")
 	_terminal.type_text("")
 
 
@@ -804,7 +804,7 @@ func _setback() -> void:
 	_player.modulate = Color(1.0, 0.45, 0.6, 0.35)
 	create_tween().tween_property(_player, "modulate", Color.WHITE, 0.5)
 	if _flash_label != null:
-		_flash_label.text = "set back — nothing lost, try it again"
+		_flash_label.text = I18n.t("set back — nothing lost, try it again")
 		_flash_label.modulate.a = 1.0
 		create_tween().tween_property(_flash_label, "modulate:a", 0.0, 1.6)
 
@@ -832,19 +832,20 @@ func _interact(it: Interactable) -> void:
 	var idx := state.world_index
 	if it == _console:
 		if adv.is_passed(idx):
-			_show_dialogue("Trial", ["You've already passed this trial. The console idles quietly.", "The portal ahead is open — step through it."])
+			_show_dialogue(I18n.t("Trial"), [I18n.t("You've already passed this trial. The console idles quietly."), I18n.t("The portal ahead is open — step through it.")])
 		elif adv.all_orbs_collected(idx):
 			_open_terminal()
 		else:
 			var missing := adv.orbs_total(idx) - adv.orbs_collected_count(idx)
-			_show_dialogue("Trial", ["The console is locked.", "Collect the remaining %d skill orb%s first — the trial needs them." % [missing, "" if missing == 1 else "s"]])
+			var need := I18n.t("Collect the remaining skill orb first — the trial needs it.") if missing == 1 else (I18n.t("Collect the remaining %d skill orbs first — the trial needs them.") % missing)
+			_show_dialogue(I18n.t("Trial"), [I18n.t("The console is locked."), need])
 	elif it == _portal:
 		if adv.is_passed(idx):
 			if adv.advance():
 				if adv.is_active():
 					_load_world(state.world_index)
 		else:
-			_show_dialogue("Portal", ["The portal is dark.", "Pass this world's trial at the console to wake it."])
+			_show_dialogue(I18n.t("Portal"), [I18n.t("The portal is dark."), I18n.t("Pass this world's trial at the console to wake it.")])
 
 
 func _collect_orb(o: Dictionary) -> void:
@@ -859,10 +860,10 @@ func _collect_orb(o: Dictionary) -> void:
 		tw.tween_callback(node.queue_free)
 	if not lesson.is_empty():
 		_pending_practice = lesson
-		_show_dialogue("Skill learned:  %s" % lesson.get("skill", "?"), [
+		_show_dialogue(I18n.t("Skill learned:  %s") % lesson.get("skill", "?"), [
 			str(lesson.get("teaches", "")),
 			"",
-			"[E] — try it at a real prompt",
+			I18n.t("[E] — try it at a real prompt"),
 		])
 	_refresh_hud()
 
@@ -881,7 +882,7 @@ func _on_command_output(outcome: ExecutionOutcome) -> void:
 		if str(r.get("name", "")) == _practice_skill:
 			_practice_done = true
 			_terminal.type_text("")
-			_terminal.type_text("  ✔ that's `%s` — it's yours now. [Esc] back to the climb." % _practice_skill, "success")
+			_terminal.type_text(I18n.t("  ✔ that's `%s` — it's yours now. [Esc] back to the climb.") % _practice_skill, "success")
 			break
 
 
@@ -899,7 +900,7 @@ func _on_trial_passed(_world_id: String, _reward: Dictionary) -> void:
 	_refresh_hud()
 	if _overlay.visible:
 		_terminal.type_text("")
-		_terminal.type_text("  [Esc] step back — the portal ahead is open.", "tip")
+		_terminal.type_text("  " + I18n.t("[Esc] step back — the portal ahead is open."), "tip")
 
 
 func _on_adventure_won() -> void:
@@ -932,7 +933,7 @@ func _show_victory() -> void:
 		l.theme_type_variation = &"AccentLabel" if str(line).begins_with("root@") or str(line).begins_with("YOU MADE IT") else &""
 		vb.add_child(l)
 	var cont := Label.new()
-	cont.text = "\n[ Esc ] return to the menu"
+	cont.text = "\n" + I18n.t("[ Esc ] return to the menu")
 	cont.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	cont.theme_type_variation = &"FaintLabel"
 	vb.add_child(cont)

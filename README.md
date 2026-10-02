@@ -300,6 +300,17 @@ Full details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - **New challenge:** add a JSON file to `data/challenges/` and list its id
   in a level file. No code is needed.
   See [docs/ADDING_CHALLENGES.md](docs/ADDING_CHALLENGES.md).
+- **Translation:** the UI language is switchable in Settings (English /
+  Français). Translation is keyed by the English source string — the code and
+  data keep their English, and `data/i18n/<locale>.json` maps it to the target
+  language. A string with no entry falls back to English, so a partial
+  translation still plays. **Terminal output stays English on purpose** — `ls`
+  columns, `Permission denied`, prompts and every command in a solution are the
+  Linux being taught, so only the teaching layer (UI, objectives, hints,
+  narration, help) is localised. `python3 tools/extract_strings.py` reports the
+  full translatable surface; `--missing <locale>` lists what a locale still
+  lacks. `tests/test_i18n.gd` guards that every translated string keeps the
+  `%`-placeholders of its English source.
 
 ## Credits
 

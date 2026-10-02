@@ -19,7 +19,7 @@ func _init(p_profile: PlayerProfile) -> void:
 
 static func data() -> Dictionary:
 	if _data.is_empty():
-		_data = JsonLoader.load_dict(DATA_PATH)
+		_data = JsonLoader.load_content_dict(DATA_PATH)
 	return _data
 
 

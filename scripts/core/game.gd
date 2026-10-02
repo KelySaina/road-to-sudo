@@ -32,9 +32,23 @@ var _session_started_msec := 0
 
 func _ready() -> void:
 	registry = CommandRegistry.create_default()
+	var p := SaveManager.load_profile()
+	I18n.set_locale(str(p.settings.get("locale", I18n.DEFAULT_LOCALE)))
 	library = ChallengeLibrary.load_default()
 	meta = MetaCommands.new(self)
-	_load_profile(SaveManager.load_profile())
+	_load_profile(p)
+
+
+## Change the interface language. Reloads the content that was cached at boot
+## (challenges, difficulty) so the next screen is in the new language; the menu
+## rebuilds itself after this via EventBus.menu_requested. Terminal output is
+## untouched — it is English on purpose.
+func set_locale(code: String) -> void:
+	I18n.set_locale(code)
+	profile.settings["locale"] = I18n.locale()
+	library = ChallengeLibrary.load_default()
+	difficulty = DifficultySettings.load_id(profile.difficulty)
+	save_now()
 
 
 func _load_profile(p: PlayerProfile) -> void:

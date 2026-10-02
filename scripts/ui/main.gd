@@ -38,6 +38,8 @@ func show_menu() -> void:
 		var resumed: bool = Game.start_adventure2d()
 		_show_world(resumed))
 	menu.settings_changed.connect(apply_theme)
+	# Switching language rebuilds the menu so every label picks up the new locale.
+	menu.language_changed.connect(show_menu)
 
 
 func _show_game(mode: String, fresh: bool) -> void:

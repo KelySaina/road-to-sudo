@@ -19,14 +19,14 @@ var time_bonus: bool = false
 
 static func all() -> Array:
 	var out: Array = []
-	var data := JsonLoader.load_dict(DATA_PATH)
+	var data := JsonLoader.load_content_dict(DATA_PATH)
 	for key in data.get("order", ["beginner", "normal", "expert"]):
 		out.append(from_dict(key, data.get(key, {})))
 	return out
 
 
 static func load_id(difficulty_id: String) -> DifficultySettings:
-	var data := JsonLoader.load_dict(DATA_PATH)
+	var data := JsonLoader.load_content_dict(DATA_PATH)
 	if not data.has(difficulty_id):
 		difficulty_id = "beginner"
 	return from_dict(difficulty_id, data.get(difficulty_id, {}))

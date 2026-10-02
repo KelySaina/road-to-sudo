@@ -13,6 +13,7 @@ func _initialize() -> void:
 		preload("res://tests/test_core.gd").new(),
 		preload("res://tests/test_shell.gd").new(),
 		preload("res://tests/test_challenges.gd").new(),
+		preload("res://tests/test_i18n.gd").new(),
 	]
 	for suite in suites:
 		for m in suite.get_method_list():

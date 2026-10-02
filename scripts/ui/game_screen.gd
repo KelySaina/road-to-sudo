@@ -38,8 +38,8 @@ func begin(mode: String, fresh: bool) -> void:
 	_print_login_banner(fresh)
 	if mode == "practice":
 		objective_panel.show_practice()
-		terminal.type_text("PRACTICE LAB — a sandbox machine. No objectives, no score.", "tip")
-		terminal.type_text("Try:  cat README.lab", "dim")
+		terminal.type_text(I18n.t("PRACTICE LAB — a sandbox machine. No objectives, no score."), "tip")
+		terminal.type_text(I18n.t("Try:  cat README.lab"), "dim")
 	elif mode == "adventure":
 		objective_panel.visible = false
 		adventure_panel.visible = true
@@ -61,11 +61,11 @@ func _refresh_session() -> void:
 		return
 	terminal.history = s.history
 	terminal.set_prompt(s.user, s.machine.hostname, s.pretty_cwd(), s.prompt_symbol())
-	var mode_text := "CAMPAIGN · %s" % Game.difficulty.label.to_upper()
+	var mode_text := I18n.t("CAMPAIGN · %s") % Game.difficulty.label.to_upper()
 	if _mode == "practice":
-		mode_text = "PRACTICE LAB"
+		mode_text = I18n.t("PRACTICE LAB")
 	elif _mode == "adventure":
-		mode_text = "ADVENTURE · THE ASCENT"
+		mode_text = I18n.t("ADVENTURE · THE ASCENT")
 	status_bar.bind(s, mode_text)
 
 
@@ -110,8 +110,8 @@ func _on_challenge_started(c: Challenge) -> void:
 			terminal.type_text("  › " + str(tip), "tip")
 		if not c.tips.is_empty():
 			terminal.type_text("")
-	terminal.type_text("  OBJECTIVE  " + c.objective_for(diff.id), "objective")
-	terminal.type_text("  (stuck? :hint or F1)\n" if diff.max_hints > 0 else "", "dim")
+	terminal.type_text("  " + I18n.t("OBJECTIVE") + "  " + c.objective_for(diff.id), "objective")
+	terminal.type_text(I18n.t("  (stuck? :hint or F1)") + "\n" if diff.max_hints > 0 else "", "dim")
 	objective_panel.show_challenge(c)
 	_refresh_session()
 
@@ -119,26 +119,26 @@ func _on_challenge_started(c: Challenge) -> void:
 func _on_challenge_completed(c: Challenge, result: Dictionary) -> void:
 	var diff: DifficultySettings = Game.difficulty
 	terminal.type_text("")
-	terminal.type_text("  ✔ OBJECTIVE COMPLETE — %s" % c.title, "success")
+	terminal.type_text(I18n.t("  ✔ OBJECTIVE COMPLETE — %s") % I18n.t(c.title), "success")
 	var parts: Array = ["+%d XP" % int(result.base)]
 	if int(result.bonus) > 0:
-		parts.append("+%d %s" % [int(result.bonus), "no-hint bonus" if int(result.hints) == 0 else "bonus"])
+		parts.append("+%d %s" % [int(result.bonus), I18n.t("no-hint bonus") if int(result.hints) == 0 else I18n.t("bonus")])
 	if int(result.get("time_bonus", 0)) > 0:
-		parts.append("+%d speed" % int(result.time_bonus))
+		parts.append("+%d %s" % [int(result.time_bonus), I18n.t("speed")])
 	if float(result.multiplier) != 1.0:
 		parts.append("×%s %s" % [str(result.multiplier), diff.label])
 	if not result.get("first_time", true):
-		parts = ["replay — no XP"]
+		parts = [I18n.t("replay — no XP")]
 	terminal.type_text("    " + "   ".join(PackedStringArray(parts)), "success")
 	if diff.show_explanations and c.explanation != "":
 		terminal.type_text("")
-		terminal.type_text("  WHAT JUST HAPPENED", "header")
+		terminal.type_text("  " + I18n.t("WHAT JUST HAPPENED"), "header")
 		for line in c.explanation.split("\n"):
 			terminal.type_text("  " + line, "story")
 	var fresh: Array = result.get("new_commands", [])
 	if not fresh.is_empty():
 		terminal.type_text("")
-		terminal.type_text("  New in your toolbox: " + "  ".join(PackedStringArray(fresh)), "reaction")
+		terminal.type_text("  " + I18n.t("New in your toolbox:") + " " + "  ".join(PackedStringArray(fresh)), "reaction")
 	objective_panel.show_completed(c, result)
 	# Deferred so a rank-up triggered by this XP prints before the prompt.
 	_print_continue.call_deferred(str(result.get("next", "")) != "")
@@ -147,27 +147,27 @@ func _on_challenge_completed(c: Challenge, result: Dictionary) -> void:
 func _print_continue(has_next: bool) -> void:
 	terminal.type_text("")
 	if has_next:
-		terminal.type_text("  ▸ Press Enter to continue.", "tip")
+		terminal.type_text("  " + I18n.t("▸ Press Enter to continue."), "tip")
 
 
 func _on_hint_revealed(index: int, text: String) -> void:
-	terminal.type_text("  HINT %d/%d  %s" % [index, Game.challenges.hints_available(), text], "warn")
+	terminal.type_text(I18n.t("  HINT %d/%d  %s") % [index, Game.challenges.hints_available(), text], "warn")
 
 
 func _on_rank_up(rank: Dictionary) -> void:
 	terminal.type_text("")
-	terminal.type_text("  ★ RANK UP — you are now: %s" % rank.name, "reaction")
+	terminal.type_text(I18n.t("  ★ RANK UP — you are now: %s") % I18n.t(str(rank.name)), "reaction")
 	terminal.type_text("    %s" % rank.get("blurb", ""), "dim")
 
 
 func _on_adventure_won() -> void:
 	var world = Game.adventure.world
 	terminal.print_text("")
-	terminal.print_rule("THE OTHER SIDE OF THE PROMPT")
+	terminal.print_rule(I18n.t("THE OTHER SIDE OF THE PROMPT"))
 	for line in world.outro:
 		terminal.type_text("  " + str(line), "success" if line.begins_with("root@") else "story")
 	terminal.type_text("")
-	terminal.type_text("  Type :menu to return. This victory is saved to your rank.", "tip")
+	terminal.type_text("  " + I18n.t("Type :menu to return. This victory is saved to your rank."), "tip")
 
 
 func _on_campaign_finished() -> void:
@@ -177,32 +177,32 @@ func _on_campaign_finished() -> void:
 		if not lvl.get("challenges", []).is_empty():
 			done.append(str(lvl.get("title", "")))
 	terminal.print_text("")
-	terminal.print_rule("THE ROAD CONTINUES")
+	terminal.print_rule(I18n.t("THE ROAD CONTINUES"))
 	var lines: Array = [
 		"",
-		"  You started this session not knowing who you were.",
-		"  Now files, permissions and a broken production box all bend to you.",
+		I18n.t("  You started this session not knowing who you were."),
+		I18n.t("  Now files, permissions and a broken production box all bend to you."),
 		"",
-		"  Rank        %s" % Game.progression.current_rank().name,
+		I18n.t("  Rank        %s") % I18n.t(str(Game.progression.current_rank().name)),
 		"  XP          %d" % p.xp,
-		"  Commands    %d run, %d pipes, %d permission errors met" % [int(p.stats.commands_run), int(p.stats.pipes), int(p.stats.permission_denied)],
-		"  Hints used  %d" % int(p.stats.hints_used),
+		I18n.t("  Commands    %d run, %d pipes, %d permission errors met") % [int(p.stats.commands_run), int(p.stats.pipes), int(p.stats.permission_denied)],
+		I18n.t("  Hints used  %d") % int(p.stats.hints_used),
 		"",
-		"  Finished so far:",
+		I18n.t("  Finished so far:"),
 	]
 	for title in done:
-		lines.append("    ✔ %s" % title)
+		lines.append("    ✔ %s" % I18n.t(str(title)))
 	lines.append_array([
 		"",
-		"  Next on the road: users & groups, processes, networking, services,",
-		"  SSH, git, security... more levels are on the way.",
+		I18n.t("  Next on the road: users & groups, processes, networking, services,"),
+		I18n.t("  SSH, git, security... more levels are on the way."),
 		"",
-		"  Type :menu, keep exploring this machine, or try Adventure mode and",
-		"  the Practice Lab — both always open.",
+		I18n.t("  Type :menu, keep exploring this machine, or try Adventure mode and"),
+		I18n.t("  the Practice Lab — both always open."),
 	])
 	for line in lines:
 		terminal.type_text(line, "story")
 		objective_panel.show_practice()
-	objective_panel.level_label.text = "CAMPAIGN COMPLETE"
-	objective_panel.title.text = "The road continues"
-	objective_panel.objective.text = "You've finished every level built so far. More are on the way."
+	objective_panel.level_label.text = I18n.t("CAMPAIGN COMPLETE")
+	objective_panel.title.text = I18n.t("The road continues")
+	objective_panel.objective.text = I18n.t("You've finished every level built so far. More are on the way.")

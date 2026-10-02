@@ -122,13 +122,13 @@ func engage_trial(index: int) -> void:
 	_hints_shown = 0
 	_log_start = _session.command_log.size()
 	_in_trial = not is_passed(index)
-	narrate.emit("── TRIAL — %s ──" % str(trial.get("name", wd.get("name", ""))).to_upper(), "rule")
+	narrate.emit(I18n.t("── TRIAL — %s ──") % str(trial.get("name", wd.get("name", ""))).to_upper(), "rule")
 	if is_passed(index):
-		narrate.emit("You've already passed this trial. The console idles quietly.", "dim")
+		narrate.emit(I18n.t("You've already passed this trial. The console idles quietly."), "dim")
 	else:
-		narrate.emit("OBJECTIVE  " + str(trial.get("objective", "")), "objective")
-		narrate.emit("Skills in your kit: " + "  ".join(PackedStringArray(state.skills)), "tip")
-		narrate.emit("(type `hint` if you're stuck, or Esc to step back)", "dim")
+		narrate.emit(I18n.t("OBJECTIVE") + "  " + str(trial.get("objective", "")), "objective")
+		narrate.emit(I18n.t("Skills in your kit:") + " " + "  ".join(PackedStringArray(state.skills)), "tip")
+		narrate.emit(I18n.t("(type `hint` if you're stuck, or Esc to step back)"), "dim")
 	state_changed.emit()
 
 
@@ -162,7 +162,7 @@ func observe(outcome: ExecutionOutcome) -> void:
 		match e.name:
 			"adv_hint": _handle_hint()
 			"adv_look": _handle_look()
-			"adv_move": narrate.emit("Just run and jump — A/D or the arrows, Space to jump. Consoles and portals take E.", "dim")
+			"adv_move": narrate.emit(I18n.t("Just run and jump — A/D or the arrows, Space to jump. Consoles and portals take E."), "dim")
 	if _won or not _in_trial:
 		return
 	var trial: Dictionary = current_world().get("trial", {})
@@ -204,9 +204,9 @@ func _pass_trial() -> void:
 	_in_trial = false
 	var trial: Dictionary = wd.get("trial", {})
 	narrate.emit("", "story")
-	narrate.emit("✔ TRIAL PASSED — %s" % wd.get("name", ""), "success")
+	narrate.emit(I18n.t("✔ TRIAL PASSED — %s") % wd.get("name", ""), "success")
 	narrate.emit("", "story")
-	narrate.emit("WHAT YOU LEARNED", "header")
+	narrate.emit(I18n.t("WHAT YOU LEARNED"), "header")
 	for line in trial.get("learned", []):
 		narrate.emit("  " + str(line), "story")
 	var reward := {"xp": int(trial.get("xp", 80 + index * 25))}
@@ -216,7 +216,7 @@ func _pass_trial() -> void:
 		_win()
 	else:
 		narrate.emit("", "story")
-		narrate.emit("The portal ahead hums awake. Step through it to the next world.", "tip")
+		narrate.emit(I18n.t("The portal ahead hums awake. Step through it to the next world."), "tip")
 
 
 func _win() -> void:
@@ -262,10 +262,10 @@ func _apply_setup(setup: Dictionary) -> void:
 
 func _handle_hint() -> void:
 	if not _in_trial:
-		narrate.emit("Nothing to solve at this prompt — try the command out. The trial waits at the console, once you have every orb.", "dim")
+		narrate.emit(I18n.t("Nothing to solve at this prompt — try the command out. The trial waits at the console, once you have every orb."), "dim")
 		return
 	if reveal_hint() == "":
-		narrate.emit("No more hints — trust what you've learned. `talk <command>` teaches any tool.", "dim")
+		narrate.emit(I18n.t("No more hints — trust what you've learned. `talk <command>` teaches any tool."), "dim")
 
 
 func _handle_look() -> void:
@@ -284,7 +284,7 @@ func reveal_hint() -> String:
 	var text: String = hints[_hints_shown]
 	_hints_shown += 1
 	narrate.emit("", "story")
-	narrate.emit("HINT %d/%d  %s" % [_hints_shown, hints.size(), text], "warn")
+	narrate.emit(I18n.t("HINT %d/%d  %s") % [_hints_shown, hints.size(), text], "warn")
 	return text
 
 
@@ -298,21 +298,21 @@ func status_text() -> String:
 	var wd := current_world()
 	var idx := state.world_index
 	var out := "%s\n" % wd.get("name", "?")
-	out += "Skills learned: %s\n" % ("—" if state.skills.is_empty() else "  ".join(PackedStringArray(state.skills)))
-	out += "This world: %d/%d orbs collected" % [orbs_collected_count(idx), orbs_total(idx)]
+	out += I18n.t("Skills learned: %s") % ("—" if state.skills.is_empty() else "  ".join(PackedStringArray(state.skills))) + "\n"
+	out += I18n.t("This world: %d/%d orbs collected") % [orbs_collected_count(idx), orbs_total(idx)]
 	if is_passed(idx):
-		out += "  ·  trial PASSED"
+		out += I18n.t("  ·  trial PASSED")
 	elif all_orbs_collected(idx):
-		out += "  ·  trial ready (use the console)"
+		out += I18n.t("  ·  trial ready (use the console)")
 	out += "\n"
 	return out
 
 
 func map_text() -> String:
-	var out := "THE ASCENT — %d worlds\n\n" % world.count()
+	var out := I18n.t("THE ASCENT — %d worlds") % world.count() + "\n\n"
 	for i in world.count():
 		var marker := "●" if i == state.world_index else ("✔" if is_passed(i) else ("·" if i < state.world_index else "○"))
 		var name := world.world_name(i) if (i <= state.world_index or is_passed(i)) else "???"
 		out += "  %s %s\n" % [marker, name]
-	out += "\n  ● here   ✔ passed   ○ ahead\n"
+	out += "\n  " + I18n.t("● here   ✔ passed   ○ ahead") + "\n"
 	return out

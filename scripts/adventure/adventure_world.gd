@@ -15,7 +15,7 @@ var worlds: Array = []   # ordered list of raw world dicts
 
 
 static func load_default() -> AdventureWorld:
-	return from_dict(JsonLoader.load_dict(DATA_PATH))
+	return from_dict(JsonLoader.load_content_dict(DATA_PATH))
 
 
 static func from_dict(d: Dictionary) -> AdventureWorld:

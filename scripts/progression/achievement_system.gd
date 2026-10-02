@@ -21,7 +21,7 @@ var profile: PlayerProfile
 static func load_default(p_profile: PlayerProfile) -> AchievementSystem:
 	var a := AchievementSystem.new()
 	a.profile = p_profile
-	a.definitions = JsonLoader.load_array(DATA_PATH)
+	a.definitions = JsonLoader.load_content_array(DATA_PATH)
 	return a
 
 

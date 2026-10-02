@@ -26,16 +26,16 @@ func execute(ctx: CommandContext) -> int:
 		var registry: CommandRegistry = ctx.shell.registry
 		var cmd := registry.get_command(topic)
 		if cmd != null:
-			ctx.out("They lean in and teach you about ", "reaction")
+			ctx.out(I18n.t("They lean in and teach you about") + " ", "reaction")
 			ctx.out(cmd.get_command_name() + ":\n", "exec")
-			ctx.out("  %s\n" % cmd.get_summary())
-			ctx.out("  use it like:  %s\n" % cmd.get_usage(), "dim")
-			for line in cmd.get_manual().split("\n"):
+			ctx.out("  %s\n" % I18n.t(cmd.get_summary()))
+			ctx.out("  %s  %s\n" % [I18n.t("use it like:"), I18n.t(cmd.get_usage())], "dim")
+			for line in I18n.t(cmd.get_manual()).split("\n"):
 				ctx.out("  " + line + "\n")
-			ctx.out("  (`learn` lists every command; `man %s` is the full page.)\n" % cmd.get_command_name(), "dim")
+			ctx.out("  " + I18n.t("(`learn` lists every command; `man %s` is the full page.)") % cmd.get_command_name() + "\n", "dim")
 			ctx.emit("manual_read", {"topic": cmd.get_command_name()})
 			return 0
-		ctx.out("They tilt their head — they don't know a command called '%s'. Try `learn` for the list.\n" % topic, "dim")
+		ctx.out(I18n.t("They tilt their head — they don't know a command called '%s'. Try `learn` for the list.") % topic + "\n", "dim")
 		return 0
 	ctx.emit("adv_talk", {"who": topic})
 	return 0

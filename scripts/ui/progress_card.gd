@@ -25,11 +25,11 @@ func refresh() -> void:
 	tween.tween_property(bar, "value", prog.progress_to_next(), 0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	var nxt := prog.next_rank()
 	if nxt.is_empty():
-		next_label.text = "Nothing left above you."
+		next_label.text = I18n.t("Nothing left above you.")
 	elif Game.profile.xp >= int(nxt.xp):
-		next_label.text = "Next: %s — needs a special challenge" % nxt.name
+		next_label.text = I18n.t("Next: %s — needs a special challenge") % nxt.name
 	else:
-		next_label.text = "Next: %s at %d XP" % [nxt.name, int(nxt.xp)]
+		next_label.text = I18n.t("Next: %s at %d XP") % [nxt.name, int(nxt.xp)]
 	_rebuild_chips()
 
 
