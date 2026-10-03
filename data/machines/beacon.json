@@ -1,0 +1,66 @@
+{
+  "hostname": "beacon-01",
+  "users": {
+    "root": {
+      "uid": 0,
+      "gid": 0,
+      "groups": [
+        "root"
+      ],
+      "home": "/root",
+      "shell": "/bin/bash",
+      "gecos": "root"
+    },
+    "player": {
+      "uid": 1000,
+      "gid": 1000,
+      "groups": [
+        "player",
+        "users"
+      ],
+      "home": "/home/player",
+      "shell": "/bin/bash",
+      "gecos": "Operator"
+    }
+  },
+  "processes": [
+    {
+      "pid": 1,
+      "user": "root",
+      "cpu": 0.0,
+      "mem": 0.5,
+      "stat": "Ss",
+      "cmd": "/sbin/init"
+    },
+    {
+      "pid": 207,
+      "user": "root",
+      "cpu": 0.0,
+      "mem": 0.4,
+      "stat": "Ss",
+      "cmd": "sshd: /usr/sbin/sshd -D [listener]"
+    }
+  ],
+  "files": {
+    "/etc/motd": {
+      "content": "\n  B E A C O N - 0 1   //   relay tower\n  link: UP\n\n"
+    },
+    "/home/player/launch.code": {
+      "owner": "player",
+      "group": "player",
+      "mode": "600",
+      "lines": [
+        "LAUNCH-CODE: 7F3A-QX92-ROOT",
+        "Carry this back to the mainframe."
+      ]
+    },
+    "/home/player/README": {
+      "owner": "player",
+      "group": "player",
+      "lines": [
+        "beacon-01 holds the launch code at ~/launch.code.",
+        "Pull it home with scp — don't just read it here."
+      ]
+    }
+  }
+}

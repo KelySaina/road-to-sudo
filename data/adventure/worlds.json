@@ -240,9 +240,293 @@
     },
     {
       "id": "w6",
+      "palette": "green",
+      "course": ["ledge", "flat", "stair", "gap", "tower"],
+      "name": "World 6 — The Dormant Engines",
+      "subtitle": "bring a dead service back to life",
+      "cwd": "~",
+      "intro": [
+        "A hall of cold turbines — the machine's services, the daemons that keep it",
+        "breathing. The web engine has stalled, and the lower floors trust you now:",
+        "here are operator keys. Learn to drive the engines, then restart the one that died."
+      ],
+      "orbs": [
+        {"skill": "sudo", "teaches": "run a single command with root power — controlling services needs it. Reaching this orb earns you OPERATOR (sudo) rights.", "example": "sudo systemctl status nginx", "grant_group": "sudo"},
+        {"skill": "systemctl", "teaches": "control services: `status` inspects, `start` runs it now, `enable` makes it start on every boot", "example": "sudo systemctl start nginx"},
+        {"skill": "journalctl", "teaches": "read the system log; `journalctl -u nginx` shows just one service's messages", "example": "journalctl -u nginx"}
+      ],
+      "trial": {
+        "name": "The Stalled Engine",
+        "objective": "The web engine is down. Start nginx now, and make sure it comes back on every boot.",
+        "setup": {
+          "services": {
+            "nginx": {"active": false, "enabled": false, "sub": "dead", "description": "nginx web engine", "exec": "/usr/sbin/nginx -g 'daemon off;'", "journal": ["Stopping nginx web engine...", "nginx.service: Deactivated successfully.", "Stopped nginx web engine."]}
+          }
+        },
+        "success": {"all": [
+          {"type": "service_active", "service": "nginx", "expect": true},
+          {"type": "service_enabled", "service": "nginx", "expect": true}
+        ]},
+        "hints": [
+          "Look before you touch: `sudo systemctl status nginx`. It reads inactive (dead) and disabled.",
+          "Start it now: `sudo systemctl start nginx`. Changing a service needs root — that's what your new sudo rights are for.",
+          "Make it survive a reboot too: `sudo systemctl enable nginx`. 'active' (running now) and 'enabled' (starts at boot) are separate switches — you need both."
+        ],
+        "learned": [
+          "`systemctl start` runs a service now; `systemctl enable` makes it start on every boot — two independent switches.",
+          "Changing a service's state needs root, so you prefix it with `sudo`. `journalctl -u UNIT` tells you why one died."
+        ],
+        "reactions": [
+          {"when": {"type": "event", "name": "service_denied"},
+           "say": "Controlling a service needs root. Prefix it with sudo: `sudo systemctl start nginx`."},
+          {"when": {"all": [{"type": "service_active", "service": "nginx", "expect": true}, {"type": "service_enabled", "service": "nginx", "expect": false}]},
+           "say": "It's running now — but still disabled, so the next reboot would lose it. `sudo systemctl enable nginx`."}
+        ]
+      }
+    },
+    {
+      "id": "w7",
+      "palette": "blue",
+      "course": ["ledge", "spikes", "lift", "burst", "tower"],
+      "name": "World 7 — The Severed Wire",
+      "subtitle": "read the network, find the leak",
+      "cwd": "~",
+      "intro": [
+        "A lattice of glowing wires — the machine's network. Traffic hums along most",
+        "of them, but one thread pulses wrong: something opened a port and waits for",
+        "orders from outside. Learn to read the wires, then find the leak."
+      ],
+      "orbs": [
+        {"skill": "ip", "teaches": "inspect network interfaces and addresses; `ip addr` shows this machine's own IPs", "example": "ip addr"},
+        {"skill": "ss", "teaches": "list open sockets; `ss -ltnp` shows which process is listening on which TCP port", "example": "ss -ltnp"},
+        {"skill": "dig", "teaches": "look up a name in DNS; `dig +short name` prints just its IP", "example": "dig +short gateway.lan"}
+      ],
+      "trial": {
+        "name": "The Open Port",
+        "objective": "A backdoor opened a TCP port and is listening for commands. Find the port number it listens on, and write just that number into ~/breach.txt.",
+        "setup": {
+          "net": {
+            "interfaces": [{"name": "eth0", "ip": "10.0.0.7", "cidr": 24, "mac": "52:54:00:ab:cd:07", "state": "UP"}],
+            "routes": [{"dst": "default", "via": "10.0.0.1", "dev": "eth0"}, {"dst": "10.0.0.0/24", "dev": "eth0", "src": "10.0.0.7"}],
+            "dns": {"gateway.lan": "10.0.0.1", "mirror.lan": "10.0.0.30"},
+            "listen": [
+              {"proto": "tcp", "addr": "0.0.0.0", "port": 22, "process": "sshd", "pid": 502},
+              {"proto": "tcp", "addr": "127.0.0.1", "port": 631, "process": "cupsd", "pid": 540},
+              {"proto": "tcp", "addr": "0.0.0.0", "port": 4444, "process": "nc", "pid": 7777}
+            ]
+          },
+          "processes": [
+            {"pid": 7777, "user": "player", "cpu": 0.2, "mem": 0.4, "stat": "S", "cmd": "nc -lvnp 4444 -e /bin/bash"}
+          ],
+          "remove": ["~/breach.txt"]
+        },
+        "success": {"type": "file_matches", "path": "~/breach.txt", "regex": "^\\s*4444\\s*$"},
+        "hints": [
+          "Don't guess — list what's listening: `ss -ltnp`. Most ports are normal (22 is ssh, 631 is printing).",
+          "One line stands out: port 4444 owned by `nc` (netcat), bound to 0.0.0.0 (reachable from anywhere). That's the backdoor.",
+          "Record just the number: `echo 4444 > ~/breach.txt`."
+        ],
+        "learned": [
+          "`ss -ltnp` lists listening TCP sockets with the owning process — the first place to look for an intruder's foothold.",
+          "`ip addr` shows your own addresses; `dig +short name` turns a name into an IP."
+        ],
+        "reactions": [
+          {"when": {"all": [{"type": "command_ran", "name": ["ps", "ls", "cat"]}, {"not": {"type": "command_ran", "name": "ss"}}]},
+           "say": "A listening port isn't a file or an ordinary process — look at the sockets themselves: `ss -ltnp`. The odd one out is the backdoor."}
+        ]
+      }
+    },
+    {
+      "id": "w8",
+      "palette": "orange",
+      "course": ["ledge", "rover", "stair", "gap", "tower"],
+      "name": "World 8 — The Supply Depot",
+      "subtitle": "query and install software",
+      "cwd": "~",
+      "intro": [
+        "Endless crates of software stretch into the dark — the package depot. The",
+        "recovery script needs a tool that was never installed here. Learn to search",
+        "the shelves and read what's on them, then install what's missing."
+      ],
+      "orbs": [
+        {"skill": "dpkg", "teaches": "query installed packages; `dpkg -l` lists them all, `dpkg -s PKG` shows one package's status", "example": "dpkg -l"},
+        {"skill": "apt search", "teaches": "find a package in the repo by keyword: `apt search <word>`", "example": "apt search json"},
+        {"skill": "apt", "teaches": "install software and its dependencies: `sudo apt install <pkg>` (needs root)", "example": "sudo apt install jq"}
+      ],
+      "trial": {
+        "name": "The Missing Tool",
+        "objective": "The recovery script calls `jq`, but it isn't installed. Install the jq package.",
+        "setup": {
+          "packages": {
+            "jq": {"installed": false, "version": "1.7.1-3", "section": "utils", "description": "command-line JSON processor"},
+            "libjq1": {"installed": false, "version": "1.7.1-3", "section": "libs", "description": "flexible JSON processor - shared library"},
+            "ripgrep": {"installed": false, "version": "14.1.0-1", "section": "utils", "description": "fast recursive line-oriented search tool"},
+            "curl": {"installed": true, "version": "8.5.0-2", "section": "web", "description": "command line tool for transferring data with URLs"}
+          }
+        },
+        "success": {"type": "package_installed", "package": "jq", "expect": true},
+        "hints": [
+          "Is it here? `dpkg -l jq` finds nothing installed — you'll have to add it.",
+          "Find it in the repo: `apt search json` (or `apt search jq`).",
+          "Install it — this changes the system, so it needs root: `sudo apt install jq`."
+        ],
+        "learned": [
+          "`dpkg -l` and `dpkg -s` query what's already installed; `apt search` finds packages in the repo.",
+          "`sudo apt install PKG` adds a package and its dependencies. Installing changes the system, so it needs root."
+        ],
+        "reactions": [
+          {"when": {"all": [{"type": "command_ran", "name": "apt", "args_contain": "install"}, {"type": "package_installed", "package": "jq", "expect": false}]},
+           "say": "Installing software changes the system, so it needs root. Prefix it with sudo: `sudo apt install jq`."}
+        ]
+      }
+    },
+    {
+      "id": "w9",
+      "palette": "violet",
+      "course": ["ledge", "flat", "stair", "gap", "tower"],
+      "name": "World 9 — The Hall of Records",
+      "subtitle": "track history with git",
+      "cwd": "~/relic",
+      "intro": [
+        "A vast archive of ledgers — every change the machine ever made, remembered.",
+        "But the relic project in front of you is untracked: edit it and its history",
+        "is lost forever. Learn to keep records, then commit the relic for good."
+      ],
+      "orbs": [
+        {"skill": "git init", "teaches": "start tracking a folder's history: `git init` turns it into a repository", "example": "git init"},
+        {"skill": "git add", "teaches": "stage changes for the next snapshot: `git add .` stages everything", "example": "git add ."},
+        {"skill": "git commit", "teaches": "save a snapshot with a message: `git commit -m \"...\"`", "example": "git commit -m 'first commit'"}
+      ],
+      "trial": {
+        "name": "The First Commit",
+        "objective": "Turn the ~/relic project into a git repository and commit everything, leaving a clean working tree.",
+        "setup": {
+          "files": {
+            "~/relic": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+            "~/relic/README.md": {"owner": "player", "group": "player", "mode": "644", "content": "# Relic\nThe last known-good boot sequence.\n"},
+            "~/relic/boot.sh": {"owner": "player", "group": "player", "mode": "755", "lines": ["#!/bin/bash", "echo 'cold boot: ok'"]}
+          }
+        },
+        "success": {"type": "git_state", "repo": "~/relic", "min_commits": 1, "clean": true},
+        "hints": [
+          "You're already in ~/relic. Start its history: `git init`.",
+          "Stage every file for the first snapshot: `git add .` — then `git status` shows them ready, in green.",
+          "Save the snapshot: `git commit -m \"initial commit\"`. A clean tree means nothing is left unstaged."
+        ],
+        "learned": [
+          "The flow is always edit → `git add` → `git commit`. `git init` starts the repo; `git commit -m` saves a snapshot.",
+          "A 'clean' working tree means every change has been committed — nothing would be lost."
+        ],
+        "reactions": [
+          {"when": {"all": [{"type": "command_ran", "name": "git", "args_contain": "init"}, {"not": {"type": "command_ran", "name": "git", "args_contain": "commit"}}]},
+           "say": "Repo created — now capture the files: `git add .`, then `git commit -m \"initial commit\"`."}
+        ]
+      }
+    },
+    {
+      "id": "w10",
+      "palette": "red",
+      "course": ["ledge", "gap", "lift", "spikes", "tower"],
+      "name": "World 10 — The Far Tower",
+      "subtitle": "reach another machine over ssh",
+      "cwd": "~",
+      "intro": [
+        "Across a dark gulf stands another machine — beacon-01, a relay tower. The",
+        "launch code you need lives over there, not here. Learn to cross the network",
+        "by ssh, then bring the code home."
+      ],
+      "orbs": [
+        {"skill": "ssh-keygen", "teaches": "create an SSH key pair — your identity for logging in without a password", "example": "ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ''"},
+        {"skill": "ssh", "teaches": "log into another machine over the network: `ssh host` opens a shell there (type `exit` to come back)", "example": "ssh beacon-01"},
+        {"skill": "scp", "teaches": "copy files between machines: `scp host:path .` pulls a remote file to here", "example": "scp beacon-01:/etc/motd ."}
+      ],
+      "trial": {
+        "name": "The Distant Key",
+        "objective": "The launch code sits on beacon-01 at ~/launch.code. Bring that file back into your home directory here.",
+        "setup": {
+          "net": {
+            "interfaces": [{"name": "eth0", "ip": "10.0.0.7", "cidr": 24, "mac": "52:54:00:ab:cd:07", "state": "UP"}],
+            "routes": [{"dst": "default", "via": "10.0.0.1", "dev": "eth0"}],
+            "dns": {"beacon-01": "10.0.0.20"},
+            "hosts": {
+              "10.0.0.20": {"name": "beacon-01", "up": true, "machine": "beacon", "ports": {"22": {"proto": "ssh"}}}
+            }
+          },
+          "remove": ["~/launch.code"]
+        },
+        "success": {"all": [
+          {"type": "host_is", "host": "mainframe"},
+          {"type": "file_exists", "path": "~/launch.code"}
+        ]},
+        "hints": [
+          "Look first if you like: `ssh beacon-01`, then `ls` and `cat launch.code`, then `exit` to return. But reading it there doesn't bring it home.",
+          "Copy it across in one step: `scp beacon-01:launch.code ~/` (a remote path is written host:path).",
+          "Check it landed: `ls ~` — launch.code should now be in your home directory."
+        ],
+        "learned": [
+          "`ssh host` opens a shell on another machine; `scp host:path dest` copies files across the network.",
+          "`ssh-keygen` makes the key pair that lets you log in without typing a password every time."
+        ],
+        "reactions": [
+          {"when": {"type": "host_is", "host": "beacon-01"},
+           "say": "You're on beacon-01 now — reading the file here won't bring it home. `exit` back to the mainframe, then pull it: `scp beacon-01:launch.code ~/`."}
+        ]
+      }
+    },
+    {
+      "id": "w11",
+      "palette": "orange",
+      "course": ["ledge", "burst", "stair", "rover", "tower"],
+      "name": "World 11 — The Clockwork Loop",
+      "subtitle": "automate with for and if",
+      "cwd": "~",
+      "intro": [
+        "Gears the size of rooms turn in lockstep — the automation floor. A hundred",
+        "log files need the same judgement applied to each, and no one has time to do",
+        "it by hand. Learn to loop and to branch, then let the shell do the work."
+      ],
+      "orbs": [
+        {"skill": "for", "teaches": "repeat a command over a list: `for f in *.log; do echo \"$f\"; done`", "example": "for f in ~/logs/*; do echo \"$f\"; done"},
+        {"skill": "if", "teaches": "run steps only when a test passes: `if COND; then ...; fi`", "example": "if [ -d ~/logs ]; then echo yes; fi"},
+        {"skill": "test", "teaches": "the condition itself — `[ -f file ]` is true if it exists; `grep -q WORD file` is true if WORD is in it", "example": "grep -q boot ~/logs/web.log && echo found"}
+      ],
+      "trial": {
+        "name": "The Sorting Engine",
+        "objective": "Each file in ~/logs may or may not contain the word ERROR. For every file that does, append its name to ~/flagged.txt — and leave the clean ones out.",
+        "setup": {
+          "files": {
+            "~/logs": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+            "~/logs/web.log": {"owner": "player", "group": "player", "mode": "644", "lines": ["GET / 200", "GET /app 200", "ERROR upstream timeout", "GET / 200"]},
+            "~/logs/db.log": {"owner": "player", "group": "player", "mode": "644", "lines": ["connect ok", "slow query 1.2s", "ERROR deadlock detected"]},
+            "~/logs/cron.log": {"owner": "player", "group": "player", "mode": "644", "lines": ["run backup ok", "run cleanup ok"]}
+          },
+          "remove": ["~/flagged.txt"]
+        },
+        "success": {"all": [
+          {"type": "file_contains", "path": "~/flagged.txt", "text": "web.log"},
+          {"type": "file_contains", "path": "~/flagged.txt", "text": "db.log"},
+          {"not": {"type": "file_contains", "path": "~/flagged.txt", "text": "cron.log"}}
+        ]},
+        "hints": [
+          "Loop over the files: `for f in ~/logs/*; do ... ; done`.",
+          "Inside the loop, test each one for the word: `if grep -q ERROR \"$f\"; then ... ; fi`.",
+          "When it matches, record the name: `echo \"$f\" >> ~/flagged.txt`. All together: `for f in ~/logs/*; do if grep -q ERROR \"$f\"; then echo \"$f\" >> ~/flagged.txt; fi; done`."
+        ],
+        "learned": [
+          "`for VAR in LIST; do ...; done` repeats work over many items; `if COND; then ...; fi` acts only when a test passes.",
+          "`grep -q` is a silent test — true when the pattern is found. Loop + test is how one command handles a thousand files."
+        ],
+        "reactions": [
+          {"when": {"type": "file_contains", "path": "~/flagged.txt", "text": "cron.log"},
+           "say": "cron.log has no ERROR — it shouldn't be on the list. Start clean (`rm ~/flagged.txt`) and gate the write on the match: `if grep -q ERROR \"$f\"; then ...`."}
+        ]
+      }
+    },
+    {
+      "id": "w12",
       "palette": "red",
       "course": ["rover", "tower", "spikes", "lift", "burst", "stair"],
-      "name": "World 6 — The Throne of root",
+      "name": "World 12 — The Throne of root",
       "subtitle": "become root, end the impostor",
       "cwd": "/opt",
       "final": true,
@@ -253,7 +537,7 @@
       ],
       "orbs": [
         {"skill": "id", "teaches": "show who you are and which groups you're in (like 'sudo')", "example": "id"},
-        {"skill": "sudo", "teaches": "run as root when policy allows; `sudo -i` opens a root shell. Collecting this earns you the right.", "example": "sudo -i", "grant_group": "sudo"},
+        {"skill": "sudo", "teaches": "the last step from operator to root: `sudo -i` opens a full root shell. You earned these rights on the engine floor — now take the throne.", "example": "sudo -i", "grant_group": "sudo"},
         {"skill": "rm", "teaches": "delete a file — powerful and irreversible, so aim carefully", "example": "touch /tmp/junk.txt && rm /tmp/junk.txt"}
       ],
       "trial": {

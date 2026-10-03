@@ -68,9 +68,18 @@ It reuses the whole engine — the VFS, the shell, and the same
    backup daemon.
 4. **The Tangled Archive** — `find`, `mkdir`, `cp` → recover a buried config.
 5. **The Cutting Room** — `cut`, `sort`, `uniq` → name the most frequent account.
-6. **The Throne of root** — `id`, `sudo`, `rm` → collecting the **sudo orb**
-   earns you the right; become root, remove the impostor's launcher, and end it.
-   Passing this trial wins the Ascent: *"YOU MADE IT."*
+6. **The Dormant Engines** — `sudo`, `systemctl`, `journalctl` → the **sudo orb**
+   earns you operator rights; start a dead service and enable it for boot.
+7. **The Severed Wire** — `ip`, `ss`, `dig` → find the backdoor's listening port.
+8. **The Supply Depot** — `dpkg`, `apt search`, `apt` → install a missing tool.
+9. **The Hall of Records** — `git init`, `git add`, `git commit` → make the first
+   commit on a clean tree.
+10. **The Far Tower** — `ssh-keygen`, `ssh`, `scp` → pull a file off `beacon-01`.
+11. **The Clockwork Loop** — `for`, `if`, `test` → flag every log that has an
+    `ERROR`, with a loop.
+12. **The Throne of root** — `id`, `sudo`, `rm` → become root, remove the
+    impostor's launcher, and end it. Passing this trial wins the Ascent:
+    *"YOU MADE IT."*
 
 XP from trials feeds the same rank ladder as the campaign, and the run is saved.
 
@@ -80,10 +89,15 @@ Everything lives in `data/adventure/worlds.json`: an ordered list of worlds,
 each with `orbs` (skill + `teaches` + `example`, and an optional `grant_group`)
 and a `trial` (`objective`, `setup`, `success`, `hints`, `learned`, and
 `reactions` — the same shapes challenges use, plus an optional `respawn` on a
-reaction for the final world). Each orb's `example` must be a command that
-actually runs against the world's trial `setup`, since the practice prompt
-invites the player to type it. The course for each world is generated in code
-from its orb count, so adding a world is pure JSON.
+reaction for the final world). A trial's `setup` can lay down `files`,
+`processes`, `services`, a `packages` database and a `net` (interfaces, DNS and
+reachable hosts for `ssh`/`scp`) — the same builders the machine definitions and
+campaign challenges use — so even the services, networking, package and ssh
+worlds are pure JSON (the one exception is a brand-new remote host, which is a
+small machine file under `data/machines/`). Each orb's `example` must be a
+command that actually runs against the world's trial `setup`, since the practice
+prompt invites the player to type it. The course for each world is generated in
+code from its orb count, so adding a world is pure JSON.
 
 - Logic: `scripts/adventure/` — `AdventureWorld` (parses the worlds),
   `AdventureState` (skills learned, world index, trials passed), and

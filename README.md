@@ -155,24 +155,30 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   investigate, `sudo -i`, stop the rogue root process, and hold the throne.
 - **Adventure mode — "The Ascent to Root" (Skill Worlds):** a side-scrolling 2D
   **platformer** built on one loop — **learn a skill, then prove it.** You run
-  (`A`/`D`) and jump (`Space`) an operator through six worlds, each one a course
-  built from pits, ledges, spike strips, patrolling rovers, pulsing emitters,
-  two-step stairs, zig-zag towers and lifts over gaps you can't jump — every
-  world picks its own obstacles and its own tile colour in `worlds.json`.
+  (`A`/`D`) and jump (`Space`) an operator through **twelve worlds** that mirror
+  the campaign — filesystem, logs, processes, find, cut, **services, networking,
+  packages, git, ssh and bash** — each one a course built from pits, ledges,
+  spike strips, patrolling rovers, pulsing emitters, two-step stairs, zig-zag
+  towers and lifts over gaps you can't jump — every world picks its own obstacles
+  and its own tile colour in `worlds.json`.
   Glowing **skill orbs** sit on the ledges, so every command costs you a jump. Reach one and you learn it — a card explains
   the command, and then it drops you onto a **real prompt to try it on**: the
-  world's files are laid out so the example actually runs, and nothing there is
+  world's files, services, package database or network are laid out so the
+  example actually runs, and nothing there is
   graded. Take every orb and the world's **trial console** unlocks: press **E**
   and solve a real problem with exactly those skills — make a script run
-  (`chmod`), name a log intruder (`grep|sort|uniq`), stop a miner (`ps`,`kill`)…
+  (`chmod`), name a log intruder (`grep|sort|uniq`), stop a miner (`ps`,`kill`),
+  restart a dead service (`systemctl`), trace a backdoor port (`ss`), install a
+  missing tool (`apt`), make the first commit (`git`), pull a file off another
+  box (`scp`), or flag every error log with a loop (`for`/`if`)…
   Any valid solution passes, you get a "what you learned", and the **portal** to
   the next world opens. No HP, no lives and nothing kills you — touch a hazard or
   fall in a pit and you're set back on the last ground you stood on, and told so.
   The camera leads where you run, the vector-drawn operator has a real run cycle
   with poses for rising and falling, and each course is backed by parallax layers
   of machine receding into the dark. It ends at the Throne of root: the
-  **sudo orb** earns you the right, and you become root to end the impostor
-  (*"YOU MADE IT."*). Trial XP feeds the same ranks; the run is saved.
+  **sudo orb** (first earned on the engine floor) lets you become root to end the
+  impostor (*"YOU MADE IT."*). Trial XP feeds the same ranks; the run is saved.
   Full write-up: [docs/ADVENTURE.md](docs/ADVENTURE.md).
 - **Practice Lab:** a separate sandbox machine with no objectives and no
   score.
@@ -263,7 +269,7 @@ road-to-sudo/
 │   └── ui/                  UiTheme + one script per scene
 ├── data/
 │   ├── machines/            workstation.json, sandbox.json, mainframe.json
-│   ├── adventure/           worlds.json (the six skill worlds)
+│   ├── adventure/           worlds.json (the twelve skill worlds)
 │   ├── levels/              ordered chapters listing challenge ids
 │   ├── challenges/          one JSON file per challenge
 │   ├── achievements.json, difficulty.json, progression.json
@@ -386,10 +392,19 @@ Level 7 (Services) `systemctl` / `journalctl`; Level 8 (Networking) `ip` / `ss`
 and `ssh-keygen`; Level 12 (Bash) `for` / `while` / `if` / `test` and `$( )` in
 the shell interpreter.
 
-What's left is content, not engine:
-- **More Adventure worlds:** the mode is data-driven — a world is `orbs` + a
-  `trial` in `data/adventure/worlds.json`, plus the `course` of platforming
-  segments and the tile `palette` it is built from. New worlds are pure JSON.
+**Adventure mode now mirrors the campaign too** — twelve worlds, from the
+filesystem up to the Throne of root, covering services, networking, packages,
+git, ssh and bash. A world is `orbs` + a `trial` in
+`data/adventure/worlds.json`, plus the `course` of platforming segments and the
+tile `palette` it is built from; a trial can lay down files, processes,
+services, a package database or a network, so a new world is still (almost
+always) pure JSON.
+
+What's left is polish and reach, not engine:
+- **Interactive programs:** a `nano`-style editor would unlock a whole class of
+  "fix this config" challenges; `less` paging and `tail -f` would follow.
+- **Shell completeness:** `case`, functions, `$(( ))` arithmetic, `[abc]` glob
+  classes and `find -o`.
 
 The Final is done: a broken production server that uses everything, ending with
 `sudo -i` → *"YOU MADE IT. Welcome to the other side of the prompt."*

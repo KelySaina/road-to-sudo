@@ -14,6 +14,12 @@ const SOLUTIONS := [
 	["ps aux", "kill 6660"],
 	["find /etc -name backup.cfg", "mkdir ~/restored", "cp /etc/skel/.cache/hoard/deep/backup.cfg ~/restored/"],
 	["cut -d, -f1 access.csv | sort | uniq -c | sort -rn | head -1", "echo nemo > ~/culprit.txt"],
+	["sudo systemctl status nginx", "sudo systemctl start nginx", "sudo systemctl enable nginx"],
+	["ss -ltnp", "echo 4444 > ~/breach.txt"],
+	["dpkg -l jq", "apt search json", "sudo apt install jq"],
+	["git init", "git add .", "git commit -m 'initial commit'"],
+	["scp beacon-01:launch.code ~/"],
+	['for f in ~/logs/*; do if grep -q ERROR "$f"; then echo "$f" >> ~/flagged.txt; fi; done'],
 	["sudo -i", "rm /opt/initd-imposter/imposterd", "kill 1313"],
 ]
 
@@ -65,7 +71,7 @@ func _collect_all(ctx: Dictionary, index: int) -> void:
 func test_world_valid() -> void:
 	var world := AdventureWorld.load_default()
 	check(world.validate().is_empty(), "world validates: %s" % str(world.validate()))
-	check(world.count() == 6, "six worlds (%d)" % world.count())
+	check(world.count() == 12, "twelve worlds (%d)" % world.count())
 	for i in world.count():
 		check(not world.orbs(i).is_empty(), "world %d has orbs" % i)
 		check(world.trial(i).has("learned"), "world %d trial teaches something" % i)
@@ -122,14 +128,15 @@ func test_wrong_answers() -> void:
 func test_respawn_then_win() -> void:
 	var ctx := _new()
 	var mgr: AdventureManager = ctx.mgr
-	mgr.enter_world(5)
-	_collect_all(ctx, 5) # the sudo orb grants the sudo group
+	var throne := mgr.world.count() - 1
+	mgr.enter_world(throne)
+	_collect_all(ctx, throne) # the sudo orb grants the sudo group
 	check(ctx.session.machine.is_sudoer("player"), "the sudo orb makes you a sudoer")
-	mgr.engage_trial(5)
+	mgr.engage_trial(throne)
 	_run(ctx, "sudo -i")
 	check(ctx.session.user == "root", "sudo -i makes you root in the final trial")
 	_run(ctx, "kill 1313") # launcher still stands -> respawns, not won
-	check(mgr.is_active() and not mgr.is_passed(5), "killing it early does not win — it respawns")
+	check(mgr.is_active() and not mgr.is_passed(throne), "killing it early does not win — it respawns")
 	check(_imposter(ctx) != -1, "the impostor respawns from its launcher")
 	_run(ctx, "rm /opt/initd-imposter/imposterd")
 	_run(ctx, "kill %d" % _imposter(ctx))

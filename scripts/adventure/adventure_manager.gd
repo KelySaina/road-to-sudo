@@ -256,6 +256,15 @@ func _apply_setup(setup: Dictionary) -> void:
 		pr["pid"] = int(pr.get("pid", m.next_pid + 1))
 		m.next_pid = maxi(m.next_pid, pr.pid)
 		m.processes.append(pr)
+	# Later worlds need machine state beyond files and processes — a stalled
+	# service, a package database, a network to probe or a host to ssh into.
+	# The shapes match the campaign's challenge setup (and machine definitions).
+	if setup.has("services"):
+		MachineBuilder.apply_services(m, setup.services)
+	if setup.has("packages"):
+		MachineBuilder.apply_packages(m, setup.packages)
+	if setup.has("net"):
+		MachineBuilder._build_net(m, setup.net)
 
 
 # --- hints & verbs ----------------------------------------------------------
