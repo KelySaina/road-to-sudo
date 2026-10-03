@@ -107,7 +107,7 @@ func _localize_static() -> void:
 	_set_label("Top/Center/Column/Card/Pages/Settings/Grid/FontLabel", "Text size")
 	_set_label("Top/Center/Column/Card/Pages/Settings/Grid/DiffLabel", "Difficulty (current journey)")
 	_set_label("Top/Center/Column/Card/Pages/Settings/ResetConfirm/ResetQuestion", "rm -rf ~/progress ? This cannot be undone.")
-	_set_label("Top/Center/Column/Footer", "v0.1 · vertical slice · ↑↓ navigate · Enter select · Esc back")
+	_set_label("Top/Center/Column/Footer", "v0.3 · ↑↓ navigate · Enter select · Esc back")
 
 
 func _set_label(path: String, english: String) -> void:
