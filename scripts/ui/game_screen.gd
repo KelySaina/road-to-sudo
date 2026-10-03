@@ -9,6 +9,7 @@ extends Control
 @onready var menu_button: Button = %MenuButton
 
 var _mode := "campaign"
+var _editor: Control
 
 
 func _ready() -> void:
@@ -31,6 +32,11 @@ func _ready() -> void:
 	EventBus.campaign_finished.connect(_on_campaign_finished)
 	EventBus.rank_up.connect(_on_rank_up)
 
+	_editor = preload("res://scripts/ui/editor.gd").new()
+	add_child(_editor)
+	_editor.closed.connect(_on_editor_closed)
+	EventBus.editor_requested.connect(func(data: Dictionary): _editor.open(data))
+
 
 ## Called by Main right after the scene is added: "campaign" or "practice".
 func begin(mode: String, fresh: bool) -> void:
@@ -51,9 +57,17 @@ func begin(mode: String, fresh: bool) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _editor != null and _editor.visible:
+		return
 	if event.is_action_pressed("ui_hint") and _mode == "campaign":
 		Game.submit(":hint")
 		get_viewport().set_input_as_handled()
+
+
+func _on_editor_closed(saved: bool) -> void:
+	terminal.focus_input()
+	if saved:
+		terminal.print_text(I18n.t("  [ file saved ]"), "dim")
 
 
 func _refresh_session() -> void:

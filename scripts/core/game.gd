@@ -238,6 +238,38 @@ func submit(line: String) -> void:
 	_lines_since_save += 1
 	if _lines_since_save >= AUTOSAVE_EVERY_LINES:
 		save_now()
+	for e in outcome.events:
+		if e.name == "open_editor":
+			EventBus.editor_requested.emit(e.data)
+			break
+
+
+## Called by the editor overlay when the player saves (^O or save-on-exit).
+## Writes the buffer through the live session, then re-grades, so finishing a
+## "fix this file" challenge in the editor completes it just like a command.
+## Returns {ok, lines} or {ok=false, error} for the editor's status line.
+func apply_edit(path: String, content: String) -> Dictionary:
+	if session == null:
+		return {"ok": false, "error": "no session"}
+	var abs := session.resolve(path)
+	var res := session.machine.vfs.write_file(abs, content, session.access(), false)
+	if not res.ok:
+		return {"ok": false, "error": res.error}
+	var outcome := ExecutionOutcome.new()
+	outcome.line = "nano %s" % path
+	outcome.emit("file_edited", {"path": abs})
+	if mode == "campaign":
+		challenges.observe(outcome)
+	elif mode == "adventure":
+		adventure.observe(outcome)
+	achievements.check_outcome(outcome)
+	EventBus.session_changed.emit()
+	_lines_since_save += 1
+	if _lines_since_save >= AUTOSAVE_EVERY_LINES:
+		save_now()
+	var trimmed := content.trim_suffix("\n")
+	var lines := 0 if content == "" else trimmed.split("\n").size()
+	return {"ok": true, "lines": lines}
 
 
 func replay_briefing() -> void:

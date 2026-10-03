@@ -369,9 +369,9 @@ These are honest gaps, not bugs:
 - Control flow covers `for` / `while` / `until` / `if` (single-line and
   multi-line blocks in scripts), `test` / `[ ]`, and `$( )` / backticks — but
   not shell **functions**, `case`, or `$(( ))` arithmetic.
-- There are no interactive programs: `less` prints the whole file,
-  `tail -f` doesn't follow, `su` can't prompt for a password, and there is
-  no text editor.
+- `nano` is a real full-screen editor (open a file, edit, `^O` save, `^X` exit),
+  but the other interactive programs are still stubs: `less` prints the whole
+  file, `tail -f` doesn't follow, and `su` can't prompt for a password.
 - Globs support `*` and `?` but not `[abc]` classes. `find` has no `-o`
   (OR).
 - The font is the system monospace font (JetBrains Mono, Fira Code, … and
@@ -400,9 +400,14 @@ tile `palette` it is built from; a trial can lay down files, processes,
 services, a package database or a network, so a new world is still (almost
 always) pure JSON.
 
+**A real text editor landed** — `nano FILE` opens a full-screen editor overlay
+(type, `^O` to save, `^X` to exit); saving writes through the live session and
+re-grades, so a challenge can now be solved by *editing a file*, not just by
+piping into it. It's the first interactive program in the terminal.
+
 What's left is polish and reach, not engine:
-- **Interactive programs:** a `nano`-style editor would unlock a whole class of
-  "fix this config" challenges; `less` paging and `tail -f` would follow.
+- **More interactive programs:** `less` paging, `tail -f` that follows, a `su`
+  password prompt — the editor's overlay pattern generalizes to these.
 - **Shell completeness:** `case`, functions, `$(( ))` arithmetic, `[abc]` glob
   classes and `find -o`.
 

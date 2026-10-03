@@ -15,6 +15,9 @@ signal commands_unlocked(names: Array)
 signal session_changed()
 signal campaign_finished()
 signal menu_requested()
+## A command asked to open the full-screen text editor. data: {path, display,
+## content, can_write, is_new}. The screen hosting the terminal opens the editor.
+signal editor_requested(data: Dictionary)
 
 # Adventure (skill-worlds) mode
 signal adventure_started()

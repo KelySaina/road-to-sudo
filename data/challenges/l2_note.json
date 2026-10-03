@@ -1,0 +1,42 @@
+{
+  "id": "l2_note",
+  "title": "Leave a note",
+  "level": "text",
+  "machine": "workstation",
+  "xp": 120,
+  "briefing": [
+    "Not everything is a pipe. Sometimes you just open a file and write.",
+    "",
+    "`nano` is a small full-screen text editor: type to edit, Ctrl-O to save,",
+    "Ctrl-X to exit. It's the easiest way to create or change a file by hand."
+  ],
+  "tips": [
+    "Open a new file in the editor: `nano handoff.txt`. Type the line, then Ctrl-O (save) and Ctrl-X (exit).",
+    "Prefer the one-liner? `echo 'deploy at dawn' > handoff.txt` does the same thing."
+  ],
+  "objective": "Leave a shift note: create ~/handoff.txt containing the line  deploy at dawn",
+  "hints": [
+    "Open the editor on a new file: `nano handoff.txt`. Type the line exactly: deploy at dawn",
+    "Save with Ctrl-O (confirm the name with Enter), then exit with Ctrl-X.",
+    "Or skip the editor entirely: `echo 'deploy at dawn' > ~/handoff.txt`."
+  ],
+  "solution": "echo 'deploy at dawn' > ~/handoff.txt",
+  "setup": {
+    "remove": [
+      "~/handoff.txt"
+    ],
+    "cwd": "~"
+  },
+  "success": {
+    "type": "file_contains",
+    "path": "~/handoff.txt",
+    "text": "deploy at dawn"
+  },
+  "explanation": "`nano FILE` opens a full-screen editor — type, Ctrl-O to save, Ctrl-X to exit. For a quick one-liner, `echo text > file` writes it in one go; both end with the same file on disk.",
+  "unlocks": [
+    "nano"
+  ],
+  "teaches": [
+    "nano"
+  ]
+}

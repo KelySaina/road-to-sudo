@@ -88,15 +88,31 @@ func _run() -> void:
 	Game.submit(":hint")
 	check(Game.challenges.hints_shown() == 1, "hint via :hint")
 	Game.submit("sudo whoami")
+	var solved_by_editor := false
 	for i in Game.library.order.size():
 		var c: Challenge = Game.challenges.current
-		for line in c.solution.split("\n"):
-			screen.terminal.input.text = line
-			screen.terminal._on_submitted(line)
+		if c.id == "l2_note":
+			# Solve a real campaign challenge through the editor, not a command:
+			# open nano, type the line, save. Saving must re-grade and complete it.
+			Game.submit("nano ~/handoff.txt")
 			await _frames(1)
+			check(screen._editor.visible, "nano opened the editor on the challenge file")
+			screen._editor._text.text = "deploy at dawn\n"
+			screen._editor._save()
+			await _frames(1)
+			check(screen._editor._saved_once, "the editor reported a successful save")
+			screen._editor._request_exit()
+			await _frames(1)
+			solved_by_editor = Game.challenges.completed_pending_next
+		else:
+			for line in c.solution.split("\n"):
+				screen.terminal.input.text = line
+				screen.terminal._on_submitted(line)
+				await _frames(1)
 		check(Game.challenges.completed_pending_next, "%s completed via UI" % c.id)
 		screen.terminal._on_submitted("") # Enter to continue
 		await _frames(1)
+	check(solved_by_editor, "editing a file in nano completes a campaign challenge (grade-on-save)")
 	check(Game.profile.completed.size() == Game.library.order.size(), "whole campaign completed (%d/%d)" % [Game.profile.completed.size(), Game.library.order.size()])
 	check(Game.challenges.current == null, "campaign finished")
 	check(Game.profile.xp > 1000, "xp awarded (%d)" % Game.profile.xp)
@@ -164,6 +180,26 @@ func _run() -> void:
 	Game.submit("chmod +x scripts/hello.sh && ./scripts/hello.sh world")
 	await _frames(2)
 	check(screen.terminal.output.get_parsed_text().contains("Hello, world!"), "practice lab script runs")
+
+	# The text editor: nano opens an overlay; saving writes through the session.
+	Game.submit("nano ~/mynote.txt")
+	await _frames(2)
+	check(screen._editor.visible, "nano opens the editor overlay")
+	check(screen._editor._text.text == "", "a new file opens empty in the editor")
+	var edited_path: String = screen._editor._path
+	screen._editor._text.text = "edited in nano\n"
+	screen._editor._save()
+	await _frames(1)
+	var saved_node = Game.session.machine.vfs.get_node_at(edited_path)
+	check(saved_node != null and saved_node.content == "edited in nano\n", "saving (^O) writes the buffer to disk")
+	screen._editor._request_exit()
+	await _frames(1)
+	check(not screen._editor.visible, "exiting (^X) closes the editor")
+	Game.submit("nano ~/mynote.txt")
+	await _frames(1)
+	check(screen._editor._text.text == "edited in nano\n", "reopening an existing file shows its saved content")
+	screen._editor._request_exit()
+	await _frames(1)
 
 	# A fresh profile loaded from disk keeps everything.
 	var reloaded := SaveManager.load_profile()
@@ -399,11 +435,12 @@ func _run() -> void:
 	Game.save_now()
 	check(SaveManager.load_world("adventure").has("adv_state"), "adventure state persisted")
 
-	# fast-forward to the final world and win it
-	for i in 5:
+	# fast-forward to the final world (the Throne) and win it
+	var throne := Game.adventure.world.count() - 1
+	for i in throne:
 		Game.adventure.state.mark_passed(str(Game.adventure.world.world_at(i).get("id", "")))
-	Game.adventure.state.world_index = 5
-	world._load_world(5)
+	Game.adventure.state.world_index = throne
+	world._load_world(throne)
 	await _frames(2)
 	_drain_dialogue(world)
 	for guard in 10:

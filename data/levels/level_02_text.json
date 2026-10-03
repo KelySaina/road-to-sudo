@@ -10,6 +10,7 @@
     "l2_bashusers",
     "l2_tally",
     "l2_apikey",
-    "l2_attacker_ip"
+    "l2_attacker_ip",
+    "l2_note"
   ]
 }
