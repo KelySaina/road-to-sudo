@@ -243,44 +243,41 @@
       "palette": "green",
       "course": ["ledge", "flat", "stair", "gap", "tower"],
       "name": "World 6 — The Dormant Engines",
-      "subtitle": "bring a dead service back to life",
+      "subtitle": "find the service that crashed",
       "cwd": "~",
       "intro": [
         "A hall of cold turbines — the machine's services, the daemons that keep it",
-        "breathing. The web engine has stalled, and the lower floors trust you now:",
-        "here are operator keys. Learn to drive the engines, then restart the one that died."
+        "breathing. One of them has crashed, and the whole floor is waiting on a",
+        "diagnosis. Learn to read the engines, then name the one that died and why."
       ],
       "orbs": [
-        {"skill": "sudo", "teaches": "run a single command with root power — controlling services needs it. Reaching this orb earns you OPERATOR (sudo) rights.", "example": "sudo systemctl status nginx", "grant_group": "sudo"},
-        {"skill": "systemctl", "teaches": "control services: `status` inspects, `start` runs it now, `enable` makes it start on every boot", "example": "sudo systemctl start nginx"},
-        {"skill": "journalctl", "teaches": "read the system log; `journalctl -u nginx` shows just one service's messages", "example": "journalctl -u nginx"}
+        {"skill": "systemctl", "teaches": "inspect services: `systemctl status UNIT` shows if it's running or dead, `systemctl --failed` lists everything that crashed", "example": "systemctl --failed"},
+        {"skill": "journalctl", "teaches": "read a service's log: `journalctl -u UNIT` shows just that unit's messages — where the reason for a crash hides", "example": "journalctl -u nginx"},
+        {"skill": "systemctl is-enabled", "teaches": "a service can be dead now yet still set to start at boot: `systemctl is-enabled UNIT` tells you which", "example": "systemctl is-enabled nginx"}
       ],
       "trial": {
         "name": "The Stalled Engine",
-        "objective": "The web engine is down. Start nginx now, and make sure it comes back on every boot.",
+        "objective": "A service has crashed and the floor needs it named. Find which unit is in the failed state, and write just its name into ~/failed.txt.",
         "setup": {
           "services": {
-            "nginx": {"active": false, "enabled": false, "sub": "dead", "description": "nginx web engine", "exec": "/usr/sbin/nginx -g 'daemon off;'", "journal": ["Stopping nginx web engine...", "nginx.service: Deactivated successfully.", "Stopped nginx web engine."]}
+            "ssh": {"active": true, "enabled": true, "description": "OpenSSH server daemon", "main_pid": 502},
+            "cron": {"active": true, "enabled": true, "description": "Regular background program processing daemon", "main_pid": 488},
+            "nginx": {"active": false, "enabled": true, "sub": "failed", "description": "nginx web engine", "exec": "/usr/sbin/nginx -g 'daemon off;'", "journal": ["nginx.service: Main process exited, code=exited, status=1/FAILURE", "nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)", "nginx.service: Failed with result 'exit-code'."]}
           }
         },
-        "success": {"all": [
-          {"type": "service_active", "service": "nginx", "expect": true},
-          {"type": "service_enabled", "service": "nginx", "expect": true}
-        ]},
+        "success": {"type": "file_matches", "path": "~/failed.txt", "regex": "^\\s*nginx\\s*$"},
         "hints": [
-          "Look before you touch: `sudo systemctl status nginx`. It reads inactive (dead) and disabled.",
-          "Start it now: `sudo systemctl start nginx`. Changing a service needs root — that's what your new sudo rights are for.",
-          "Make it survive a reboot too: `sudo systemctl enable nginx`. 'active' (running now) and 'enabled' (starts at boot) are separate switches — you need both."
+          "Don't read every unit — ask which crashed: `systemctl --failed`.",
+          "One unit is in the failed state: nginx. See why with `journalctl -u nginx` (its port was already taken).",
+          "Record the culprit: `echo nginx > ~/failed.txt`."
         ],
         "learned": [
-          "`systemctl start` runs a service now; `systemctl enable` makes it start on every boot — two independent switches.",
-          "Changing a service's state needs root, so you prefix it with `sudo`. `journalctl -u UNIT` tells you why one died."
+          "`systemctl status UNIT` and `systemctl --failed` show what's running and what crashed; `journalctl -u UNIT` shows why.",
+          "Reading a service's state needs no special power — but changing it (start / stop / enable) needs root, which you earn at the very top."
         ],
         "reactions": [
-          {"when": {"type": "event", "name": "service_denied"},
-           "say": "Controlling a service needs root. Prefix it with sudo: `sudo systemctl start nginx`."},
-          {"when": {"all": [{"type": "service_active", "service": "nginx", "expect": true}, {"type": "service_enabled", "service": "nginx", "expect": false}]},
-           "say": "It's running now — but still disabled, so the next reboot would lose it. `sudo systemctl enable nginx`."}
+          {"when": {"all": [{"type": "command_ran", "name": ["cat", "ls", "less"]}, {"not": {"type": "command_ran", "name": "systemctl"}}]},
+           "say": "A crashed service isn't a file you can cat — ask systemd directly: `systemctl --failed` lists what died."}
         ]
       }
     },
@@ -341,42 +338,42 @@
       "palette": "orange",
       "course": ["ledge", "rover", "stair", "gap", "tower"],
       "name": "World 8 — The Supply Depot",
-      "subtitle": "query and install software",
+      "subtitle": "audit what software is installed",
       "cwd": "~",
       "intro": [
-        "Endless crates of software stretch into the dark — the package depot. The",
-        "recovery script needs a tool that was never installed here. Learn to search",
-        "the shelves and read what's on them, then install what's missing."
+        "Endless crates of software stretch into the dark — the package depot. Before",
+        "the next upgrade, the depot needs an audit: exactly what is installed, and at",
+        "which version. Learn to read the shelves, then report a version."
       ],
       "orbs": [
-        {"skill": "dpkg", "teaches": "query installed packages; `dpkg -l` lists them all, `dpkg -s PKG` shows one package's status", "example": "dpkg -l"},
+        {"skill": "dpkg", "teaches": "query installed packages: `dpkg -l` lists them all, `dpkg -s PKG` shows one package's version and status", "example": "dpkg -s curl"},
         {"skill": "apt search", "teaches": "find a package in the repo by keyword: `apt search <word>`", "example": "apt search json"},
-        {"skill": "apt", "teaches": "install software and its dependencies: `sudo apt install <pkg>` (needs root)", "example": "sudo apt install jq"}
+        {"skill": "apt show", "teaches": "see a package's details — version, description, dependencies: `apt show <pkg>`", "example": "apt show curl"}
       ],
       "trial": {
-        "name": "The Missing Tool",
-        "objective": "The recovery script calls `jq`, but it isn't installed. Install the jq package.",
+        "name": "The Inventory",
+        "objective": "The upgrade log needs the exact installed version of `curl`. Look it up in the package database, and write just that version string into ~/version.txt.",
         "setup": {
           "packages": {
-            "jq": {"installed": false, "version": "1.7.1-3", "section": "utils", "description": "command-line JSON processor"},
-            "libjq1": {"installed": false, "version": "1.7.1-3", "section": "libs", "description": "flexible JSON processor - shared library"},
+            "curl": {"installed": true, "version": "8.5.0-2", "section": "web", "description": "command line tool for transferring data with URLs"},
+            "jq": {"installed": true, "version": "1.7.1-3", "section": "utils", "description": "command-line JSON processor"},
             "ripgrep": {"installed": false, "version": "14.1.0-1", "section": "utils", "description": "fast recursive line-oriented search tool"},
-            "curl": {"installed": true, "version": "8.5.0-2", "section": "web", "description": "command line tool for transferring data with URLs"}
+            "git": {"installed": true, "version": "2.43.0-1", "section": "vcs", "description": "fast, scalable, distributed revision control system"}
           }
         },
-        "success": {"type": "package_installed", "package": "jq", "expect": true},
+        "success": {"type": "file_matches", "path": "~/version.txt", "regex": "^\\s*8\\.5\\.0-2\\s*$"},
         "hints": [
-          "Is it here? `dpkg -l jq` finds nothing installed — you'll have to add it.",
-          "Find it in the repo: `apt search json` (or `apt search jq`).",
-          "Install it — this changes the system, so it needs root: `sudo apt install jq`."
+          "Ask the package database directly: `dpkg -s curl` (or `dpkg -l curl`).",
+          "Read the Version line — it's 8.5.0-2.",
+          "Record just that string: `echo 8.5.0-2 > ~/version.txt`."
         ],
         "learned": [
-          "`dpkg -l` and `dpkg -s` query what's already installed; `apt search` finds packages in the repo.",
-          "`sudo apt install PKG` adds a package and its dependencies. Installing changes the system, so it needs root."
+          "`dpkg -l` and `dpkg -s` query what's already installed and at what version; `apt search` and `apt show` explore the repo.",
+          "Reading the package database needs no special power — but installing or removing (`apt install` / `apt remove`) needs root, which you earn at the very top."
         ],
         "reactions": [
-          {"when": {"all": [{"type": "command_ran", "name": "apt", "args_contain": "install"}, {"type": "package_installed", "package": "jq", "expect": false}]},
-           "say": "Installing software changes the system, so it needs root. Prefix it with sudo: `sudo apt install jq`."}
+          {"when": {"all": [{"type": "command_ran", "name": ["ls", "cat", "find"]}, {"not": {"type": "command_ran", "name": ["dpkg", "apt"]}}]},
+           "say": "A package's version isn't lying around in a file — ask the package database: `dpkg -s curl` prints its Version."}
         ]
       }
     },
@@ -537,7 +534,7 @@
       ],
       "orbs": [
         {"skill": "id", "teaches": "show who you are and which groups you're in (like 'sudo')", "example": "id"},
-        {"skill": "sudo", "teaches": "the last step from operator to root: `sudo -i` opens a full root shell. You earned these rights on the engine floor — now take the throne.", "example": "sudo -i", "grant_group": "sudo"},
+        {"skill": "sudo", "teaches": "run as root when policy allows; `sudo -i` opens a root shell. Collecting this orb earns you the right.", "example": "sudo -i", "grant_group": "sudo"},
         {"skill": "rm", "teaches": "delete a file — powerful and irreversible, so aim carefully", "example": "touch /tmp/junk.txt && rm /tmp/junk.txt"}
       ],
       "trial": {

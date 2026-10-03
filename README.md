@@ -168,17 +168,17 @@ so the Linux layer stays honest: `:hint`, `:solution`, `:objective`,
   graded. Take every orb and the world's **trial console** unlocks: press **E**
   and solve a real problem with exactly those skills — make a script run
   (`chmod`), name a log intruder (`grep|sort|uniq`), stop a miner (`ps`,`kill`),
-  restart a dead service (`systemctl`), trace a backdoor port (`ss`), install a
-  missing tool (`apt`), make the first commit (`git`), pull a file off another
-  box (`scp`), or flag every error log with a loop (`for`/`if`)…
+  name the service that crashed (`systemctl`/`journalctl`), trace a backdoor port
+  (`ss`), audit an installed version (`dpkg`), make the first commit (`git`), pull
+  a file off another box (`scp`), or flag every error log with a loop (`for`/`if`)…
   Any valid solution passes, you get a "what you learned", and the **portal** to
   the next world opens. No HP, no lives and nothing kills you — touch a hazard or
   fall in a pit and you're set back on the last ground you stood on, and told so.
   The camera leads where you run, the vector-drawn operator has a real run cycle
   with poses for rising and falling, and each course is backed by parallax layers
   of machine receding into the dark. It ends at the Throne of root: the
-  **sudo orb** (first earned on the engine floor) lets you become root to end the
-  impostor (*"YOU MADE IT."*). Trial XP feeds the same ranks; the run is saved.
+  **sudo orb** earns you the right, and you become root to end the impostor
+  (*"YOU MADE IT."*). Trial XP feeds the same ranks; the run is saved.
   Full write-up: [docs/ADVENTURE.md](docs/ADVENTURE.md).
 - **Practice Lab:** a separate sandbox machine with no objectives and no
   score.

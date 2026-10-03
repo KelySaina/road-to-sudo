@@ -68,10 +68,11 @@ It reuses the whole engine — the VFS, the shell, and the same
    backup daemon.
 4. **The Tangled Archive** — `find`, `mkdir`, `cp` → recover a buried config.
 5. **The Cutting Room** — `cut`, `sort`, `uniq` → name the most frequent account.
-6. **The Dormant Engines** — `sudo`, `systemctl`, `journalctl` → the **sudo orb**
-   earns you operator rights; start a dead service and enable it for boot.
+6. **The Dormant Engines** — `systemctl`, `journalctl`, `systemctl is-enabled` →
+   name the service that crashed (read-only: inspecting state needs no root).
 7. **The Severed Wire** — `ip`, `ss`, `dig` → find the backdoor's listening port.
-8. **The Supply Depot** — `dpkg`, `apt search`, `apt` → install a missing tool.
+8. **The Supply Depot** — `dpkg`, `apt search`, `apt show` → audit an installed
+   package's version (read-only: querying the database needs no root).
 9. **The Hall of Records** — `git init`, `git add`, `git commit` → make the first
    commit on a clean tree.
 10. **The Far Tower** — `ssh-keygen`, `ssh`, `scp` → pull a file off `beacon-01`.
