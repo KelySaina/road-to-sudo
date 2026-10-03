@@ -15,6 +15,11 @@ config/description="Learn Linux by using it. A terminal RPG about the long walk 
 run/main_scene="res://scenes/main/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
+boot_splash/show_image=true
+boot_splash/image="res://assets/branding/splash.png"
+boot_splash/fullsize=false
+boot_splash/use_filter=true
+boot_splash/bg_color=Color(0.031, 0.024, 0.059, 1)
 
 [autoload]
 
