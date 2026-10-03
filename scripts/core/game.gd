@@ -242,6 +242,12 @@ func submit(line: String) -> void:
 		if e.name == "open_editor":
 			EventBus.editor_requested.emit(e.data)
 			break
+		elif e.name == "open_pager":
+			EventBus.viewer_requested.emit({"mode": "page", "title": e.data.get("title", ""), "content": e.data.get("content", "")})
+			break
+		elif e.name == "open_follow":
+			EventBus.viewer_requested.emit({"mode": "follow", "title": e.data.get("title", ""), "content": e.data.get("content", ""), "kind": e.data.get("kind", "sys")})
+			break
 
 
 ## Called by the editor overlay when the player saves (^O or save-on-exit).

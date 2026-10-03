@@ -201,6 +201,30 @@ func _run() -> void:
 	screen._editor._request_exit()
 	await _frames(1)
 
+	# less: an interactive pager overlay that scrolls and quits.
+	Game.submit("less README.lab")
+	await _frames(2)
+	check(screen._pager.visible, "less opens the pager overlay")
+	check(screen._pager._text.text.length() > 0, "the pager shows the file")
+	screen._pager._close()
+	await _frames(1)
+	check(not screen._pager.visible, "q closes the pager")
+
+	# tail -f: a live follow view that streams new lines until stopped.
+	Game.submit("echo following-demo > ~/live.log")
+	await _frames(1)
+	Game.submit("tail -f ~/live.log")
+	await _frames(2)
+	check(screen._pager.visible, "tail -f opens the follow view")
+	var lines_before: int = screen._pager._text.get_line_count()
+	screen._pager._tick_feed()
+	screen._pager._tick_feed()
+	await _frames(1)
+	check(screen._pager._text.get_line_count() > lines_before, "new lines stream into the follow view")
+	screen._pager._close()
+	await _frames(1)
+	check(not screen._pager.visible, "Ctrl-C / q stops following")
+
 	# A fresh profile loaded from disk keeps everything.
 	var reloaded := SaveManager.load_profile()
 	SaveManager._cache = {}

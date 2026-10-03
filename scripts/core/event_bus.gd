@@ -18,6 +18,9 @@ signal menu_requested()
 ## A command asked to open the full-screen text editor. data: {path, display,
 ## content, can_write, is_new}. The screen hosting the terminal opens the editor.
 signal editor_requested(data: Dictionary)
+## A command asked to open the read-only viewer (less / tail -f). data carries
+## {mode:"page"|"follow", title, content, ...}. The screen opens the pager.
+signal viewer_requested(data: Dictionary)
 
 # Adventure (skill-worlds) mode
 signal adventure_started()
