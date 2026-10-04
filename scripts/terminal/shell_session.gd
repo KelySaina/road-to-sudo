@@ -25,6 +25,12 @@ var functions: Dictionary = {}
 var command_log: Array = []
 ## Set by `exit N` inside a script; the interpreter stops at the next check.
 var exit_requested: int = -1
+## Set by `return N` inside a function; consumed at the function boundary so the
+## unwind stops there instead of leaving the whole shell like `exit` does.
+var return_requested: int = -1
+## How many function bodies are currently on the call stack (so `return` outside a
+## function can report the same error bash does).
+var function_depth: int = 0
 ## Stack of {"user", "cwd"} pushed by su / sudo -i, popped by exit.
 var user_stack: Array = []
 ## Stack of saved local contexts pushed by `ssh`, popped on remote `exit`.

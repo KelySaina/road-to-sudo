@@ -103,6 +103,30 @@ func test_functions() -> void:
 	check_eq(out(sh, "echo $1"), "outer\n", "the caller's $1 is restored afterwards")
 
 
+func test_return() -> void:
+	var sh := new_shell()
+	# return stops the body early and does NOT leak past the function.
+	run(sh, "early() { echo one; return; echo two; }")
+	check_eq(out(sh, "early"), "one\n", "return stops the body before the next statement")
+	check_eq(out(sh, "echo after"), "after\n", "return does not leave the shell (unlike exit)")
+	# return sets the function's exit status.
+	run(sh, "ok() { return 0; }")
+	run(sh, "bad() { return 3; }")
+	run(sh, "ok")
+	check_eq(sh.session.last_exit_code, 0, "return 0 is a success status")
+	run(sh, "bad")
+	check_eq(sh.session.last_exit_code, 3, "return N sets the function's exit code")
+	# return breaks out of a loop inside the body.
+	run(sh, "firsthit() { for n in 1 2 3 4; do echo $n; if [ $n = 2 ]; then return; fi; done; }")
+	check_eq(out(sh, "firsthit"), "1\n2\n", "return unwinds a loop inside the function")
+	# return only affects the innermost function, and the caller keeps running.
+	run(sh, "leaf() { return 7; }")
+	run(sh, "stem() { leaf; echo stem-continues; }")
+	check_eq(out(sh, "stem"), "stem-continues\n", "an inner return doesn't abort the caller")
+	# return outside a function is an error, not a shell exit.
+	check(text(sh, "return").contains("can only"), "return outside a function errors")
+
+
 func test_find_or() -> void:
 	var sh := new_shell()
 	run(sh, "mkdir -p /tmp/fo && cd /tmp/fo")

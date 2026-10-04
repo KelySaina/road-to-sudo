@@ -1530,5 +1530,6 @@
   "Replay": "Rejouer",
   "Your Journey": "Ton parcours",
   "highest rank reached": "rang le plus élevé atteint",
-  "v0.4.0 · ↑↓ navigate · Enter select · Esc back": "v0.4.0 · ↑↓ naviguer · Entrée sélectionner · Esc retour"
+  "v0.4.0 · ↑↓ navigate · Enter select · Esc back": "v0.4.0 · ↑↓ naviguer · Entrée sélectionner · Esc retour",
+  "return from a shell function with a status": "revenir d'une fonction shell avec un statut"
 }

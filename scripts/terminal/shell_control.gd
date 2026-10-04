@@ -176,7 +176,7 @@ static func _run_for(shell, line: String, words: Array, outcome, depth: int, par
 	for value in items:
 		shell.session.env[name] = value
 		shell.run_into(body, outcome, depth, parent)
-		if shell.session.exit_requested >= 0:
+		if shell.session.exit_requested >= 0 or shell.session.return_requested >= 0:
 			return
 		count += 1
 		if count > MAX_ITERATIONS:
@@ -203,7 +203,7 @@ static func _run_while(shell, line: String, words: Array, is_until: bool, outcom
 		if not ok:
 			break
 		shell.run_into(body, outcome, depth, parent)
-		if shell.session.exit_requested >= 0:
+		if shell.session.exit_requested >= 0 or shell.session.return_requested >= 0:
 			return
 		count += 1
 		if count > MAX_ITERATIONS:

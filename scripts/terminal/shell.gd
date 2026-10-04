@@ -42,7 +42,7 @@ func run_into(line: String, outcome: ExecutionOutcome, depth: int, parent: Comma
 	# multi-line blocks work (their embedded newlines separate statements).
 	for stmt in ShellControl.split_statements(line):
 		_run_statement(stmt, outcome, depth, parent)
-		if session.exit_requested >= 0 and depth > 0:
+		if (session.exit_requested >= 0 or session.return_requested >= 0) and depth > 0:
 			return
 
 
@@ -83,7 +83,7 @@ func _run_statement(stmt: String, outcome: ExecutionOutcome, depth: int, parent:
 				if session.last_exit_code == 0:
 					continue
 		_run_pipeline(segment.pipeline, outcome, depth, parent)
-		if session.exit_requested >= 0 and depth > 0:
+		if (session.exit_requested >= 0 or session.return_requested >= 0) and depth > 0:
 			return
 		if segment.pipeline.size() > 1:
 			outcome.emit("pipe_used", {"length": segment.pipeline.size()})
@@ -326,10 +326,16 @@ func _run_function(name: String, ctx: CommandContext) -> int:
 	session.positional = ctx.args().duplicate()
 	var saved_code := session.last_exit_code
 	session.last_exit_code = 0
+	session.function_depth += 1
 	run_into(body, ctx.outcome, ctx.depth + 1, ctx)
+	session.function_depth -= 1
+	# `return N` unwinds the body up to here; consume it so it stops at the
+	# function boundary instead of leaking out like `exit`.
+	if session.return_requested >= 0:
+		session.last_exit_code = session.return_requested
+		session.return_requested = -1
 	var code := session.last_exit_code
 	session.positional = saved_positional
-	session.last_exit_code = code
 	return code
 
 
