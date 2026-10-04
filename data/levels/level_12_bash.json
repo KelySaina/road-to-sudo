@@ -2,13 +2,15 @@
   "id": "bash",
   "order": 12,
   "title": "Level 12 — Bash: Loops & Logic",
-  "subtitle": "for, while, if, test and $( ) — turning commands into scripts",
-  "description": "One command does one thing. Bash's control flow does it a hundred times, or only when it should. Learn to repeat work with `for` and `while`, make decisions with `if` and `test` ([ ]), and glue commands together with command substitution `$( )`.",
+  "subtitle": "for, while, if, case, functions, test and $( ) — turning commands into scripts",
+  "description": "One command does one thing. Bash's control flow does it a hundred times, or only when it should. Repeat work with `for` and `while`, decide with `if`/`test` and `case`, glue commands with `$( )`, and wrap your own with functions.",
   "machine": "workstation",
   "challenges": [
     "l12_for",
     "l12_if",
     "l12_while",
-    "l12_subst"
+    "l12_subst",
+    "l12_case",
+    "l12_func"
   ]
 }

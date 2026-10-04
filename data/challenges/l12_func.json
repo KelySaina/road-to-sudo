@@ -1,0 +1,41 @@
+{
+  "id": "l12_func",
+  "title": "Make your own command",
+  "level": "bash",
+  "machine": "workstation",
+  "fresh_machine": true,
+  "xp": 170,
+  "time_limit": 300,
+  "briefing": [
+    "You keep writing the same deploy line for each service. Wrap it once: define",
+    "a function `deploy` that appends a line \"deploying NAME\" to ~/deploy.log,",
+    "then call it for api and web.",
+    "",
+    "A function is a command you define yourself — name it, and its arguments",
+    "arrive as $1, $2, …  Define once, call as often as you like."
+  ],
+  "tips": [
+    "Define with `name() { commands; }` — the args are $1, $2, …  e.g. `deploy() { echo \"deploying $1\" >> ~/deploy.log; }`.",
+    "Then just call it like any command: `deploy api` and `deploy web`."
+  ],
+  "objective": "Define a function `deploy` that appends \"deploying $1\" to ~/deploy.log, then call it for api and web (so the log has: deploying api, then deploying web).",
+  "expert_objective": "Write a deploy() function that logs \"deploying $1\" to ~/deploy.log; run it for api and web.",
+  "hints": [
+    "A function is `name() { body; }`. Make the body append the argument: `deploy() { echo \"deploying $1\" >> ~/deploy.log; }`.",
+    "Call it like a command, once per service: `deploy api` then `deploy web`.",
+    "All together: `deploy() { echo \"deploying $1\" >> ~/deploy.log; }` ; `deploy api` ; `deploy web`"
+  ],
+  "solution": "deploy() { echo \"deploying $1\" >> ~/deploy.log; }\ndeploy api\ndeploy web",
+  "setup": {
+    "remove": ["~/deploy.log"],
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {"type": "file_contains", "path": "~/deploy.log", "text": "deploying api"},
+      {"type": "file_contains", "path": "~/deploy.log", "text": "deploying web"}
+    ]
+  },
+  "explanation": "`name() { ... }` defines a function — your own command. Its arguments come in as $1, $2, … ($@ is all of them, $# the count). Define the work once and call it by name as many times as you need; it's the first step from running commands to writing real scripts.",
+  "teaches": ["bash", "functions", "scripting"]
+}

@@ -1,0 +1,52 @@
+{
+  "id": "l12_case",
+  "title": "Sort the intake",
+  "level": "bash",
+  "machine": "workstation",
+  "fresh_machine": true,
+  "xp": 160,
+  "time_limit": 300,
+  "briefing": [
+    "~/inbox has four files dropped in together: report.pdf, notes.txt, data.csv",
+    "and photo.png. Sort them — text files (.txt, .csv) into ~/text, and the",
+    "rest (.pdf, .png) into ~/media.",
+    "",
+    "An `if` with a chain of tests would work, but `case` is made for exactly",
+    "this: match one value against several patterns and branch."
+  ],
+  "tips": [
+    "`case $f in PATTERN) ... ;; PATTERN) ... ;; esac` — patterns are globs, and `a|b` matches either.",
+    "Loop the files and branch inside: `for f in *; do case $f in *.txt|*.csv) mv \"$f\" ~/text/ ;; *) ... ;; esac; done`."
+  ],
+  "objective": "Move every .txt and .csv file from ~/inbox into ~/text, and every .pdf and .png into ~/media. Use a case to decide. Leave ~/inbox empty.",
+  "expert_objective": "Sort ~/inbox: text (.txt/.csv) to ~/text, media (.pdf/.png) to ~/media, with a case.",
+  "hints": [
+    "Walk the files with a loop, then branch on each name with case: `for f in *; do case $f in ... ; esac; done`.",
+    "Text patterns together: `*.txt|*.csv) mv \"$f\" ~/text/ ;;` — and media: `*.pdf|*.png) mv \"$f\" ~/media/ ;;`.",
+    "`cd ~/inbox`, then `for f in *; do case $f in *.txt|*.csv) mv \"$f\" ~/text/ ;; *.pdf|*.png) mv \"$f\" ~/media/ ;; esac; done`"
+  ],
+  "solution": "cd ~/inbox\nfor f in *; do case $f in *.txt|*.csv) mv \"$f\" ~/text/ ;; *.pdf|*.png) mv \"$f\" ~/media/ ;; esac; done",
+  "setup": {
+    "files": {
+      "~/inbox": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "~/inbox/report.pdf": {"owner": "player", "group": "player", "content": "%PDF report\n"},
+      "~/inbox/notes.txt": {"owner": "player", "group": "player", "content": "meeting notes\n"},
+      "~/inbox/data.csv": {"owner": "player", "group": "player", "content": "a,b,c\n"},
+      "~/inbox/photo.png": {"owner": "player", "group": "player", "content": "PNG bytes\n"},
+      "~/text": {"dir": true, "owner": "player", "group": "player", "mode": "755"},
+      "~/media": {"dir": true, "owner": "player", "group": "player", "mode": "755"}
+    },
+    "cwd": "~"
+  },
+  "success": {
+    "all": [
+      {"type": "file_exists", "path": "~/text/notes.txt"},
+      {"type": "file_exists", "path": "~/text/data.csv"},
+      {"type": "file_exists", "path": "~/media/report.pdf"},
+      {"type": "file_exists", "path": "~/media/photo.png"},
+      {"type": "path_missing", "path": "~/inbox/notes.txt"}
+    ]
+  },
+  "explanation": "`case WORD in pattern) ... ;; esac` matches a value against glob patterns, top to bottom, running the first that fits — with `|` for alternatives and `*` as the catch-all. It's the clean way to branch many ways on one value, where a pile of `if`/`elif` would sprawl.",
+  "teaches": ["bash", "case", "scripting"]
+}

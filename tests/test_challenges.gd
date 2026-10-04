@@ -17,7 +17,7 @@ func _play(mgr: ChallengeManager, shell: Shell, lines: Array) -> bool:
 
 func test_library_is_valid() -> void:
 	var lib := ChallengeLibrary.load_default()
-	check_eq(lib.order.size(), 65, "full campaign in order")
+	check_eq(lib.order.size(), 67, "full campaign in order")
 	for cid in lib.order:
 		var c := lib.get_challenge(cid)
 		check(c.validate().is_empty(), "%s validates: %s" % [cid, str(c.validate())])
