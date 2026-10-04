@@ -136,6 +136,13 @@ func test_find_or() -> void:
 	check_eq(_sorted(out(sh, "find . -name '*.log' -o -name '*.txt'")), "./a.log ./b.log ./c.txt", "-o unions two name tests")
 	check_eq(_sorted(out(sh, "find . -type f -name '*.txt'")), "./c.txt", "-a (implicit) still intersects within a group")
 	check_eq(_sorted(out(sh, "find . -name '*.conf' -o -name '*.txt' -o -name '*.log'")), "./a.log ./b.log ./c.txt ./d.conf", "chained -o")
+	# \( \) grouping lets -o bind before an -a, which a flat clause list can't do.
+	run(sh, "echo x > e.log.bak")
+	check_eq(_sorted(out(sh, "find . \\( -name '*.log' -o -name '*.txt' \\) -a -name 'a*'")), "./a.log", "group makes (log OR txt) AND a*")
+	check_eq(_sorted(out(sh, "find . -name '*.log' -o -name '*.txt' -a -name 'z*'")), "./a.log ./b.log", "without a group, -a binds tighter than -o")
+	# negation, including a negated group.
+	check_eq(_sorted(out(sh, "find . -type f ! -name '*.log' ! -name '*.bak'")), "./c.txt ./d.conf", "stacked negations")
+	check_eq(_sorted(out(sh, "find . -type f ! \\( -name '*.log' -o -name '*.bak' \\)")), "./c.txt ./d.conf", "negated group (De Morgan)")
 
 
 func _sorted(text: String) -> String:

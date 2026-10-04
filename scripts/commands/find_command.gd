@@ -9,7 +9,7 @@ func get_category() -> String: return "files"
 func get_summary() -> String: return "search for files in a directory hierarchy"
 func get_usage() -> String: return "find [PATH...] [-name PATTERN] [-type f|d] [-maxdepth N] [-exec CMD {} \\;]"
 func get_manual() -> String:
-	return """Walks directories and prints every path matching ALL the given tests.
+	return """Walks directories and prints every path matching the given tests.
   -name '*.log'   match the file name (quote the pattern!)
   -iname PAT      same, case-insensitive
   -type f|d       only files / only directories
@@ -17,8 +17,11 @@ func get_manual() -> String:
   -user NAME      owned by NAME
   -perm 644       exact permission bits
   -empty          empty files or directories
+  ! EXPR / -not   negate a test
+  EXPR -o EXPR    match either side (-a, the default, is AND)
+  \\( EXPR \\)      group, so -o can bind before an -a
   -exec cmd {} \\; run cmd for each match ({} is replaced by the path)
-Example:  find /var/log -name '*.log' -exec grep ERROR {} \\;"""
+Example:  find . \\( -name '*.log' -o -name '*.txt' \\) -type f"""
 
 
 func execute(ctx: CommandContext) -> int:
@@ -48,7 +51,7 @@ func execute(ctx: CommandContext) -> int:
 			if depth < parsed.mindepth:
 				continue
 			var node := ctx.vfs().get_node_at(path)
-			if node == null or not _matches(node, parsed.groups, ctx):
+			if node == null or not _eval(parsed.expr, node, ctx):
 				continue
 			var shown := _display_path(start, start_abs, path)
 			if parsed.exec_argv.is_empty() and not parsed.delete:
@@ -75,34 +78,26 @@ func execute(ctx: CommandContext) -> int:
 
 
 func _parse_expression(args: Array) -> Dictionary:
-	# Tests group into OR-clauses of AND-ed tests: `A B -o C` is `(A AND B) OR C`,
-	# since -a (implicit AND) binds tighter than -o, like real find.
-	var groups: Array = [[]]
-	var result := {"groups": groups, "maxdepth": -1, "mindepth": 0, "exec_argv": [], "delete": false}
-	var negate := false
+	var result := {"expr": null, "maxdepth": -1, "mindepth": 0, "exec_argv": [], "delete": false}
+	# First pass: pull out global options and actions (which can sit anywhere), and
+	# collect the remaining tokens — tests, operators, and \( \) grouping — as the
+	# boolean expression to parse. Test tokens are folded into one {kind,value} each.
+	var etoks: Array = []
 	var i := 0
 	while i < args.size():
 		var a: String = args[i]
 		var needs_value := a in ["-name", "-iname", "-type", "-maxdepth", "-mindepth", "-user", "-group", "-perm"]
 		if needs_value and i + 1 >= args.size():
 			return {"error": "missing argument to `%s'" % a}
-		var cur: Array = groups[groups.size() - 1]
 		match a:
-			"!", "-not":
-				negate = true
-				i += 1
-				continue
-			"-a", "-and":
-				i += 1
-				continue
-			"-o", "-or":
-				groups.append([])
-				i += 1
 			"-name", "-iname", "-type", "-user", "-group", "-perm":
-				cur.append({"kind": a, "value": args[i + 1], "negate": negate})
+				etoks.append({"kind": a, "value": args[i + 1]})
 				i += 2
 			"-empty":
-				cur.append({"kind": a, "value": "", "negate": negate})
+				etoks.append({"kind": "-empty", "value": ""})
+				i += 1
+			"(", ")", "!", "-not", "-a", "-and", "-o", "-or":
+				etoks.append(a)
 				i += 1
 			"-maxdepth":
 				result.maxdepth = int(args[i + 1])
@@ -129,46 +124,114 @@ func _parse_expression(args: Array) -> Dictionary:
 				i += 1
 			_:
 				return {"error": "unknown predicate `%s'" % a}
-		negate = false
+
+	if etoks.is_empty():
+		return result   # no tests: everything matches
+	# Second pass: recursive descent over the tokens into an AST. Precedence from
+	# loosest to tightest: -o, then -a (juxtaposition), then !/-not, then \( \).
+	var c := {"toks": etoks, "i": 0, "error": ""}
+	var tree = _parse_or(c)
+	if c.error != "":
+		return {"error": c.error}
+	if c.i < etoks.size():
+		return {"error": "unexpected `%s'" % str(etoks[c.i])}
+	result.expr = tree
 	return result
 
 
-## True when ANY group matches (OR), a group matching when ALL its tests do (AND).
-## With no tests at all, everything matches.
-func _matches(node: VFSNode, groups: Array, ctx: CommandContext) -> bool:
-	var any_tests := false
-	for group in groups:
-		if group.is_empty():
-			continue
-		any_tests = true
-		var all_ok := true
-		for t in group:
-			if not _test_one(node, t, ctx):
-				all_ok = false
-				break
-		if all_ok:
+func _peek(c: Dictionary):
+	return c.toks[c.i] if c.i < c.toks.size() else null
+
+
+## Is the next token one of these operator strings? False for a test token (a
+## Dictionary), which must never be compared to a String with `==` (GDScript errors).
+func _is_op(c: Dictionary, ops: Array) -> bool:
+	var t = _peek(c)
+	return typeof(t) == TYPE_STRING and t in ops
+
+
+func _parse_or(c: Dictionary):
+	var node = _parse_and(c)
+	while c.error == "" and _is_op(c, ["-o", "-or"]):
+		c.i += 1
+		var rhs = _parse_and(c)
+		node = {"op": "or", "children": [node, rhs]}
+	return node
+
+
+func _parse_and(c: Dictionary):
+	var children: Array = [_parse_unary(c)]
+	# Implicit AND: any operand not separated by -o (or closing the group) binds here.
+	while c.error == "" and _peek(c) != null and not _is_op(c, ["-o", "-or", ")"]):
+		if _is_op(c, ["-a", "-and"]):
+			c.i += 1
+		children.append(_parse_unary(c))
+	return children[0] if children.size() == 1 else {"op": "and", "children": children}
+
+
+func _parse_unary(c: Dictionary):
+	if _is_op(c, ["!", "-not"]):
+		c.i += 1
+		return {"op": "not", "child": _parse_unary(c)}
+	return _parse_primary(c)
+
+
+func _parse_primary(c: Dictionary):
+	var t = _peek(c)
+	if _is_op(c, ["("]):
+		c.i += 1
+		var node = _parse_or(c)
+		if not _is_op(c, [")"]):
+			c.error = "expected `)'"
+			return null
+		c.i += 1
+		return node
+	if typeof(t) == TYPE_DICTIONARY:
+		c.i += 1
+		return {"op": "test", "kind": t.kind, "value": t.value}
+	c.error = "expected an expression%s" % (" but found `%s'" % str(t) if t != null else "")
+	return null
+
+
+## Evaluate the test AST against one node. A null tree matches everything.
+func _eval(node, vfsnode: VFSNode, ctx: CommandContext) -> bool:
+	if node == null:
+		return true
+	match node.op:
+		"test":
+			return _test_one(vfsnode, node, ctx)
+		"not":
+			return not _eval(node.child, vfsnode, ctx)
+		"and":
+			for child in node.children:
+				if not _eval(child, vfsnode, ctx):
+					return false
 			return true
-	return not any_tests
+		"or":
+			for child in node.children:
+				if _eval(child, vfsnode, ctx):
+					return true
+			return false
+	return true
 
 
-func _test_one(node: VFSNode, t: Dictionary, ctx: CommandContext) -> bool:
-	var ok := true
+func _test_one(node: VFSNode, t: Dictionary, _ctx: CommandContext) -> bool:
 	match t.kind:
 		"-name":
-			ok = Expander.fnmatch(str(t.value), node.name)
+			return Expander.fnmatch(str(t.value), node.name)
 		"-iname":
-			ok = Expander.fnmatch(str(t.value).to_lower(), node.name.to_lower())
+			return Expander.fnmatch(str(t.value).to_lower(), node.name.to_lower())
 		"-type":
-			ok = (t.value == "d" and node.is_dir()) or (t.value == "f" and not node.is_dir())
+			return (t.value == "d" and node.is_dir()) or (t.value == "f" and not node.is_dir())
 		"-user":
-			ok = node.owner == t.value
+			return node.owner == t.value
 		"-group":
-			ok = node.group == t.value
+			return node.group == t.value
 		"-perm":
-			ok = (node.mode & 4095) == Permissions.from_octal(str(t.value).trim_prefix("-").trim_prefix("/"))
+			return (node.mode & 4095) == Permissions.from_octal(str(t.value).trim_prefix("-").trim_prefix("/"))
 		"-empty":
-			ok = node.children.is_empty() if node.is_dir() else node.content == ""
-	return (not ok) if t.negate else ok
+			return node.children.is_empty() if node.is_dir() else node.content == ""
+	return false
 
 
 func _display_path(start: String, start_abs: String, path: String) -> String:
