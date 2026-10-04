@@ -58,6 +58,17 @@ func test_arithmetic() -> void:
 	check_eq(out(sh, "for n in 1 2 3; do echo $((n * n)); done"), "1\n4\n9\n", "arithmetic inside a loop")
 
 
+func test_glob_classes() -> void:
+	var sh := new_shell()
+	run(sh, "cd /tmp")
+	for f in ["a1.txt", "a2.txt", "b1.txt", "c9.log"]:
+		run(sh, "echo x > " + f)
+	check_eq(out(sh, "echo [ab]1.txt"), "a1.txt b1.txt\n", "[ab] character class")
+	check_eq(out(sh, "echo a[0-9].txt"), "a1.txt a2.txt\n", "[0-9] range")
+	check_eq(out(sh, "echo [!a]1.txt"), "b1.txt\n", "[!a] negation")
+	check_eq(out(sh, "echo nomatch[0-9].zz"), "nomatch[0-9].zz\n", "no match stays literal")
+
+
 func test_case() -> void:
 	var sh := new_shell()
 	run(sh, "x=start")

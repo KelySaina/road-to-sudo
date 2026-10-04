@@ -28,7 +28,7 @@ static func expand_word(word: Dictionary, session: ShellSession) -> Array:
 		piece = expand_variables(piece, session)
 		if s.q == ShellLexer.QUOTE_DOUBLE:
 			piece = piece.replace("\\$", "$")
-		if s.q == ShellLexer.QUOTE_NONE and (piece.contains("*") or piece.contains("?")):
+		if s.q == ShellLexer.QUOTE_NONE and (piece.contains("*") or piece.contains("?") or (piece.contains("[") and piece.contains("]"))):
 			globbable = true
 		text += piece
 
@@ -77,13 +77,45 @@ static func expand_variables(text: String, session: ShellSession) -> String:
 
 
 ## Expands a glob pattern against the VFS, component by component.
+## Shell glob match for a single path component: * ? and [abc] / [a-z] classes
+## (and [!abc] negation). Shared by filename globbing and case patterns.
+static func fnmatch(pattern: String, name: String) -> bool:
+	var rx := "^"
+	var i := 0
+	var n := pattern.length()
+	while i < n:
+		var c := pattern[i]
+		match c:
+			"*": rx += ".*"
+			"?": rx += "."
+			"[":
+				var close := pattern.find("]", i + 1)
+				if close == -1:
+					rx += "\\["
+				else:
+					var cls := pattern.substr(i + 1, close - (i + 1))
+					if cls.begins_with("!"):
+						cls = "^" + cls.substr(1)
+					rx += "[" + cls + "]"
+					i = close
+			_:
+				if c in [".", "+", "(", ")", "{", "}", "^", "$", "\\", "|"]:
+					rx += "\\" + c
+				else:
+					rx += c
+		i += 1
+	rx += "$"
+	var re := RegEx.create_from_string(rx)
+	return re != null and re.search(name) != null
+
+
 static func glob(pattern: String, session: ShellSession) -> Array:
 	var absolute := pattern.begins_with("/")
 	var parts := pattern.split("/", false)
 	var bases: Array = ["/" if absolute else ""]
 	for p in parts:
 		var next_bases: Array = []
-		var has_wild := p.contains("*") or p.contains("?")
+		var has_wild := p.contains("*") or p.contains("?") or (p.contains("[") and p.contains("]"))
 		for base in bases:
 			if not has_wild:
 				next_bases.append(_join_rel(base, p))
@@ -97,7 +129,7 @@ static func glob(pattern: String, session: ShellSession) -> Array:
 			for child_name in node.sorted_child_names():
 				if child_name.begins_with(".") and not p.begins_with("."):
 					continue
-				if child_name.match(p):
+				if fnmatch(p, child_name):
 					next_bases.append(_join_rel(base, child_name))
 		bases = next_bases
 		if bases.is_empty():

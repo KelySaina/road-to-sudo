@@ -277,7 +277,7 @@ static func _run_case(shell, line: String, words: Array, outcome, depth: int, pa
 		var body := text.substr(close + 1)
 		var matched := false
 		for pat in pat_part.split("|", false):
-			if _glob_match(pat.strip_edges(), subject):
+			if Expander.fnmatch(pat.strip_edges(), subject):
 				matched = true
 				break
 		if matched:
@@ -297,35 +297,6 @@ static func _expand_scalar(shell, text: String, outcome, depth: int, parent) -> 
 	if s.length() >= 2 and ((s[0] == "\"" and s[-1] == "\"") or (s[0] == "'" and s[-1] == "'")):
 		s = s.substr(1, s.length() - 2)
 	return s
-
-
-## Shell glob match for case patterns: * ? and [abc] / [a-z] classes.
-static func _glob_match(pattern: String, text: String) -> bool:
-	var rx := "^"
-	var i := 0
-	var n := pattern.length()
-	while i < n:
-		var c := pattern[i]
-		match c:
-			"*": rx += ".*"
-			"?": rx += "."
-			"[":
-				var close := pattern.find("]", i + 1)
-				if close == -1:
-					rx += "\\["
-				else:
-					var cls := pattern.substr(i + 1, close - (i + 1))
-					rx += "[" + cls + "]"
-					i = close
-			_:
-				if c in [".", "+", "(", ")", "{", "}", "^", "$", "\\", "|"]:
-					rx += "\\" + c
-				else:
-					rx += c
-		i += 1
-	rx += "$"
-	var re := RegEx.create_from_string(rx)
-	return re != null and re.search(text) != null
 
 
 # --- helpers ----------------------------------------------------------------
