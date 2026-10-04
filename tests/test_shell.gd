@@ -38,6 +38,26 @@ func test_control_flow() -> void:
 	check(out(sh, "for f in *.txt; do echo got $f; done").contains("got welcome.txt"), "for over a glob")
 
 
+func test_arithmetic() -> void:
+	var sh := new_shell()
+	check_eq(out(sh, "echo $((2 + 3))"), "5\n", "addition")
+	check_eq(out(sh, "echo $(( (2+3) * 4 ))"), "20\n", "parentheses and precedence")
+	check_eq(out(sh, "echo $((10 / 3))"), "3\n", "integer division")
+	check_eq(out(sh, "echo $((10 % 3))"), "1\n", "modulo")
+	check_eq(out(sh, "echo $((7 / 0))"), "0\n", "division by zero is 0, not a crash")
+	check_eq(out(sh, "echo $((-3 + 1))"), "-2\n", "unary minus")
+	check_eq(out(sh, "echo $((2 > 1))"), "1\n", "comparison is 1 when true")
+	check_eq(out(sh, "echo $((2 < 1))"), "0\n", "comparison is 0 when false")
+	check_eq(out(sh, "echo $((5 == 5))"), "1\n", "equality")
+	check_eq(out(sh, "echo $((1 && 0))"), "0\n", "logical and")
+	check_eq(out(sh, "echo a$((1+1))b"), "a2b\n", "expansion sits inside a word")
+	run(sh, "i=5")
+	check_eq(out(sh, "echo $((i + 1))"), "6\n", "bare variable name resolves")
+	check_eq(out(sh, "echo $(($i * 2))"), "10\n", "$-prefixed variable resolves")
+	check_eq(out(sh, "echo $((nope + 2))"), "2\n", "an unset variable reads as 0")
+	check_eq(out(sh, "for n in 1 2 3; do echo $((n * n)); done"), "1\n4\n9\n", "arithmetic inside a loop")
+
+
 func test_multiline_script() -> void:
 	var sh := new_shell()
 	var src := "#!/bin/bash\nfor n in 1 2 3\ndo\n  if [ $n -gt 1 ]\n  then\n    echo big $n\n  fi\ndone\n"

@@ -55,6 +55,9 @@ func _run_statement(stmt: String, outcome: ExecutionOutcome, depth: int, parent:
 		ShellControl.run(self, stmt, outcome, depth, parent)
 		return
 	var line := stmt
+	# Arithmetic $(( )) first, so its parens aren't mistaken for $( ) command subst.
+	if line.contains("$(("):
+		line = Arith.expand(line, session)
 	if line.contains("$(") or line.contains("`"):
 		line = _expand_command_subst(line, outcome, depth, parent)
 	var parsed := CommandParser.parse(line)
