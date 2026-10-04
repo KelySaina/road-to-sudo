@@ -96,12 +96,12 @@ func _run() -> void:
 			# open nano, type the line, save. Saving must re-grade and complete it.
 			Game.submit("nano ~/handoff.txt")
 			await _frames(1)
-			check(screen._editor.visible, "nano opened the editor on the challenge file")
-			screen._editor._text.text = "deploy at dawn\n"
-			screen._editor._save()
+			check(screen._overlays.editor.visible, "nano opened the editor on the challenge file")
+			screen._overlays.editor._text.text = "deploy at dawn\n"
+			screen._overlays.editor._save()
 			await _frames(1)
-			check(screen._editor._saved_once, "the editor reported a successful save")
-			screen._editor._request_exit()
+			check(screen._overlays.editor._saved_once, "the editor reported a successful save")
+			screen._overlays.editor._request_exit()
 			await _frames(1)
 			solved_by_editor = Game.challenges.completed_pending_next
 		else:
@@ -199,54 +199,54 @@ func _run() -> void:
 	# The text editor: nano opens an overlay; saving writes through the session.
 	Game.submit("nano ~/mynote.txt")
 	await _frames(2)
-	check(screen._editor.visible, "nano opens the editor overlay")
-	check(screen._editor._text.text == "", "a new file opens empty in the editor")
-	var edited_path: String = screen._editor._path
-	screen._editor._text.text = "edited in nano\n"
-	screen._editor._save()
+	check(screen._overlays.editor.visible, "nano opens the editor overlay")
+	check(screen._overlays.editor._text.text == "", "a new file opens empty in the editor")
+	var edited_path: String = screen._overlays.editor._path
+	screen._overlays.editor._text.text = "edited in nano\n"
+	screen._overlays.editor._save()
 	await _frames(1)
 	var saved_node = Game.session.machine.vfs.get_node_at(edited_path)
 	check(saved_node != null and saved_node.content == "edited in nano\n", "saving (^O) writes the buffer to disk")
-	screen._editor._request_exit()
+	screen._overlays.editor._request_exit()
 	await _frames(1)
-	check(not screen._editor.visible, "exiting (^X) closes the editor")
+	check(not screen._overlays.editor.visible, "exiting (^X) closes the editor")
 	Game.submit("nano ~/mynote.txt")
 	await _frames(1)
-	check(screen._editor._text.text == "edited in nano\n", "reopening an existing file shows its saved content")
-	screen._editor._request_exit()
+	check(screen._overlays.editor._text.text == "edited in nano\n", "reopening an existing file shows its saved content")
+	screen._overlays.editor._request_exit()
 	await _frames(1)
 
 	# less: an interactive pager overlay that scrolls and quits.
 	Game.submit("less README.lab")
 	await _frames(2)
-	check(screen._pager.visible, "less opens the pager overlay")
-	check(screen._pager._text.text.length() > 0, "the pager shows the file")
-	screen._pager._close()
+	check(screen._overlays.pager.visible, "less opens the pager overlay")
+	check(screen._overlays.pager._text.text.length() > 0, "the pager shows the file")
+	screen._overlays.pager._close()
 	await _frames(1)
-	check(not screen._pager.visible, "q closes the pager")
+	check(not screen._overlays.pager.visible, "q closes the pager")
 
 	# tail -f: a live follow view that streams new lines until stopped.
 	Game.submit("echo following-demo > ~/live.log")
 	await _frames(1)
 	Game.submit("tail -f ~/live.log")
 	await _frames(2)
-	check(screen._pager.visible, "tail -f opens the follow view")
-	var lines_before: int = screen._pager._text.get_line_count()
-	screen._pager._tick_feed()
-	screen._pager._tick_feed()
+	check(screen._overlays.pager.visible, "tail -f opens the follow view")
+	var lines_before: int = screen._overlays.pager._text.get_line_count()
+	screen._overlays.pager._tick_feed()
+	screen._overlays.pager._tick_feed()
 	await _frames(1)
-	check(screen._pager._text.get_line_count() > lines_before, "new lines stream into the follow view")
-	screen._pager._close()
+	check(screen._overlays.pager._text.get_line_count() > lines_before, "new lines stream into the follow view")
+	screen._overlays.pager._close()
 	await _frames(1)
-	check(not screen._pager.visible, "Ctrl-C / q stops following")
+	check(not screen._overlays.pager.visible, "Ctrl-C / q stops following")
 
 	# su: an interactive masked password prompt that switches the user.
 	# (The practice lab's bob has the password "builder".)
 	check(Game.session.user == "player", "in the lab as player")
 	Game.submit("su bob")
 	await _frames(2)
-	check(screen._prompt.visible, "su opens the password prompt")
-	screen._prompt._on_submit("builder")
+	check(screen._overlays.prompt.visible, "su opens the password prompt")
+	screen._overlays.prompt._on_submit("builder")
 	await _frames(2)
 	check(Game.session.user == "bob", "the right password switches the user")
 	Game.submit("exit")
@@ -254,7 +254,7 @@ func _run() -> void:
 	check(Game.session.user == "player", "exit returns to the previous user")
 	Game.submit("su bob")
 	await _frames(2)
-	screen._prompt._on_submit("wrong")
+	screen._overlays.prompt._on_submit("wrong")
 	await _frames(2)
 	check(Game.session.user == "player", "a wrong password does not switch the user")
 
@@ -335,6 +335,18 @@ func _run() -> void:
 	check(not world._practice_done, "an unrelated command doesn't count as trying the skill")
 	Game.submit(str(Game.adventure.world.orbs(0)[0].get("example", ""))); await _frames(2)
 	check(world._practice_done, "running the command is recognised as having tried it")
+
+	# Interactive programs must also work inside the Ascent, not just the campaign:
+	# nano opens the editor overlay above the trial console, saves through the live
+	# session, and hands focus back to the world terminal when it closes.
+	Game.submit("nano ascent_note.txt"); await _frames(2)
+	check(world._overlays.editor.visible, "nano opens the editor overlay inside the adventure world")
+	world._overlays.editor._text.text = "root is near\n"
+	world._overlays.editor._save(); await _frames(1)
+	check(Game.session.machine.vfs.exists(Game.session.resolve("ascent_note.txt")), "editing in the adventure world writes through the live session")
+	world._overlays.editor._request_exit(); await _frames(2)
+	check(not world._overlays.editor.visible, "closing nano returns to the adventure console")
+
 	world._close_terminal(); await _frames(2)
 	check(not world._overlay.visible, "Esc leaves practice and returns to the course")
 	check(not world._player.input_locked, "and hands control back to the player")

@@ -9,9 +9,7 @@ extends Control
 @onready var menu_button: Button = %MenuButton
 
 var _mode := "campaign"
-var _editor: Control
-var _pager: Control
-var _prompt: Control
+var _overlays: InteractiveOverlays
 
 
 func _ready() -> void:
@@ -34,27 +32,12 @@ func _ready() -> void:
 	EventBus.campaign_finished.connect(_on_campaign_finished)
 	EventBus.rank_up.connect(_on_rank_up)
 
-	# Full-screen interactive overlays (editor, pager) ride above the toast layer
-	# (CanvasLayer 10), so a stray achievement toast can't draw over them.
-	var overlay_layer := CanvasLayer.new()
-	overlay_layer.layer = 20
-	add_child(overlay_layer)
-
-	_editor = preload("res://scripts/ui/editor.gd").new()
-	overlay_layer.add_child(_editor)
-	_editor.closed.connect(_on_editor_closed)
-	EventBus.editor_requested.connect(func(data: Dictionary): _editor.open(data))
-
-	_pager = preload("res://scripts/ui/pager.gd").new()
-	overlay_layer.add_child(_pager)
-	_pager.closed.connect(func(): terminal.focus_input())
-	EventBus.viewer_requested.connect(_on_viewer_requested)
-
-	_prompt = preload("res://scripts/ui/prompt.gd").new()
-	overlay_layer.add_child(_prompt)
-	_prompt.answered.connect(func(text: String): Game.resolve_prompt(text, false); terminal.focus_input())
-	_prompt.cancelled.connect(func(): Game.resolve_prompt("", true); terminal.focus_input())
-	EventBus.prompt_requested.connect(func(data: Dictionary): _prompt.ask(str(data.get("label", "Password: "))))
+	# Full-screen interactive programs (nano, less, su prompt) ride above the
+	# toast layer (CanvasLayer 10), so a stray achievement toast can't draw over
+	# them. The same host is used by the 2D adventure world.
+	_overlays = InteractiveOverlays.new()
+	_overlays.install(self, func(): terminal.focus_input())
+	_overlays.editor_closed.connect(_on_editor_closed)
 
 
 ## Called by Main right after the scene is added: "campaign" or "practice".
@@ -76,7 +59,7 @@ func begin(mode: String, fresh: bool) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if (_editor != null and _editor.visible) or (_pager != null and _pager.visible) or (_prompt != null and _prompt.visible):
+	if _overlays != null and _overlays.any_visible():
 		return
 	if event.is_action_pressed("ui_hint") and _mode == "campaign":
 		Game.submit(":hint")
@@ -87,13 +70,6 @@ func _on_editor_closed(saved: bool) -> void:
 	terminal.focus_input()
 	if saved:
 		terminal.print_text(I18n.t("  [ file saved ]"), "dim")
-
-
-func _on_viewer_requested(data: Dictionary) -> void:
-	if str(data.get("mode", "page")) == "follow":
-		_pager.follow(str(data.get("title", "")), str(data.get("content", "")), str(data.get("kind", "sys")))
-	else:
-		_pager.page(str(data.get("title", "")), str(data.get("content", "")))
 
 
 func _refresh_session() -> void:

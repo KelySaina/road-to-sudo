@@ -89,6 +89,7 @@ var _dialogue_body: RichTextLabel
 var _dialogue_pages: Array = []
 var _dialogue_page := 0
 var _overlay: Control
+var _overlays: InteractiveOverlays
 var _terminal
 var _overlay_title: Label
 var _overlay_mode := ""           # "trial" | "practice"
@@ -113,6 +114,14 @@ func _ready() -> void:
 	_build_hud()
 	_build_dialogue()
 	_build_overlay()
+
+	# Interactive programs (nano, less, tail -f, su) open above the trial console,
+	# the same host the campaign screen uses, so they work inside the Ascent too.
+	_overlays = InteractiveOverlays.new()
+	_overlays.install(self, _focus_terminal)
+	_overlays.editor_closed.connect(func(saved: bool):
+		if saved and _terminal != null:
+			_terminal.print_text(I18n.t("  [ file saved ]"), "dim"))
 
 	adv.battle_won.connect(_on_trial_passed)
 	adv.adventure_won.connect(_on_adventure_won)
@@ -674,6 +683,11 @@ func _build_overlay() -> void:
 	_overlay.hide()
 
 
+func _focus_terminal() -> void:
+	if _terminal != null:
+		_terminal.focus_input()
+
+
 func _open_overlay(title: String) -> void:
 	_overlay_title.text = title
 	_terminal.clear_screen()
@@ -817,6 +831,10 @@ func _setback() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# An interactive program (editor/pager/prompt) is modal: it handles its own
+	# keys, so the world and the trial console below must stay inert.
+	if _overlays != null and _overlays.any_visible():
+		return
 	if _overlay.visible:
 		if event.is_action_pressed("ui_cancel"):
 			_close_terminal()
