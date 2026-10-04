@@ -1478,7 +1478,6 @@
   "not found": "introuvable",
   "page through a file (scroll, search, q to quit)": "parcourir un fichier (défiler, rechercher, q pour quitter)",
   "↑↓ scroll · Space/b page · g/G top/bottom · / search · q quit": "↑↓ défiler · Space/b page · g/G haut/bas · / rechercher · q quitter",
-  "v0.3.1 · ↑↓ navigate · Enter select · Esc back": "v0.3.1 · ↑↓ naviguer · Entrée sélectionner · Esc retour",
   "A function is `name() { body; }`. Make the body append the argument: `deploy() { echo \"deploying $1\" >> ~/deploy.log; }`.": "Une fonction, c'est `name() { body; }`. Fais que le corps ajoute l'argument : `deploy() { echo \"deploying $1\" >> ~/deploy.log; }`.",
   "A function is a command you define yourself — name it, and its arguments": "Une fonction est une commande que tu définis toi-même — nomme-la, et ses arguments",
   "All together: `deploy() { echo \"deploying $1\" >> ~/deploy.log; }` ; `deploy api` ; `deploy web`": "Tout ensemble : `deploy() { echo \"deploying $1\" >> ~/deploy.log; }` ; `deploy api` ; `deploy web`",
@@ -1530,5 +1529,6 @@
   "Rank": "Rang",
   "Replay": "Rejouer",
   "Your Journey": "Ton parcours",
-  "highest rank reached": "rang le plus élevé atteint"
+  "highest rank reached": "rang le plus élevé atteint",
+  "v0.4.0 · ↑↓ navigate · Enter select · Esc back": "v0.4.0 · ↑↓ naviguer · Entrée sélectionner · Esc retour"
 }
