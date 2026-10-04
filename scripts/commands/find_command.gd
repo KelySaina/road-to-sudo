@@ -48,7 +48,7 @@ func execute(ctx: CommandContext) -> int:
 			if depth < parsed.mindepth:
 				continue
 			var node := ctx.vfs().get_node_at(path)
-			if node == null or not _matches(node, parsed.tests, ctx):
+			if node == null or not _matches(node, parsed.groups, ctx):
 				continue
 			var shown := _display_path(start, start_abs, path)
 			if parsed.exec_argv.is_empty() and not parsed.delete:
@@ -75,8 +75,10 @@ func execute(ctx: CommandContext) -> int:
 
 
 func _parse_expression(args: Array) -> Dictionary:
-	var tests: Array = []
-	var result := {"tests": tests, "maxdepth": -1, "mindepth": 0, "exec_argv": [], "delete": false}
+	# Tests group into OR-clauses of AND-ed tests: `A B -o C` is `(A AND B) OR C`,
+	# since -a (implicit AND) binds tighter than -o, like real find.
+	var groups: Array = [[]]
+	var result := {"groups": groups, "maxdepth": -1, "mindepth": 0, "exec_argv": [], "delete": false}
 	var negate := false
 	var i := 0
 	while i < args.size():
@@ -84,16 +86,23 @@ func _parse_expression(args: Array) -> Dictionary:
 		var needs_value := a in ["-name", "-iname", "-type", "-maxdepth", "-mindepth", "-user", "-group", "-perm"]
 		if needs_value and i + 1 >= args.size():
 			return {"error": "missing argument to `%s'" % a}
+		var cur: Array = groups[groups.size() - 1]
 		match a:
 			"!", "-not":
 				negate = true
 				i += 1
 				continue
+			"-a", "-and":
+				i += 1
+				continue
+			"-o", "-or":
+				groups.append([])
+				i += 1
 			"-name", "-iname", "-type", "-user", "-group", "-perm":
-				tests.append({"kind": a, "value": args[i + 1], "negate": negate})
+				cur.append({"kind": a, "value": args[i + 1], "negate": negate})
 				i += 2
 			"-empty":
-				tests.append({"kind": a, "value": "", "negate": negate})
+				cur.append({"kind": a, "value": "", "negate": negate})
 				i += 1
 			"-maxdepth":
 				result.maxdepth = int(args[i + 1])
@@ -118,37 +127,48 @@ func _parse_expression(args: Array) -> Dictionary:
 					return {"error": "-exec needs a command"}
 				result.exec_argv = cmd
 				i += 1
-			"-o", "-or":
-				return {"error": "-o (OR) is not supported in this simulator yet; run find twice"}
 			_:
 				return {"error": "unknown predicate `%s'" % a}
 		negate = false
 	return result
 
 
-func _matches(node: VFSNode, tests: Array, ctx: CommandContext) -> bool:
-	for t in tests:
-		var ok := true
-		match t.kind:
-			"-name":
-				ok = node.name.match(t.value)
-			"-iname":
-				ok = node.name.to_lower().match(str(t.value).to_lower())
-			"-type":
-				ok = (t.value == "d" and node.is_dir()) or (t.value == "f" and not node.is_dir())
-			"-user":
-				ok = node.owner == t.value
-			"-group":
-				ok = node.group == t.value
-			"-perm":
-				ok = (node.mode & 4095) == Permissions.from_octal(str(t.value).trim_prefix("-").trim_prefix("/"))
-			"-empty":
-				ok = node.children.is_empty() if node.is_dir() else node.content == ""
-		if t.negate:
-			ok = not ok
-		if not ok:
-			return false
-	return true
+## True when ANY group matches (OR), a group matching when ALL its tests do (AND).
+## With no tests at all, everything matches.
+func _matches(node: VFSNode, groups: Array, ctx: CommandContext) -> bool:
+	var any_tests := false
+	for group in groups:
+		if group.is_empty():
+			continue
+		any_tests = true
+		var all_ok := true
+		for t in group:
+			if not _test_one(node, t, ctx):
+				all_ok = false
+				break
+		if all_ok:
+			return true
+	return not any_tests
+
+
+func _test_one(node: VFSNode, t: Dictionary, ctx: CommandContext) -> bool:
+	var ok := true
+	match t.kind:
+		"-name":
+			ok = Expander.fnmatch(str(t.value), node.name)
+		"-iname":
+			ok = Expander.fnmatch(str(t.value).to_lower(), node.name.to_lower())
+		"-type":
+			ok = (t.value == "d" and node.is_dir()) or (t.value == "f" and not node.is_dir())
+		"-user":
+			ok = node.owner == t.value
+		"-group":
+			ok = node.group == t.value
+		"-perm":
+			ok = (node.mode & 4095) == Permissions.from_octal(str(t.value).trim_prefix("-").trim_prefix("/"))
+		"-empty":
+			ok = node.children.is_empty() if node.is_dir() else node.content == ""
+	return (not ok) if t.negate else ok
 
 
 func _display_path(start: String, start_abs: String, path: String) -> String:

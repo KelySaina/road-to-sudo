@@ -58,6 +58,23 @@ func test_arithmetic() -> void:
 	check_eq(out(sh, "for n in 1 2 3; do echo $((n * n)); done"), "1\n4\n9\n", "arithmetic inside a loop")
 
 
+func test_find_or() -> void:
+	var sh := new_shell()
+	run(sh, "mkdir -p /tmp/fo && cd /tmp/fo")
+	for f in ["a.log", "b.log", "c.txt", "d.conf"]:
+		run(sh, "echo x > " + f)
+	check_eq(_sorted(out(sh, "find . -name '*.log'")), "./a.log ./b.log", "plain -name (one group)")
+	check_eq(_sorted(out(sh, "find . -name '*.log' -o -name '*.txt'")), "./a.log ./b.log ./c.txt", "-o unions two name tests")
+	check_eq(_sorted(out(sh, "find . -type f -name '*.txt'")), "./c.txt", "-a (implicit) still intersects within a group")
+	check_eq(_sorted(out(sh, "find . -name '*.conf' -o -name '*.txt' -o -name '*.log'")), "./a.log ./b.log ./c.txt ./d.conf", "chained -o")
+
+
+func _sorted(text: String) -> String:
+	var lines: Array = text.strip_edges().split("\n", false)
+	lines.sort()
+	return " ".join(PackedStringArray(lines))
+
+
 func test_glob_classes() -> void:
 	var sh := new_shell()
 	run(sh, "cd /tmp")
