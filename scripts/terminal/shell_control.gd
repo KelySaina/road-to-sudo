@@ -5,7 +5,8 @@ extends RefCounted
 ## inner command lists through the shell's normal path — so pipes, redirects and
 ## nesting all work, and every body is just ordinary commands.
 
-const OPENERS := ["for", "while", "until", "if"]
+const OPENERS := ["for", "while", "until", "if", "case"]
+const CLOSERS := ["done", "fi", "esac"]
 const MAX_ITERATIONS := 100000  # a guard so a runaway loop can't hang the game
 
 
@@ -23,7 +24,7 @@ static func block_depth(text: String) -> int:
 			continue
 		if w.text in OPENERS:
 			depth += 1
-		elif w.text in ["done", "fi"]:
+		elif w.text in CLOSERS:
 			depth -= 1
 	return depth
 
@@ -46,7 +47,7 @@ static func split_statements(line: String) -> Array:
 			continue
 		if w.text in OPENERS:
 			depth += 1
-		elif w.text in ["done", "fi"]:
+		elif w.text in CLOSERS:
 			depth -= 1
 	var last := line.substr(seg_start).strip_edges()
 	if last != "":
@@ -142,6 +143,7 @@ static func run(shell, line: String, outcome, depth: int, parent) -> void:
 		"for": _run_for(shell, line, words, outcome, depth, parent)
 		"while", "until": _run_while(shell, line, words, words[0].text == "until", outcome, depth, parent)
 		"if": _run_if(shell, line, words, outcome, depth, parent)
+		"case": _run_case(shell, line, words, outcome, depth, parent)
 		_: shell.run_into(line, outcome, depth, parent)
 
 
@@ -245,6 +247,87 @@ static func _run_if(shell, line: String, words: Array, outcome, depth: int, pare
 		shell.session.last_exit_code = 0
 
 
+# --- case WORD in PAT) BODY ;; PAT2|PAT3) BODY2 ;; *) BODY ;; esac -----------
+
+static func _run_case(shell, line: String, words: Array, outcome, depth: int, parent) -> void:
+	var in_idx := -1
+	for i in range(1, words.size()):
+		if words[i].text == "in":
+			in_idx = i
+			break
+	if in_idx == -1:
+		return _syntax(shell, outcome, "in")
+	var esac_idx := _match(words, 0, "case", "esac")
+	if esac_idx == -1:
+		return _syntax(shell, outcome, "esac")
+
+	var subj_raw := line.substr(words[0].end, words[in_idx].start - words[0].end)
+	var subject := _expand_scalar(shell, subj_raw, outcome, depth, parent)
+	var clauses_raw := line.substr(words[in_idx].end, words[esac_idx].start - words[in_idx].end)
+
+	shell.session.last_exit_code = 0
+	for clause in clauses_raw.split(";;", false):
+		var text: String = clause.strip_edges()
+		if text == "":
+			continue
+		var close := text.find(")")
+		if close == -1:
+			continue
+		var pat_part := text.substr(0, close).strip_edges().lstrip("(").strip_edges()
+		var body := text.substr(close + 1)
+		var matched := false
+		for pat in pat_part.split("|", false):
+			if _glob_match(pat.strip_edges(), subject):
+				matched = true
+				break
+		if matched:
+			shell.run_into(body, outcome, depth, parent)
+			return
+
+
+## Expand a single value (subject of a case): arithmetic, command subst and
+## variables, then strip one layer of surrounding quotes. No globbing.
+static func _expand_scalar(shell, text: String, outcome, depth: int, parent) -> String:
+	var s := text
+	if s.contains("$(("):
+		s = Arith.expand(s, shell.session)
+	if s.contains("$(") or s.contains("`"):
+		s = shell._expand_command_subst(s, outcome, depth, parent)
+	s = Expander.expand_variables(s, shell.session).strip_edges()
+	if s.length() >= 2 and ((s[0] == "\"" and s[-1] == "\"") or (s[0] == "'" and s[-1] == "'")):
+		s = s.substr(1, s.length() - 2)
+	return s
+
+
+## Shell glob match for case patterns: * ? and [abc] / [a-z] classes.
+static func _glob_match(pattern: String, text: String) -> bool:
+	var rx := "^"
+	var i := 0
+	var n := pattern.length()
+	while i < n:
+		var c := pattern[i]
+		match c:
+			"*": rx += ".*"
+			"?": rx += "."
+			"[":
+				var close := pattern.find("]", i + 1)
+				if close == -1:
+					rx += "\\["
+				else:
+					var cls := pattern.substr(i + 1, close - (i + 1))
+					rx += "[" + cls + "]"
+					i = close
+			_:
+				if c in [".", "+", "(", ")", "{", "}", "^", "$", "\\", "|"]:
+					rx += "\\" + c
+				else:
+					rx += c
+		i += 1
+	rx += "$"
+	var re := RegEx.create_from_string(rx)
+	return re != null and re.search(text) != null
+
+
 # --- helpers ----------------------------------------------------------------
 
 ## Index of the first top-level keyword `kw` at or after `from`.
@@ -256,7 +339,7 @@ static func _find_keyword(words: Array, from: int, kw: String) -> int:
 			return i
 		if t in OPENERS:
 			block_depth += 1
-		elif t in ["done", "fi"]:
+		elif t in CLOSERS:
 			block_depth -= 1
 	return -1
 
@@ -283,7 +366,7 @@ static func _next_at_level(words: Array, from: int, limit: int, kws: Array) -> i
 		var t: String = words[i].text
 		if t in OPENERS:
 			block_depth += 1
-		elif t in ["done", "fi"]:
+		elif t in CLOSERS:
 			block_depth -= 1
 		elif block_depth == 0 and t in kws:
 			return i

@@ -58,6 +58,25 @@ func test_arithmetic() -> void:
 	check_eq(out(sh, "for n in 1 2 3; do echo $((n * n)); done"), "1\n4\n9\n", "arithmetic inside a loop")
 
 
+func test_case() -> void:
+	var sh := new_shell()
+	run(sh, "x=start")
+	check_eq(out(sh, "case $x in start) echo GO ;; stop) echo HALT ;; esac"), "GO\n", "first pattern matches")
+	run(sh, "x=stop")
+	check_eq(out(sh, "case $x in start) echo GO ;; stop) echo HALT ;; esac"), "HALT\n", "later pattern matches")
+	check_eq(out(sh, "case notes.txt in *.log) echo log ;; *.txt) echo text ;; esac"), "text\n", "glob pattern")
+	check_eq(out(sh, "case c in a|b|c) echo abc ;; *) echo other ;; esac"), "abc\n", "alternation with |")
+	check_eq(out(sh, "case zzz in a) echo A ;; *) echo DEFAULT ;; esac"), "DEFAULT\n", "* is the default")
+	check_eq(out(sh, "case 5 in [0-9]) echo digit ;; *) echo no ;; esac"), "digit\n", "[0-9] character class")
+	check_eq(out(sh, "case q in a) echo A ;; esac"), "", "no match runs nothing")
+	# only the first matching clause runs
+	check_eq(out(sh, "case ab in a*) echo one ;; *b) echo two ;; esac"), "one\n", "first match wins, not every match")
+	# a multi-line case in a script
+	var src := "#!/bin/bash\nfor w in cat dog fish\ndo\n  case $w in\n    cat|dog) echo $w is a pet ;;\n    *) echo $w is not ;;\n  esac\ndone\n"
+	sh.session.machine.vfs.put_file("/home/player/pets.sh", src, "player", "player", Permissions.from_octal("755"))
+	check_eq(out(sh, "./pets.sh"), "cat is a pet\ndog is a pet\nfish is not\n", "multi-line case inside a for loop")
+
+
 func test_multiline_script() -> void:
 	var sh := new_shell()
 	var src := "#!/bin/bash\nfor n in 1 2 3\ndo\n  if [ $n -gt 1 ]\n  then\n    echo big $n\n  fi\ndone\n"
