@@ -1450,7 +1450,6 @@
   "see a package's details — version, description, dependencies: `apt show <pkg>`": "vois les détails d'un paquet — version, description, dépendances : `apt show <pkg>`",
   "the next upgrade, the depot needs an audit: exactly what is installed, and at": "la prochaine mise à niveau, le dépôt a besoin d'un audit : exactement ce qui est installé, et à",
   "which version. Learn to read the shelves, then report a version.": "quelle version. Apprends à lire les étagères, puis rapporte une version.",
-  "v0.3 · ↑↓ navigate · Enter select · Esc back": "v0.3 · ↑↓ naviguer · Entrée sélectionner · Esc retour",
   "  [ file saved ]": "  [ fichier enregistré ]",
   "(Esc also exits)": "(Échap quitte aussi)",
   "Ctrl-X to exit. It's the easiest way to create or change a file by hand.": "Ctrl-X pour quitter. C'est le moyen le plus simple de créer ou modifier un fichier à la main.",
@@ -1478,5 +1477,6 @@
   "line": "ligne",
   "not found": "introuvable",
   "page through a file (scroll, search, q to quit)": "parcourir un fichier (défiler, rechercher, q pour quitter)",
-  "↑↓ scroll · Space/b page · g/G top/bottom · / search · q quit": "↑↓ défiler · Space/b page · g/G haut/bas · / rechercher · q quitter"
+  "↑↓ scroll · Space/b page · g/G top/bottom · / search · q quit": "↑↓ défiler · Space/b page · g/G haut/bas · / rechercher · q quitter",
+  "v0.3.1 · ↑↓ navigate · Enter select · Esc back": "v0.3.1 · ↑↓ naviguer · Entrée sélectionner · Esc retour"
 }
