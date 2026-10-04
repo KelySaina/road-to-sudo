@@ -19,6 +19,8 @@ var last_exit_code: int = 0
 var umask: int = 18
 ## Script positional parameters ($1..$9); empty for the interactive shell.
 var positional: Array = []
+## Shell functions defined this session: name -> body text (between { and }).
+var functions: Dictionary = {}
 ## Every simple command that ran: {"name", "args", "exit_code", "stdout", "stderr", "depth", "user", "cwd"}
 var command_log: Array = []
 ## Set by `exit N` inside a script; the interpreter stops at the next check.

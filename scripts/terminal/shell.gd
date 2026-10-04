@@ -10,6 +10,7 @@ const EXIT_NOT_FOUND := 127
 
 var session: ShellSession
 var registry: CommandRegistry
+var _fn_regex: RegEx
 
 
 func _init(p_session: ShellSession, p_registry: CommandRegistry) -> void:
@@ -54,6 +55,14 @@ func _run_statement(stmt: String, outcome: ExecutionOutcome, depth: int, parent:
 	if ShellControl.is_compound_start(ShellControl.first_word(stmt)):
 		ShellControl.run(self, stmt, outcome, depth, parent)
 		return
+	# A function definition — name() { ... } or function name { ... } — is stored,
+	# not run. Detected before command substitution so its body stays literal.
+	if stmt.contains("{") and stmt.contains("}"):
+		var fn := _parse_function_def(stmt)
+		if not fn.is_empty():
+			session.functions[fn.name] = fn.body
+			session.last_exit_code = 0
+			return
 	var line := stmt
 	# Arithmetic $(( )) first, so its parens aren't mistaken for $( ) command subst.
 	if line.contains("$(("):
@@ -273,6 +282,8 @@ func invoke(ctx: CommandContext) -> int:
 		ctx.emit("variable_set", {"name": cmd_name.substr(0, eq)})
 	elif cmd_name.contains("/"):
 		code = _run_program_file(cmd_name, ctx)
+	elif session.functions.has(cmd_name):
+		code = _run_function(cmd_name, ctx)
 	elif registry.has(cmd_name):
 		code = registry.get_command(cmd_name).execute(ctx)
 	else:
@@ -289,6 +300,36 @@ func invoke(ctx: CommandContext) -> int:
 	}
 	session.log_command(record)
 	ctx.outcome.records.append(record)
+	return code
+
+
+## Parse `name() { body }` or `function name { body }` into {name, body}, or {}.
+## The body is everything between the first { and the final } (DOTALL, so it can
+## span lines); inner } (as in ${VAR}) are kept, since the function's } is last.
+func _parse_function_def(stmt: String) -> Dictionary:
+	if _fn_regex == null:
+		_fn_regex = RegEx.new()
+		_fn_regex.compile("(?s)^\\s*(?:function\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*(?:\\(\\s*\\))?|([A-Za-z_][A-Za-z0-9_]*)\\s*\\(\\s*\\))\\s*\\{(.*)\\}\\s*;?\\s*$")
+	var m := _fn_regex.search(stmt)
+	if m == null:
+		return {}
+	var name := m.get_string(1)
+	if name == "":
+		name = m.get_string(2)
+	return {"name": name, "body": m.get_string(3).strip_edges()}
+
+
+## Run a defined function: its args become $1.., and its body runs like a script.
+func _run_function(name: String, ctx: CommandContext) -> int:
+	var body: String = session.functions[name]
+	var saved_positional: Array = session.positional
+	session.positional = ctx.args().duplicate()
+	var saved_code := session.last_exit_code
+	session.last_exit_code = 0
+	run_into(body, ctx.outcome, ctx.depth + 1, ctx)
+	var code := session.last_exit_code
+	session.positional = saved_positional
+	session.last_exit_code = code
 	return code
 
 

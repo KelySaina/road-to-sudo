@@ -366,14 +366,15 @@ Everything else — engine, game, terminal font fallback — is original. See
 
 These are honest gaps, not bugs:
 
-- Control flow covers `for` / `while` / `until` / `if` (single-line and
-  multi-line blocks in scripts), `test` / `[ ]`, and `$( )` / backticks — but
-  not shell **functions**, `case`, or `$(( ))` arithmetic.
+- Control flow covers `for` / `while` / `until` / `if`, `case`, shell
+  **functions** (`name() { ... }`), `test` / `[ ]`, `$( )` / backticks and
+  `$(( ))` arithmetic — single-line or multi-line in scripts. Functions don't
+  have a `return` builtin yet (the exit code is the last command's).
 - `nano` (edit), `less` (page/search) and `tail -f` (follow a live log) are real
   full-screen programs now. The remaining interactive gap is `su`, which can't
   prompt for a password.
-- Globs support `*` and `?` but not `[abc]` classes. `find` has no `-o`
-  (OR).
+- Globs support `*`, `?` and `[abc]` / `[a-z]` / `[!abc]` classes. `find`
+  supports `-o` / `-a`, but not `\( \)` grouping.
 - The font is the system monospace font (JetBrains Mono, Fira Code, … and
   falling back to DejaVu Sans Mono). To bundle one, drop
   `assets/fonts/mono-regular.ttf` and `mono-bold.ttf` in place; `UiTheme`
@@ -407,11 +408,18 @@ saving re-grades, so a challenge can be solved by *editing* a file), `less`
 in live until `^C`/`q`). They share one overlay pattern a command opens by
 emitting an event.
 
+**The shell interpreter is close to complete** — `case`, shell functions,
+`$(( ))` arithmetic, `[abc]` glob classes and `find -o` all landed, on top of the
+existing `for`/`while`/`if`/`test`/`$( )`. What's left is small: a `return`
+builtin for functions and `\( \)` grouping in `find`.
+
 What's left is polish and reach, not engine:
-- **`su` password prompt** — the last interactive gap; the same overlay pattern
-  fits a modal prompt.
-- **Shell completeness:** `case`, functions, `$(( ))` arithmetic, `[abc]` glob
-  classes and `find -o`.
+- **`su` password prompt** — the last interactive-program gap; the same overlay
+  pattern fits a modal prompt.
+- **Adventure trial overlays** — wire the editor/pager into the 2D trial console
+  (today they're campaign/practice only).
+- **A progress / stats screen** — surface rank, skills, achievements and
+  per-level/world completion in one place.
 
 The Final is done: a broken production server that uses everything, ending with
 `sudo -i` → *"YOU MADE IT. Welcome to the other side of the prompt."*

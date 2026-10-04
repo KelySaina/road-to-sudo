@@ -22,9 +22,9 @@ static func block_depth(text: String) -> int:
 	for w in scan(text):
 		if w.sep:
 			continue
-		if w.text in OPENERS:
+		if w.text in OPENERS or w.text == "{":
 			depth += 1
-		elif w.text in CLOSERS:
+		elif w.text in CLOSERS or w.text == "}":
 			depth -= 1
 	return depth
 
@@ -45,9 +45,9 @@ static func split_statements(line: String) -> Array:
 				seg_start = w.end
 				depth = 0
 			continue
-		if w.text in OPENERS:
+		if w.text in OPENERS or w.text == "{":
 			depth += 1
-		elif w.text in CLOSERS:
+		elif w.text in CLOSERS or w.text == "}":
 			depth -= 1
 	var last := line.substr(seg_start).strip_edges()
 	if last != "":

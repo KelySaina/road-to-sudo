@@ -58,6 +58,30 @@ func test_arithmetic() -> void:
 	check_eq(out(sh, "for n in 1 2 3; do echo $((n * n)); done"), "1\n4\n9\n", "arithmetic inside a loop")
 
 
+func test_functions() -> void:
+	var sh := new_shell()
+	check_eq(out(sh, "greet() { echo hello $1; }"), "", "defining a function prints nothing")
+	check_eq(out(sh, "greet world"), "hello world\n", "calling a function with an argument")
+	run(sh, "function hi { echo hi there; }")
+	check_eq(out(sh, "hi"), "hi there\n", "the `function name` form works too")
+	run(sh, "sum() { echo $(( $1 + $2 )); }")
+	check_eq(out(sh, "sum 4 5"), "9\n", "arithmetic and positional params inside a function")
+	run(sh, "count() { echo $#; }")
+	check_eq(out(sh, "count a b c"), "3\n", "$# is the argument count")
+	run(sh, "all() { echo $@; }")
+	check_eq(out(sh, "all x y z"), "x y z\n", "$@ is all the arguments")
+	run(sh, "loop() { for n in 1 2 3; do echo $n; done; }")
+	check_eq(out(sh, "loop"), "1\n2\n3\n", "a loop inside a function body")
+	# a function is ordinary in a pipeline
+	run(sh, "shout() { echo $1; }")
+	check_eq(out(sh, "shout hey | tr a-z A-Z"), "HEY\n", "a function pipes like any command")
+	# positional params are restored after the call
+	sh.session.positional = ["outer"]
+	run(sh, "inner() { echo $1; }")
+	check_eq(out(sh, "inner nested"), "nested\n", "args seen inside the call")
+	check_eq(out(sh, "echo $1"), "outer\n", "the caller's $1 is restored afterwards")
+
+
 func test_find_or() -> void:
 	var sh := new_shell()
 	run(sh, "mkdir -p /tmp/fo && cd /tmp/fo")
