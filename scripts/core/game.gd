@@ -117,6 +117,15 @@ func continue_journey() -> void:
 	start_challenge(cid, resume)
 
 
+## Jump straight to a challenge (a "checkpoint") and replay it from the start —
+## used by the Journey screen to revisit any completed level. It's a fresh
+## attempt: completing it again advances normally but grants no repeat XP.
+func jump_to_checkpoint(challenge_id: String) -> void:
+	_load_profile(SaveManager.load_profile())
+	mode = "campaign"
+	start_challenge(challenge_id, false)
+
+
 func start_practice() -> void:
 	mode = "practice"
 	challenges.current = null

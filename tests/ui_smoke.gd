@@ -173,6 +173,21 @@ func _run() -> void:
 	check(menu.name == "MainMenu", "back at menu")
 	check(menu.has_node("%AdventureButton"), "menu has an Adventure entry")
 	check(not menu.continue_button.disabled, "save exists -> continue enabled")
+
+	# Journey & stats screen, and a checkpoint jump back to a cleared challenge.
+	menu._open_journey()
+	await _frames(1)
+	check(menu._journey_page.visible, "Journey screen opens")
+	check(menu._journey_list.get_child_count() > 10, "journey lists stats and per-level checkpoints")
+	menu.checkpoint_requested.emit("t01_identity")
+	await _frames(3)
+	screen = main.host.get_child(main.host.get_child_count() - 1)
+	check(screen.name == "GameScreen", "a checkpoint jumps into the game")
+	check(Game.challenges.current != null and Game.challenges.current.id == "t01_identity", "and starts at the chosen checkpoint")
+	Game.submit(":menu")
+	await _frames(3)
+	menu = main.host.get_child(main.host.get_child_count() - 1)
+
 	menu.practice_requested.emit()
 	await _frames(3)
 	screen = main.host.get_child(main.host.get_child_count() - 1)

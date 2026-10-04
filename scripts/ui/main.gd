@@ -38,6 +38,9 @@ func show_menu() -> void:
 	menu.adventure_requested.connect(func():
 		var resumed: bool = Game.start_adventure2d()
 		_show_world(resumed))
+	menu.checkpoint_requested.connect(func(challenge_id: String):
+		Game.jump_to_checkpoint(challenge_id)
+		_show_game("campaign", false))
 	menu.settings_changed.connect(apply_theme)
 	# Switching language rebuilds the menu so every label picks up the new locale.
 	menu.language_changed.connect(show_menu)

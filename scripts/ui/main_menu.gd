@@ -5,6 +5,7 @@ signal journey_requested(difficulty: String, skip_basics: bool)
 signal continue_requested()
 signal practice_requested()
 signal adventure_requested()
+signal checkpoint_requested(challenge_id: String)
 signal settings_changed()
 signal language_changed()
 
@@ -45,6 +46,10 @@ var _blink := 0.0
 @onready var reset_button: Button = %ResetButton
 @onready var reset_confirm: HBoxContainer = %ResetConfirm
 
+var _journey_page: VBoxContainer
+var _journey_list: VBoxContainer
+var _journey_heading: Label
+
 
 func _ready() -> void:
 	start_button.pressed.connect(_open_new_journey)
@@ -70,6 +75,7 @@ func _ready() -> void:
 	_build_settings()
 	_build_language()
 	_build_audio_toggles()
+	_build_journey()
 	_wire_button_sounds(self)
 	_show_home()
 
@@ -195,9 +201,165 @@ func _unhandled_input(event: InputEvent) -> void:
 
 # --- pages ---------------------------------------------------------------------
 
+# --- Journey & stats (built in code, registered with _show_page) -------------
+
+func _build_journey() -> void:
+	var pages := home.get_parent()
+	_journey_page = VBoxContainer.new()
+	_journey_page.name = "Journey"
+	_journey_page.visible = false
+	_journey_page.add_theme_constant_override("separation", 10)
+	pages.add_child(_journey_page)
+
+	_journey_heading = Label.new()
+	_journey_heading.add_theme_font_size_override("font_size", 26)
+	_journey_page.add_child(_journey_heading)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 430)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_journey_page.add_child(scroll)
+	_journey_list = VBoxContainer.new()
+	_journey_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_journey_list.add_theme_constant_override("separation", 6)
+	scroll.add_child(_journey_list)
+
+	var back := Button.new()
+	back.text = I18n.t("← Back")
+	back.pressed.connect(_show_home)
+	_journey_page.add_child(back)
+
+	# A Home-menu entry, placed just above Achievements.
+	var btn := Button.new()
+	btn.name = "JourneyButton"
+	btn.text = I18n.t("Journey & Stats")
+	btn.pressed.connect(_open_journey)
+	home.add_child(btn)
+	home.move_child(btn, (%AchievementsButton as Button).get_index())
+
+
+func _open_journey() -> void:
+	_show_page(_journey_page)
+	for c in _journey_list.get_children():
+		c.queue_free()
+	var p := SaveManager.load_profile()
+	var prog := Progression.new(p)
+	_journey_heading.text = I18n.t("Your Journey")
+
+	_section(I18n.t("RANK & XP"))
+	_stat_row(I18n.t("Rank"), I18n.t(str(prog.current_rank().get("name", "?"))))
+	_stat_row("XP", str(p.xp))
+	var nxt := prog.next_rank()
+	if nxt.is_empty():
+		_stat_row(I18n.t("Next rank"), I18n.t("highest rank reached"))
+	else:
+		_stat_row(I18n.t("Next rank"), "%s  ·  %d XP" % [I18n.t(str(nxt.get("name", ""))), int(nxt.get("xp", 0))])
+
+	var total: int = Game.library.order.size()
+	var done := 0
+	for cid in Game.library.order:
+		if p.completed.has(cid):
+			done += 1
+	var ach := AchievementSystem.load_default(p)
+	var aw := AdventureWorld.load_default()
+	var passed := 0
+	var adv_save := SaveManager.load_world("adventure")
+	if adv_save.has("adv_state"):
+		passed = AdventureState.from_dict(adv_save.adv_state).passed.size()
+	_section(I18n.t("PROGRESS"))
+	_stat_row(I18n.t("Challenges cleared"), "%d / %d" % [done, total])
+	_stat_row(I18n.t("Achievements"), "%d / %d" % [ach.unlocked_count(), ach.definitions.size()])
+	_stat_row(I18n.t("Adventure worlds"), "%d / %d" % [passed, aw.count()])
+	_stat_row(I18n.t("Commands unlocked"), str(p.unlocked_commands.size()))
+
+	var st: Dictionary = p.stats
+	_section(I18n.t("LIFETIME"))
+	_stat_row(I18n.t("Commands run"), str(int(st.get("commands_run", 0))))
+	_stat_row(I18n.t("Pipes built"), str(int(st.get("pipes", 0))))
+	_stat_row(I18n.t("Permission errors met"), str(int(st.get("permission_denied", 0))))
+	_stat_row(I18n.t("Hints used"), str(int(st.get("hints_used", 0))))
+	_stat_row(I18n.t("Play time"), _fmt_time(int(st.get("play_seconds", 0))))
+
+	_section(I18n.t("CHECKPOINTS — jump back to any level you've cleared"))
+	var current: String = Game.library.first_incomplete(p.completed)
+	for lvl in Game.library.levels:
+		var ids: Array = lvl.get("challenges", [])
+		if ids.is_empty():
+			continue
+		var lvl_label := Label.new()
+		lvl_label.text = I18n.t(str(lvl.get("title", "")))
+		lvl_label.theme_type_variation = &"VioletLabel"
+		_journey_list.add_child(lvl_label)
+		for cid in ids:
+			_checkpoint_row(str(cid), p, current)
+	_wire_button_sounds(_journey_list)
+
+
+func _checkpoint_row(cid: String, p: PlayerProfile, current: String) -> void:
+	var c := Game.library.get_challenge(cid)
+	if c == null:
+		return
+	var completed: bool = p.completed.has(cid)
+	var is_current: bool = cid == current
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	var glyph := Label.new()
+	glyph.custom_minimum_size = Vector2(22, 0)
+	glyph.text = "✓" if completed else ("▸" if is_current else "·")
+	glyph.theme_type_variation = &"VioletLabel" if is_current else &"FaintLabel"
+	if completed:
+		glyph.add_theme_color_override("font_color", UiTheme.SUCCESS)
+	var title := Label.new()
+	title.text = "    " + I18n.t(str(c.title))
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.theme_type_variation = &"" if (completed or is_current) else &"FaintLabel"
+	row.add_child(glyph)
+	row.add_child(title)
+	if completed or is_current:
+		var go := Button.new()
+		go.text = I18n.t("Replay") if completed else I18n.t("Go ⏎")
+		go.pressed.connect(func(): checkpoint_requested.emit(cid))
+		row.add_child(go)
+	_journey_list.add_child(row)
+
+
+func _section(title: String) -> void:
+	var spacer := Control.new()
+	spacer.custom_minimum_size = Vector2(0, 8)
+	_journey_list.add_child(spacer)
+	var l := Label.new()
+	l.text = title
+	l.theme_type_variation = &"CapsLabel"
+	_journey_list.add_child(l)
+
+
+func _stat_row(label: String, value: String) -> void:
+	var row := HBoxContainer.new()
+	var l := Label.new()
+	l.text = "  " + label
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.theme_type_variation = &"DimLabel"
+	var v := Label.new()
+	v.text = value
+	v.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	row.add_child(l)
+	row.add_child(v)
+	_journey_list.add_child(row)
+
+
+func _fmt_time(secs: int) -> String:
+	var h := secs / 3600
+	var m := (secs % 3600) / 60
+	if h > 0:
+		return "%dh %02dm" % [h, m]
+	return "%dm %02ds" % [m, secs % 60]
+
+
 func _show_page(page: Control) -> void:
-	for p in [home, new_journey, achievements_page, settings_page]:
-		p.visible = p == page
+	for p in [home, new_journey, achievements_page, settings_page, _journey_page]:
+		if p != null:
+			p.visible = p == page
 
 
 func _show_home() -> void:
