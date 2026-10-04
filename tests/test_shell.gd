@@ -58,6 +58,27 @@ func test_arithmetic() -> void:
 	check_eq(out(sh, "for n in 1 2 3; do echo $((n * n)); done"), "1\n4\n9\n", "arithmetic inside a loop")
 
 
+func test_su_password() -> void:
+	var sh := new_shell("sandbox")  # sandbox's bob has password "builder"
+	check_eq(sh.session.user, "player", "start as player")
+	var ok := run(sh, "echo builder | su bob")
+	check_eq(sh.session.user, "bob", "correct password switches user")
+	check_eq(ok.exit_code, 0, "su succeeds with exit 0")
+	while sh.session.pop_user():
+		pass
+	var bad := run(sh, "echo wrong | su bob")
+	check(bad.all_text().contains("Authentication failure"), "wrong password is rejected")
+	check_eq(sh.session.user, "player", "and the user does not change")
+	var locked := run(sh, "echo anything | su")
+	check(locked.all_text().contains("Authentication failure"), "root is locked (no password)")
+	check(locked.all_text().contains("sudo"), "and it points you at sudo")
+	# root can su to anyone without a password
+	run(sh, "su") # still player (locked), so elevate via the stack manually
+	sh.session.switch_user("root", false)
+	check_eq(run(sh, "su bob").exit_code, 0, "root su's to anyone without a password")
+	check_eq(sh.session.user, "bob", "and becomes them")
+
+
 func test_functions() -> void:
 	var sh := new_shell()
 	check_eq(out(sh, "greet() { echo hello $1; }"), "", "defining a function prints nothing")

@@ -21,6 +21,9 @@ signal editor_requested(data: Dictionary)
 ## A command asked to open the read-only viewer (less / tail -f). data carries
 ## {mode:"page"|"follow", title, content, ...}. The screen opens the pager.
 signal viewer_requested(data: Dictionary)
+## A command asked for a (masked) line of input — su's password. data: {label,
+## ...}. The screen opens the prompt; the answer goes back via Game.resolve_prompt.
+signal prompt_requested(data: Dictionary)
 
 # Adventure (skill-worlds) mode
 signal adventure_started()

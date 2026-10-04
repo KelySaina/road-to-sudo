@@ -28,6 +28,7 @@ var _completing := false
 var _deferred_rank: Dictionary = {}
 var _machine_id := ""
 var _session_started_msec := 0
+var _pending_prompt: Dictionary = {}
 
 
 func _ready() -> void:
@@ -248,6 +249,38 @@ func submit(line: String) -> void:
 		elif e.name == "open_follow":
 			EventBus.viewer_requested.emit({"mode": "follow", "title": e.data.get("title", ""), "content": e.data.get("content", ""), "kind": e.data.get("kind", "sys")})
 			break
+		elif e.name == "open_prompt":
+			_pending_prompt = e.data
+			EventBus.prompt_requested.emit(e.data)
+			break
+
+
+## Called by the password-prompt overlay with the typed answer (or cancelled).
+## Completes a pending `su`: verifies the target's password and switches user, or
+## prints the authentication failure. Re-grades so a user switch can finish a
+## challenge that checks `user_is`.
+func resolve_prompt(answer: String, cancelled: bool) -> void:
+	var p := _pending_prompt
+	_pending_prompt = {}
+	if p.is_empty() or session == null:
+		return
+	var outcome := ExecutionOutcome.new()
+	var target := str(p.get("target", "root"))
+	var stored := str(session.machine.users.get(target, {}).get("password", ""))
+	if not cancelled and stored != "" and answer == stored:
+		session.switch_user(target, bool(p.get("login", false)))
+		outcome.emit("user_switched", {"user": target})
+	else:
+		outcome.write("err", "su: Authentication failure\n")
+		outcome.emit("su_failed", {"target": target})
+		if not cancelled and stored == "":
+			outcome.write("out", "(%s has no password set — the account is locked. Use sudo instead: sudo -i)\n" % target)
+	if mode == "campaign":
+		challenges.observe(outcome)
+	elif mode == "adventure":
+		adventure.observe(outcome)
+	EventBus.command_output.emit(outcome)
+	EventBus.session_changed.emit()
 
 
 ## Called by the editor overlay when the player saves (^O or save-on-exit).

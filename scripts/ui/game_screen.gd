@@ -11,6 +11,7 @@ extends Control
 var _mode := "campaign"
 var _editor: Control
 var _pager: Control
+var _prompt: Control
 
 
 func _ready() -> void:
@@ -49,6 +50,12 @@ func _ready() -> void:
 	_pager.closed.connect(func(): terminal.focus_input())
 	EventBus.viewer_requested.connect(_on_viewer_requested)
 
+	_prompt = preload("res://scripts/ui/prompt.gd").new()
+	overlay_layer.add_child(_prompt)
+	_prompt.answered.connect(func(text: String): Game.resolve_prompt(text, false); terminal.focus_input())
+	_prompt.cancelled.connect(func(): Game.resolve_prompt("", true); terminal.focus_input())
+	EventBus.prompt_requested.connect(func(data: Dictionary): _prompt.ask(str(data.get("label", "Password: "))))
+
 
 ## Called by Main right after the scene is added: "campaign" or "practice".
 func begin(mode: String, fresh: bool) -> void:
@@ -69,7 +76,7 @@ func begin(mode: String, fresh: bool) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if (_editor != null and _editor.visible) or (_pager != null and _pager.visible):
+	if (_editor != null and _editor.visible) or (_pager != null and _pager.visible) or (_prompt != null and _prompt.visible):
 		return
 	if event.is_action_pressed("ui_hint") and _mode == "campaign":
 		Game.submit(":hint")

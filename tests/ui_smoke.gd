@@ -225,6 +225,24 @@ func _run() -> void:
 	await _frames(1)
 	check(not screen._pager.visible, "Ctrl-C / q stops following")
 
+	# su: an interactive masked password prompt that switches the user.
+	# (The practice lab's bob has the password "builder".)
+	check(Game.session.user == "player", "in the lab as player")
+	Game.submit("su bob")
+	await _frames(2)
+	check(screen._prompt.visible, "su opens the password prompt")
+	screen._prompt._on_submit("builder")
+	await _frames(2)
+	check(Game.session.user == "bob", "the right password switches the user")
+	Game.submit("exit")
+	await _frames(2)
+	check(Game.session.user == "player", "exit returns to the previous user")
+	Game.submit("su bob")
+	await _frames(2)
+	screen._prompt._on_submit("wrong")
+	await _frames(2)
+	check(Game.session.user == "player", "a wrong password does not switch the user")
+
 	# A fresh profile loaded from disk keeps everything.
 	var reloaded := SaveManager.load_profile()
 	SaveManager._cache = {}

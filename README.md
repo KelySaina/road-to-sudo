@@ -370,9 +370,10 @@ These are honest gaps, not bugs:
   **functions** (`name() { ... }`), `test` / `[ ]`, `$( )` / backticks and
   `$(( ))` arithmetic — single-line or multi-line in scripts. Functions don't
   have a `return` builtin yet (the exit code is the last command's).
-- `nano` (edit), `less` (page/search) and `tail -f` (follow a live log) are real
-  full-screen programs now. The remaining interactive gap is `su`, which can't
-  prompt for a password.
+- `nano` (edit), `less` (page/search), `tail -f` (follow a live log) and `su`
+  (masked password prompt) are real interactive programs now. `su` checks the
+  target's password (locked accounts fail → use sudo); `sudo` keeps its policy
+  check, like real Linux.
 - Globs support `*`, `?` and `[abc]` / `[a-z]` / `[!abc]` classes. `find`
   supports `-o` / `-a`, but not `\( \)` grouping.
 - The font is the system monospace font (JetBrains Mono, Fira Code, … and
@@ -413,9 +414,11 @@ emitting an event.
 existing `for`/`while`/`if`/`test`/`$( )`. What's left is small: a `return`
 builtin for functions and `\( \)` grouping in `find`.
 
+**Every interactive program is in** — the terminal now has `nano`, `less`,
+`tail -f` and a masked `su` prompt, all on one full-screen overlay layer a
+command opens by emitting an event.
+
 What's left is polish and reach, not engine:
-- **`su` password prompt** — the last interactive-program gap; the same overlay
-  pattern fits a modal prompt.
 - **Adventure trial overlays** — wire the editor/pager into the 2D trial console
   (today they're campaign/practice only).
 - **A progress / stats screen** — surface rank, skills, achievements and
